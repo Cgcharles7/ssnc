@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<title>Historical Conjectures</title>
+<title>Constructive Proof of Seymour Second Neighborhood Conjecture</title>
 <style type="text/css">
 span 
 {
