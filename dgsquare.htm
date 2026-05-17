@@ -1,0 +1,1096 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<title>Historical Conjectures</title>
+<style type="text/css">
+span 
+{
+	cursor:pointer;
+	color:blue;
+	text-decoration:underline;
+}
+.link {
+	stroke: #000;
+	stroke-width: 1.5px;
+}
+
+#graph {
+	border: 1px solid #ccc; 
+	margin-top: 10px; 
+}
+.container-info { 
+	margin: 10px; 
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.hidden {
+	display: none;
+}
+
+#cnv1 {
+    height: 50vh; /* Keeps a consistent screen height if you want */
+    border: 1px solid #d3d3d3;
+    display: block; /* Ensures it respects width changes properly */
+    max-width: none; /* Prevents container limits from squishing it */
+}
+
+/* Main Content Styling */
+.main-content {
+    flex: 1; /* This makes the main content take up the remaining space */
+    padding: 20px;
+    background-color: #fff;
+}
+
+.accordion {
+    background-color: #2c3e50; /* Darker, more professional look */
+    color: white;
+    cursor: pointer;
+    padding: 20px;
+    width: 100%;
+    border: 1px solid #34495e;
+    text-align: left;
+    outline: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: 0.4s;
+    margin-top: 5px;
+}
+
+.active, .accordion:hover {
+    background-color: #1abc9c; /* High-contrast teal for active layer */    color: white;
+}
+
+.accordion:after {
+  content: '\002B';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.active:after {
+  content: "\2212";
+}
+
+.panel {
+  padding: 0 18px;
+  background-color: white;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+.matrix {
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    text-align: center;
+}
+
+.matrix th, .matrix td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    width: 40px;
+    height: 40px;
+}
+
+.matrix th {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.matrix tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.matrix tr:hover {
+    background-color: #f1f1f1;
+}
+
+.matrix td:hover {
+    background-color: #ffeb3b;
+    cursor: pointer;
+}
+
+.matrix td.active {
+    background-color: #8bc34a;
+    color: white;
+}
+
+@media (max-width: 600px) {
+    .matrix td {
+        font-size: 14px;
+        padding: 5px;
+    }
+
+    .matrix {
+        margin: 10px;
+    }
+}
+
+.adjacency-list {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #333;
+    margin: 20px;
+    padding: 0;
+    list-style-type: none;
+}
+
+.adjacency-list li {
+    margin: 8px 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.adjacency-list li:hover {
+    background-color: #e0f7fa;
+    cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+  <div class="container">
+<script>
+
+function clear(loc)
+{
+	document.getElementById(loc).innerHTML = "";
+}
+
+function deg(graph)
+{
+	let cnts = [];
+	for (let i = 0; i < graph.length; i++)
+	{
+		cnts[i] = 0;
+		for (let j = 0; j < graph.length; j++)
+		{
+			if (graph[i][j] == 1)
+			{
+				cnts[i]++;
+			}
+		}
+	}
+	
+	return cnts;
+}
+
+function dispAdjLists(graph, loc)
+{
+	let text = '<ul class="adjacency-list">';
+	for (let i = 0; i < graph.length; i++)
+	{
+		text += "<li>" + i + " → ";
+		for (let j = 0; j < graph.length; j++)
+		{
+			if (graph[i][j] == 1)
+			{
+    			text += j + ', ';
+			}
+		}
+		text += '</li><br>';
+	}
+     text += '</ul>';
+     
+	 print(text, loc); 
+}
+
+function dispAdjMtrx(graph, loc)
+{
+	let text = '<table>';
+	text += "<tr><td></td>";
+	for (let i = 0; i < graph.length; i++)
+	{
+		text += "<td>" + i + "</td>";
+	}
+	text += "</tr>";
+	
+	for (let i = 0; i < graph.length; i++)
+	{
+		text += "<tr><td>" + i + "</td>";
+		for (let j = 0; j < graph.length; j++)
+		{
+			text += '<td id="cell' + '_' + i + '_' + j + '" onclick=chAdj(' + i + ',' + j + ')>' + graph[i][j] + '</td>';
+		}
+		text += "</tr>";
+	}
+    text += '</table>';
+     
+	print(text, loc); 
+}
+
+function indexOf(forest, edge)
+{
+	let ans = -1;
+	let i = 0;
+	while (i < forest.edges.length && ans == -1)
+	{
+		if (forest.edges[i][0] == edge[0].value && forest.edges[i][1] == edge[1].value)
+		{
+			ans = i;
+		}
+		i++;
+	}
+	
+	return ans;
+}
+
+function print(text, loc)
+{
+	document.getElementById(loc).innerHTML += text + "<br>";
+}
+
+function setCoords(graphs, clusters, loc)
+{
+    const minWidth = 800;
+    // Removed the trailing dot typo, changed to a slightly tighter 250px spacing 
+    // but feel free to change 250 back to 300 depending on how much breathing room you want!
+    const dynamicWidth = clusters.length * 250; 
+    
+    let bigCen = [];
+    let c = document.getElementById(loc);
+    let ctx = c.getContext("2d");
+    
+    // 1. Calculate and strictly set the dynamic width
+    const chosenWidth = Math.max(minWidth, dynamicWidth);
+    c.width = chosenWidth;
+    c.style.width = chosenWidth + "px"; // Fixed the string concatenation bug
+        
+    for (let i = 0; i < clusters.length; i++)
+    {
+        bigCen[i] = [];
+        
+        // 2. DYNAMIC X-COORDINATE: Spreads centers evenly across the actual canvas width
+        bigCen[i][0] = (chosenWidth * (i + 1)) / (clusters.length + 1);
+        bigCen[i][1] = c.height / 2;
+        
+        let lilTheta = [];
+        for (let j = 0; j < clusters[i].length; j++)
+        {
+            let node = clusters[i][j];
+            lilTheta[j] = (2 * Math.PI * j) / clusters[i].length;
+            
+            if (clusters[i].length > 1)
+                graphs.nodes[node].xVal = bigCen[i][0] + 75 * Math.cos(lilTheta[j]);
+            else
+                graphs.nodes[node].xVal = bigCen[i][0];
+                
+            graphs.nodes[node].neighborhood = i;
+            graphs.nodes[node].yVal = bigCen[i][1] + 75 * Math.sin(lilTheta[j]);
+        }
+    }
+    
+    return graphs;
+}
+
+function square(graph)
+{
+	let newGraph = [];
+	
+	for (let i = 0; i < graph.length; i++)
+	{
+		newGraph[i] = [];
+		for (let j = 0; j < graph.length; j++)
+		{
+			newGraph[i][j] = 0;
+		}
+	}
+	
+	for (let i = 0; i < graph.length; i++)
+	{
+		for (let j = 0; j < graph.length; j++)
+		{
+			if (graph[i][j] == 1)
+			{
+				newGraph[i][j] = 1;
+				for (let k = 0; k < graph.length; k++)
+				{
+					if (graph[j][k] == 1)
+					{
+						newGraph[i][k] = 1;
+					}
+				}
+			}
+		}
+	}
+	
+	return newGraph;
+}
+
+function toggleVisibility(id) 
+{
+    const element = document.getElementById(id);
+    if (element.classList.contains('visible')) {
+        element.classList.remove('visible');
+        element.classList.add('hidden');
+    } else {
+        element.classList.remove('hidden');
+        element.classList.add('visible');
+    }
+}
+
+function showHideDiv(id)
+{
+	let val = document.getElementById(id).style.display;
+	if (val == "none")
+	{
+		document.getElementById(id).style.display = "block";
+		document.getElementById(id).focus();
+	}
+	else
+	{
+		document.getElementById(id).style.display = "none";
+		document.getElementById(id).blur();
+	}
+}
+
+function isoriented(graph, minDeg) {
+    let ans = [];
+    const seymourThreshold = minDeg / 3;
+
+    for (let i = 0; i < graph.length && ans.length == 0; i++) {
+        // 1. Check for self-loops (always a violation in oriented graphs)
+        if (graph[i][i] == 1) {
+            ans.push(`Self-loop at node ${i}`);
+            return ans;
+        }
+
+        for (let j = 0; j < graph.length && ans.length == 0; j++) {
+            // 2. Check for a 2-cycle (edge in both directions)
+            if (graph[i][j] == 1 && graph[j][i] == 1) {
+                
+                // 3. Apply the Seymour Vertex Exception
+                // If node index is exactly minDeg / 3, it's a Seymour vertex, not an error
+                if (i > minDeg / 3 || j > minDeg / 3) {
+                    ans.push(`Seymour Vertex found at node ${i}`);
+                    break;
+                }
+
+                ans.push(`2-cycle between nodes ${i} and ${j}`);
+            }
+        }
+    }
+
+    return ans;
+}
+
+function getRdmColor() {
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += Math.floor(Math.random() * 16).toString(16);
+    }
+    return color;
+}
+
+function drawGraph(forest, loc, type, clusts) {
+    const canvas = document.getElementById(loc);
+    
+    const padding = 200;
+    const widthPerNode = 80; 
+    const dynamicWidth = Math.max(1000, (forest.nodes.length * widthPerNode) + padding);
+    
+    // 2. Assign the dynamic width to both the drawing resolution AND the style
+    canvas.width = dynamicWidth;
+    canvas.style.width = dynamicWidth + "px"; 
+    
+    // height logic (either hardcoded or matched to your 50vh)
+    canvas.height = 600; 
+    canvas.style.height = "600px"; // Keeps aspect ratio 1:1 with internal resolution
+    
+    const ctx = canvas.getContext('2d');
+    
+    const showBackArcs = document.getElementById('backArcToggle').value === 'on';
+    
+    console.log(showBackArcs);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const used = Array(forest.nodes.length).fill(false);
+
+    // 1. Assign colors based on the new parameters
+    if (type === 'node' && clusts) {
+        asgnNdeClrs(forest, clusts);
+    } else if (type === 'edge' && clusts) {
+        asgnEdgeClrs(forest, clusts);
+    }
+
+    // 2. Draw edges
+    forest.nodes.forEach((nodeA, i) => {
+        forest.nodes.forEach((nodeB, j) => {
+            if (isEdge(forest, nodeA, nodeB)) {
+                // Determine if it's a back-arc (B has a lower index than A)
+                const isBackArc = nodeB.container < nodeA.container;
+                
+                // Determine edge color based on rendering type
+                let edgeColor;
+                if (type === 'edge') {
+                    // Find the actual edge object in the forest to get its assigned color
+                    const edgeObj = forest.edges.find(e => 
+                        (e.source === nodeA.id && e.target === nodeB.id) || // Adjust these keys based on your actual edge object structure
+                        (e.from === i && e.to === j)
+                    );
+                    edgeColor = edgeObj && edgeObj.color ? edgeObj.color : '#D3D3D3';
+                } else {
+                    // Default node-based color logic
+                    edgeColor = (nodeA.color === nodeB.color) ? '#00008B' : '#D3D3D3';
+                }
+
+                if (isBackArc) {
+                    // Draw back arcs with a curve
+                    if (showBackArcs) {
+                        // Uses custom edge color if it exists, otherwise defaults to pink
+                        drawCurvedEdge(ctx, nodeA, nodeB, type === 'edge' ? edgeColor : 'pink');
+                    }
+                } else {
+                    // Draw forward/internal arcs straight
+                    drawEdge(ctx, nodeA, nodeB, edgeColor);
+                    drawArrow(ctx, nodeA, nodeB);
+                }
+            }
+        });
+    });
+
+    // 3. Draw nodes
+    forest.nodes.forEach((node, i) => {
+        drawNode(ctx, node, used[i]);
+    });
+}
+
+/**
+ * Draws a curved line for back-arcs to avoid overlapping forward-arcs.
+ */
+function drawCurvedEdge(ctx, startNode, endNode, color) {
+    const sx = startNode.xVal;
+    const sy = startNode.yVal;
+    const ex = endNode.xVal;
+    const ey = endNode.yVal;
+
+    // 1. Calculate midpoint
+    const mx = (sx + ex) / 2;
+    const my = (sy + ey) / 2;
+
+    // 2. Calculate perpendicular offset for the "arc"
+    // We move the control point "up" or "out" relative to the line direction
+    const dx = ex - sx;
+    const dy = ey - sy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    
+    // Curvature intensity (adjust 50 to change how deep the arc is)
+    const intensity = 50; 
+    const nx = -(dy / dist) * intensity;
+    const ny = (dx / dist) * intensity;
+
+    // Control point for the Bezier curve
+    const cp1x = mx + nx;
+    const cp1y = my + ny;
+
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.quadraticCurveTo(cp1x, cp1y, ex, ey);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // 3. Draw an arrow at the end of the curve
+    drawArrowOnCurve(ctx, cp1x, cp1y, ex, ey, color);
+}
+
+/**
+ * Special arrow drawing for the end of a curve
+ */
+function drawArrowOnCurve(ctx, cpx, cpy, x, y, color) {
+    const angle = Math.atan2(y - cpy, x - cpx);
+    const headlen = 10;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.strokeStyle = color;
+    ctx.stroke();
+}
+
+function asgnNdeClrs(forest, clusts)
+{
+    colors = [];
+    for (let i = 0; i < clusts.length; i ++)
+    {
+        colors.push(getRdmColor());
+    }
+    
+    for (let i = 0; i < clusts.length; i++)
+    {
+        for (let j = 0; j < forest.nodes.length; j++)
+        {
+            if (clusts[i].indexOf(j) != -1)
+            {
+                forest.nodes[j]["color"] = colors[i];
+                forest.nodes[j]["container"] = i;
+            }
+        }
+    }
+
+    return forest.nodes;
+}
+
+function asgnEdgeClrs(forest, clusts)
+{
+    colors = [];
+    for (let i = 0; i < clusts.length; i ++)
+    {
+        colors.push(getRdmColor());
+    }
+    
+    for (let i = 0; i < clusts.length; i++)
+    {
+        for (let j = 0; j < forest.edges.length; j++)
+        {
+            if (clusts[i].indexOf(j) != -1)
+            {
+                forest.edges[j]["color"] = colors[i];
+                forest.edges[j]["container"] = i;
+            }
+        }
+    }
+
+    return forest.nodes;
+}
+
+
+// Helper function to check if an edge exists between two nodes
+function isEdge(forest, nodeA, nodeB) {
+    const edge = [nodeA, nodeB];
+    return indexOf(forest, edge) !== -1;
+}
+
+// Helper function to draw an edge
+function drawEdge(ctx, nodeA, nodeB, color) {
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(nodeA.xVal, nodeA.yVal);
+    ctx.lineTo(nodeB.xVal, nodeB.yVal);
+    ctx.stroke();
+}
+
+// Helper function to draw an arrow
+function drawArrow(ctx, nodeA, nodeB) {
+    const headlen = 20; // Length of the arrow head
+    const dx = nodeB.xVal - nodeA.xVal;
+    const dy = nodeB.yVal - nodeA.yVal;
+    const angle = Math.atan2(dy, dx);
+
+    ctx.beginPath();
+    ctx.moveTo(nodeB.xVal, nodeB.yVal);
+    ctx.lineTo(nodeB.xVal - headlen * Math.cos(angle - Math.PI / 7), nodeB.yVal - headlen * Math.sin(angle - Math.PI / 7));
+    ctx.lineTo(nodeB.xVal - headlen * Math.cos(angle + Math.PI / 7), nodeB.yVal - headlen * Math.sin(angle + Math.PI / 7));
+    ctx.lineTo(nodeB.xVal, nodeB.yVal);
+    ctx.closePath();
+
+    ctx.fillStyle = '#c0c0c0';
+    ctx.fill();
+    ctx.stroke();
+}
+
+// Helper function to draw a node
+function drawNode(ctx, node, isUsed) {
+    // Outer circle
+    ctx.strokeStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(node.xVal, node.yVal, 10, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    // Fill color
+    ctx.fillStyle = isUsed ? '#00FFFF' : node.color;
+    ctx.beginPath();
+    ctx.arc(node.xVal, node.yVal, 10, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // Draw the value
+    ctx.fillStyle = '#000000';
+    ctx.font = '10px Arial';
+    const valueOffset = node.value === 0 ? -3 : -3 * (Math.floor(Math.log10(node.value)) + 1);
+    ctx.fillText(node.value, node.xVal + valueOffset, node.yVal + 2);
+}
+
+function dispResults(graph, newGraph)
+{
+	let out = "<table>";
+	let cnts1 = deg(graph);
+	let cnts2 = deg(newGraph);
+	
+	out += "<tr><td>Node</td><td>Initial Degree</td><td>Int Deg</td><td>Ext Deg</td><td>Square Degree</td></tr>";
+	
+	for (let i = 0; i < graph.length; i++)
+	{
+		if (cnts2[i] < 2*cnts1[i])
+		{
+			out += "<tr><td>" + i + "</td><td>" + cnts1[i] + "</td>";
+//			let set1 = intntwk()
+            out += "<td></td><td></td>";
+			out += "<td>" + cnts2[i] + "</td></tr>";
+		}
+		else
+		{
+			out += "<tr style='background:rgba(255, 0, 0, .5)'><td>" + i + "</td><td>" + cnts1[i] + "</td>";
+			out += "<td></td><td></td>";
+			out += "<td>" + cnts2[i] + "</td></tr>";
+		}
+	}   
+	
+	out += "</table>";
+	
+//	print(out, "output");
+	
+	return out;
+}
+
+</script>
+<div class="main-content">
+<div id="spark" class="page-introduction">
+  <h2>Constructively Proving The Seymour Second Neighborhood Conjecture</h2>
+  <p></p>
+  <div id="spark-visualization">
+    <!-- Embed your D3 visualization or example here -->
+  </div>
+</div>
+
+Scenario Simulatior: <br>
+Minimum Degree: <select id="minDeg" onchange="ansOvr = main(); ansOvr = dowork(ansOvr)">
+  <option value=3>3</option>
+  <option value=4>4</option>
+  <option value=5>5</option>
+  <option value=6 selected>6</option>
+  <option value=7>7</option>
+  <option value=8>8</option>
+  <option value=9>9</option>
+  <option value=10>10</option>
+  <option value=11>11</option>
+  <option value=12>12</option>
+  <option value=13>13</option>
+  <option value=14>14</option>
+  <option value=15>15</option>
+  <option value=16>16</option>
+  <option value=17>17</option>
+  <option value=18>18</option>
+  <option value=19>19</option>
+  <option value=20>20</option>
+  <option value=21>21</option>
+  <option value=22>22</option>
+  <option value=23>23</option>
+  <option value=24>24</option>
+  <option value=25>25</option>
+  <option value=26>26</option>
+  <option value=27>27</option>
+</select><br>
+<div id="myDiv2"></div><br>
+<select id="backArcToggle" onchange="ansOvr = main(); ansOvr = dowork(ansOvr)">
+    <option value="off">Forward Flow Only (Clean)</option>
+    <option value="on">Show Back Arcs (Detailed)</option>
+</select><br>
+<button id="generateGraph" onclick="main()">Generate Graph</button><br>
+<button onclick="downloadImage()">Download as Image</button><br>
+
+<button class="accordion">Adjacency Matrix</button>
+<div class="panel">Adjacency Matrix<div class="matrix" id="origadj"></div></div>
+<button class="accordion">Adjacency Lists</button>
+<div class="panel">Adjacency Lists<div id="origadj2"></div></div>
+<button class="accordion">Graph</button>
+<div class="panel">Graph<canvas id="cnv1"></canvas>
+</div>
+
+<button class="accordion">Why Seymour's Conjecture Matters</button>
+<div class="panel" id="seymour-conj">
+    <div class="proof-explanation">
+        <p>The <b>Seymour Second Neighborhood Conjecture (SSNC)</b> claims that every oriented graph has a node whose second out neighborhood is at least as large as its first. </p>
+        
+        <p>Most proof attempts at this conjecture have been probabilistic or worked on specific classes of graphs. </p>
+        
+        <p>To truly tackle this problem, we needed something that could operate on every oriented graph. The perfect tool for the job was the Breadth First Search (BFS) algorithm. Combining this algorithm with lexicographic ordering gives a coordinate system, or a <b>well-ordering</b> on the nodes of a graph. </p>
+        
+        <p>With this, we can use a Minimum Counterexample Environment (MCE) to prove the SSNC. The necessity in this environment is that every node is non-Seymour (i.e. has a first neighborhood larger than its second). To ensure this requires that children form cycles within the neighborhoods. </p>
+        
+        <p>These are the well studied <b>transitive triangles</b> that have received a lot of attention on this problem. A parent <i>u</i> connects to two children <i>v</i> and <i>w></i> and <i>v</i> connects to <i>w</i>. By these children forming a cycle in the parent's first neighborhood, they are able to have one less second neighbor. This reduces the parent's second neighborhood, allowing that parent to be non-Seymour. </p>
+        
+        <p>Further, if a child has a higher out-degree than required, this does not help in preventing the parent become a non-Seymour vertex. Thus thse extra-interior arcs are unnexessary in an MCE environment. </p>
+        
+        <p>Similarly, back arcs only visit previously optimized neighborhoods which are not helpful in an MCE environment because these back arcs will instantly create a Seymour vertex. </p>
+        
+        <p>What we are left with is
+        <ul>
+            <li>We have a strict <b>\delta-regular graph</b> in this MCE environment.</li>
+            <li>The neighborhood R_k at distance k must be k-regular. </li>
+            <li>By the definition of $k$-regularity implies Eulerian graphs. This says we have edge disjoint cycles inside these neighbodhoods. </li>
+            <li>These non-Seymour nodes show that the neighborhoods are decreasing in size (R_k = \delta - k + 1)</li>
+            <li>The binomial theorem gives a bound on how many of these neighborhoods can occur (bounded by \delta / 3). </li>
+        </ul>
+        
+    </div>
+</div>
+
+
+
+<button class="accordion">JSON Area</button>
+<div class="panel">JSON Area<textarea id="jsonarea" rows="10" cols="50"></textarea></div>
+<button class="accordion">Results</button>
+<div class="panel">Results<p id="output"></p></div>
+<script type="text/javascript"> 
+
+let ansOvr = [];
+
+function init(A, loc)
+{
+	let graph = new Object();
+	graph.edges = new Array();
+	graph.nodes = new Array();
+	
+	let theta = [];
+	let x = [];
+	let y = [];
+	
+	for (let i = 0; i < A.length; i++)
+	{
+		theta[i] = (2*Math.PI*i) / A.length;
+		
+		graph.nodes[i] = new Object();
+		graph.nodes[i].value = i;
+		graph.nodes[i].xVal = 255*Math.cos(theta[i]) + 275;
+		graph.nodes[i].yVal = 255*Math.sin(theta[i]) + 275;
+		
+		for (let j = 0; j < A[i].length; j++)
+		{
+			if (A[i][j] == 1)
+			{
+				let len = graph.edges.length;
+				graph.edges.push([i, j]);
+			}
+		}
+	}
+	graph.index = 0;
+	graph.currCmp = 0;
+	graph.stack = null;
+	
+	drawGraph(graph, loc);
+	
+	return graph;
+}
+
+function main() {
+    let minDeg = parseInt(document.getElementById("minDeg").value, 10);
+    let numseq = Math.floor(minDeg / 3) + 2;
+
+    // Get all select elements inside the div directly
+
+    // Initialize with the root node (the 0-index graph)
+    let gphs = [generateGph(1, 0)];
+    let clusts = [[0]];
+    let runningTotalNodes = 1;
+
+    for (let i = 1; i <= numseq; i++) {
+
+        let size;
+
+        // Determine size of the current subgraph layer
+            // Safe access to the previous select value
+            if (i != numseq)
+                size = minDeg - i + 1;
+            else
+                size = minDeg - i + 2;
+        
+        // Generate the subgraph using the new deterministic logic
+        gphs.push(generateGph(size, i));
+
+        // Build the cluster (list of node indices for this layer)
+        let currentCluster = [];
+        for (let j = 0; j < size; j++) {
+            currentCluster.push(runningTotalNodes + j);
+        }
+        clusts.push(currentCluster);
+
+        // Update running total for the next iteration
+        runningTotalNodes += size;
+    }
+    
+    // Process the final combined graph
+    backArcs = generateBackArcs(clusts, minDeg);
+    let gph = combGphs(gphs, backArcs);
+
+    let sq = square(gph);
+    
+    // UI Cleanup
+    ["origadj", "output"].forEach(id => clear(id));
+
+    // Validation
+    
+    let orientationErrors = isoriented(gph, minDeg);
+    let message = orientationErrors.length === 0 
+        ? "This is an oriented graph" 
+        : `This is NOT an oriented graph because ${orientationErrors}`;
+    
+    print(message, "output");
+    
+    ansOvr = [gph, clusts, gphs];
+
+    return ansOvr;
+}
+
+function dowork(ans)
+{
+    let gph = ans[0];
+    let sq = square(gph);
+    let clusts = ans[1];
+    clear('origadj');
+    dispAdjMtrx(gph, 'origadj');
+    clear('origadj2');
+    dispAdjLists(gph, 'origadj2');
+
+    let out = dispResults(gph, sq);
+
+    gph = init(gph, 'cnv1');
+    gph.nodes = asgnNdeClrs(gph, clusts);
+    gph = setCoords(gph, clusts, 'cnv1');
+    
+    let links2 = [];
+    let links3 = [];
+    for (let i = 0; i < gph.edges.length; i++)
+    {
+        links2.push(["source:", gph.nodes[gph.edges[i][0]], "target:", gph.nodes[gph.edges[i][1]]])
+        
+        links3.push({
+            source: {
+            id: gph.nodes[gph.edges[i][0]].value,
+            container: gph.nodes[gph.edges[i][0]].container,
+            },
+            target: {
+            id: gph.nodes[gph.edges[i][1]].value,
+            container: gph.nodes[gph.edges[i][1]].container,
+            }
+        });
+    }
+    document.getElementById('jsonarea').textContent = JSON.stringify(links3, null, 2);
+    
+    drawGraph(gph, 'cnv1');
+    
+    return gph;
+}
+
+
+/**
+ * Generates an adjacency matrix based on the size of the neighborhood 
+ * and the minimum out-degree (mind).
+ * 
+ * @param {number} size - The number of vertices in the neighborhood.
+ * @param {number} mind - The minimum out-degree (delta).
+ */
+function generateGph(size, mind) {
+    const graph = Array.from({ length: size }, () => new Array(size).fill(0));
+
+    // Determine the target degree for this neighborhood.
+    // If size <= delta / 3, the neighborhood is too small to sustain 'mind'
+    // without violating the density constraints of the proof.
+    let targetDegree;
+    if (size > (mind / 3)) {
+        targetDegree = mind;
+    } else {
+        // If the neighborhood is small, we saturate it as much as possible 
+        // with forward arcs. In a simple oriented graph with no back-arcs, 
+        // the max out-degree is size - 1.
+        targetDegree = size - 1;
+    }
+
+    for (let u = 0; u < size; u++) {
+        let assignedCount = 0;
+        let step = 1;
+
+        // Populate arcs until we hit the calculated targetDegree
+        while (assignedCount < targetDegree) {
+            let v = (u + step) % size;
+
+            if (v !== u) {
+                // Check if the reverse arc already exists to keep it an oriented graph
+                // (Since we don't have back-arcs yet, this ensures u -> v only)
+                if (graph[v][u] === 0) {
+                    graph[u][v] = 1;
+                    assignedCount++;
+                }
+            }
+
+            step++;
+
+            // Safety break: cannot exceed the number of available nodes
+            if (step >= size) break;
+        }
+    }
+
+    return graph;
+}
+
+function generateBackArcs(clusters, delta) {
+    const backArcs = [];
+    const k = clusters.length - 1; // Index of the last neighborhood
+    
+    // We only process the last two neighborhoods: k (Outlet) and k-1 (Seymour)
+    const activeNeighborhoods = [k - 1, k];
+    
+    // Root vertex is explicitly the node in the first cluster (position 0)
+    const rootVertex = clusters[0][0];
+
+    activeNeighborhoods.forEach((nIdx) => {
+        const currentCluster = clusters[nIdx];
+        
+        currentCluster.forEach((u, uIdx) => {
+            // 1. Every node in these two neighborhoods sends a back-arc to the root
+            backArcs.push({ from: u, to: rootVertex });
+
+            // 2. Iterate through previous neighborhoods to distribute remaining back-arcs
+            // Specifically targeting R_1, R_2, ... up to k-2
+            for (let targetIdx = 1; targetIdx <= k - 2; targetIdx++) {
+                const targetCluster = clusters[targetIdx];
+                
+                // Constraint: Cannot send more than |A[target]| / 3
+                const maxArcsToThisCluster = Math.floor(targetCluster.length / 3);
+                
+                // Special Constraint: Nodes in the 4th cluster (index 3) 
+                // cannot send links to the 3rd cluster (index 2).
+               
+                if (nIdx === 3 && targetIdx === 2) {
+                    continue; 
+                }
+
+                // Distribute arcs to the target cluster
+                // We use (uIdx + j) % targetCluster.length for equitable distribution
+                for (let j = 0; j < maxArcsToThisCluster; j++) {
+                    const vIdx = (uIdx + j) % targetCluster.length;
+                    const v = targetCluster[vIdx];
+                    
+                    backArcs.push({ from: u, to: v });
+                }
+            }
+        });
+    });
+
+    return backArcs;
+}
+
+function combGphs(graphs, backArcs) {
+    // 1. Calculate the starting index (offset) for each sub-graph
+    const sizes = [0];
+    for (let i = 0; i < graphs.length; i++) {
+        sizes.push(sizes[i] + graphs[i].length);
+    }
+
+    const totalNodes = sizes[sizes.length - 1];
+
+    // 2. Initialize the large matrix with zeros efficiently
+    const combined = Array.from({ length: totalNodes }, () => new Array(totalNodes).fill(0));
+
+    // 3. Map the sub-graphs into the large matrix (Internal neighborhood arcs)
+    graphs.forEach((subGraph, gIdx) => {
+        const offset = sizes[gIdx];
+
+        for (let i = 0; i < subGraph.length; i++) {
+            for (let j = 0; j < subGraph[i].length; j++) {
+                combined[offset + i][offset + j] = subGraph[i][j];
+            }
+        }
+    });
+
+    // 4. Connect each sub-graph to the next one (Forward connections R_i -> R_i+1)
+    for (let i = 0; i < graphs.length - 1; i++) {
+        const currentOffset = sizes[i];
+        const nextOffset = sizes[i + 1];
+
+        for (let j = 0; j < graphs[i].length; j++) {
+            for (let k = 0; k < graphs[i + 1].length; k++) {
+                combined[currentOffset + j][nextOffset + k] = 1;
+            }
+        }
+    }
+
+    // 5. Apply the Back-Arcs (Seymour and Outlet connections)
+    // These arcs were calculated based on the delta/3 density proof
+    if (backArcs && Array.isArray(backArcs)) {
+        backArcs.forEach(arc => {
+            // Safety check to ensure indices are within the matrix bounds
+            if (arc.from < totalNodes && arc.to < totalNodes) {
+                combined[arc.from][arc.to] = 1;
+            }
+        });
+    }
+
+    return combined;
+}
+
+function getContSizes(nodes)
+{
+    let containers = {};
+    for (let i = 0; i < nodes.length; i++)
+    {
+        if (Object.keys(containers).indexOf(nodes[i].container) == -1)
+        {
+            containers[nodes[i].container] = 1;
+        }
+        else
+        {
+            containers[nodes[i].container] += 1;
+        }
+    }
+    
+    return containers;
+}
+
+ansOvr = main();
+ansOvr = dowork(ansOvr);
+
+
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.maxHeight) {
+      panel.style.maxHeight = null;
+    } else {
+      panel.style.maxHeight = panel.scrollHeight + "px";
+    } 
+  });
+}
+
+function downloadImage(canvasId = "cnv1") {
+    // 1. Target the actual rendering canvas instead of an SVG
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+        console.error("Canvas element not found!");
+        return;
+    }
+    
+    const filename = "graph.png";
+    
+    // 2. Create an off-screen link element to trigger the download trigger
+    const link = document.createElement('a');
+    link.download = filename;
+    
+    // 3. Directly convert the active canvas pixels to a base64 PNG data URL
+    link.href = canvas.toDataURL('image/png');
+    
+    // 4. Clean click execution
+    link.click();
+}
+</script> 
+<p id="output2"></p>
+  </div>
+  </div>
+
+</body>
+</html>
