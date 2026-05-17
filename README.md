@@ -1,6 +1,6 @@
 # A Constructive Proof of the Seymour Second Neighborhood Conjecture via Graph Level Order (GLO)
 
-**[Live Seymour Proof Engine (dgsquare.htm)](https://cgcharles7.github.io/SeymourConjecture/javascript_engines/dgsquare.htm)** 
+**[Live Seymour Proof Engine (dgsquare.htm)](https://cgcharles7.github.io/SeymourConjecture/javascript_files/dgsquare.htm)** 
 
 * **Author:** Charles N. Glover (Independent Researcher)
 * **Core Paper Reference:** *"A Minimum Counterexample Proof of the Seymour Second Neighborhood Conjecture via the Graph Level Order"* ([Read on alphaXiv](https://www.alphaxiv.org/abs/2501.00614)).
