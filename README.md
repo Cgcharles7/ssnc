@@ -1,4 +1,4 @@
-# A Constructive Proof of the Seymour Second Neighborhood Conjecture via Graph Level Order (GLO)
+# A Constructive Proof of the Seymour Second Neighborhood Conjecture via Graph Level Order (GLOVER)
 
 
 * **Author:** Charles N. Glover (Independent Researcher)
