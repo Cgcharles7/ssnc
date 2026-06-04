@@ -32,7 +32,7 @@ Rather than testing individual graphs, this framework **tames the infinite searc
 In a locally finite infinite graph (or a standard finite graph), the minimum degree node has a finite degree. By anchoring our analysis at this minimum out-degree node, we execute a Breadth-First Search (BFS) decomposition paired with a lexicographical ordering. 
 
 This establishes a coordinate system or a **well-ordering** on the graph's vertices. It maps every node to an exact spatial coordinate: 
-$$\text{Node Coordinate} = (\text{distance}, \text{lex_node_id})$$
+$$\text{Node Coordinate} = (\text{distance}, \text{lex\_node\_id})$$
 
 ### 2. Operating in the Dual Space: Vertex Packing
 Instead of passively searching for a needle-in-a-haystack Seymour vertex, this framework operates entirely within the **dual space**. We systematically **"pack" non-Seymour vertices** inside a strict Minimum Counterexample (MCE) environment until the structural boundaries collapse and a valid Seymour vertex is forced to emerge.
