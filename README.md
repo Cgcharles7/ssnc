@@ -1,7 +1,7 @@
 # A Constructive Proof of the Seymour Second Neighborhood Conjecture via Graph Level Order (GLOVER)
 
 
-* **Author:** Charles N. Glover (Independent Researcher)
+* **Author:** Charles N. Glover
 * **Core Paper Reference:** *"A Minimum Counterexample Proof of the Seymour Second Neighborhood Conjecture via the Graph Level Order"* ([Read on alphaXiv](https://www.alphaxiv.org/abs/2501.00614)).
 * **License:** [MIT License](LICENSE)
 
