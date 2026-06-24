@@ -44,21 +44,13 @@ def bfsDistances (graph : Array (List Nat)) (start : Nat) : Array (Option Nat) :
 
   return distances
 
-def bfsLex (graph : Array (List Nat)) (start : Nat) : Array String := Id.run do
-  -- 1. Call your BFS function to get the array of distances
+-- A clean coordinate mapper using pairs
+def bfsLexPairs (graph : Array (List Nat)) (start : Nat) : Array (Nat × Nat) := Id.run do
   let dists := bfsDistances graph start
-  
-  -- 2. Initialize an array of empty strings matching the graph's size
-  let mut ids := Array.mkArray graph.size ""
-  
-  -- 3. Loop through the nodes and construct the coordinate strings
+  let mut ids := Array.mkArray graph.size (0, 0)
   for i in [0:graph.size] do
-    -- We match on the distance since it is an Option Nat
-    let distStr := match dists[i]! with
-      | some d => toString d
-      | none   => "inf" -- Handle unreachable nodes cleanly
-      
-    -- Lean 4 uses s!"..." for string interpolation (like f-strings in Python)
-    ids := ids.set! i s!"{distStr}_{i}"
-    
+    let d := match dists[i]! with
+      | some d => d
+      | none   => 99999 -- Or a sufficiently large infinity bound
+    ids := ids.set! i (d, i)
   return ids
