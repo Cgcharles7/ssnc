@@ -1,4 +1,4 @@
--- Proving the Set Equality via your Double Inclusion
+-- Proving the Set Equality via Double Inclusion
 · ext w
   constructor
   · -- Direction 1: Left to Right (⊆)
@@ -54,7 +54,7 @@ lemma local_edges_disjoint_from_previous (k : ℕ) (v : V) (hv : v ∈ bfsLayerV
   simp [bfsLayerVerts] at hv
   omega
 
--- Fix 1 applied inside your partition theorem:
+-- Fix 1 applied inside partition theorem:
 · intro hw
     rw [outNeighbor1, Set.mem_setOf_eq] at hw
     -- 1. Unpack the exact distance of v
@@ -77,7 +77,7 @@ lemma local_edges_disjoint_from_previous (k : ℕ) (v : V) (hv : v ∈ bfsLayerV
     · right; left; rw [interiorNeighbors, Set.mem_setOf_eq]; exact ⟨hw, h_int_case⟩
     · right; right; rw [exteriorNeighbors, Set.mem_setOf_eq]; exact ⟨hw, h_ext_case⟩
 
--- Fix 2 applied to clear your lemma's sorry:
+-- Fix 2 applied to clear previous lemma's sorry:
 lemma local_edges_disjoint_from_previous (k : ℕ) (v : V) (hv : v ∈ bfsLayerVerts G v₀ (k + 1)) :
     Disjoint
       ((G.induce (verticesUpTo G v₀ k)).edgeFinset)
