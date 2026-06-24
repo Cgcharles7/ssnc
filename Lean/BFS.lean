@@ -89,36 +89,30 @@ lemma min_eq_head_of_sorted (H : List (Nat × Nat))
     congr
     -- Prove the loop invariant via induction on the remaining elements
     generalize h_init : first = init
-    have h_min : ∀ x ∈ tail, ¬(nodeLessFromCoord x init) := by
+    have h_min : ∀ x ∈ tail, (nodeLessFromCoord x init) = false := by
       intro x hx
-      -- 1. Extract the fact that 'first' relates to all elements in the tail
-      have h_rel := List.forall_mem_of_sorted h_sorted x hx
-      subst h_init
-      
-      -- 2. Unfold our comparison function
+      -- Extract the sorted relation for the tail elements
+      have h_rel := List.Sorted.rel_of_mem hx h_sorted
+      rw [← h_init] at h_rel
+      -- Unfold the boolean check and match it against the sorted hypothesis
       dsimp [nodeLessFromCoord]
       split_ifs with h1 h2
-      · -- Case 1: x.1 < first.1
-        rcases h_rel with h_dist | ⟨h_dist, h_idx⟩
-        · exact lt_asymm h_dist h1
-        · rw [h_dist] at h1; exact lt_irrefl _ h1
-      · -- Case 2: x.1 == first.1 (True)
-        -- h2 is the condition for the nested 'if': x.2 < first.2
-        rcases h_rel with h_dist | ⟨h_dist, h_idx⟩
-        · -- Contradiction: first.1 < x.1 but x.1 == first.1
-          have h_eq : x.1 = first.1 := beq_iff_eq.mp h2
-          rw [h_eq] at h_dist
-          exact lt_irrefl _ h_dist
-        · -- Contradiction: first.2 < x.2 but x.2 < first.2 (from h2)
-          exact lt_asymm h_idx h2
-      · -- Case 3: Both conditions are false, evaluating to 'false'
-        exact id
+      · -- Case 1: x.1 < first.1, which contradicts first.1 < x.1 or first.1 = x.1
+        rcases h_rel with h_lt | ⟨h_eq, _⟩
+        · exact (Nat.lt_asymm h1 h_lt).elim
+        · rw [h_eq] at h1; exact (Nat.lt_irrefl _ h1).elim
+      · -- Case 2: x.1 == first.1 and x.2 < first.2
+        rw [Nat.beq_eq] at h2
+        rcases h_rel with h_lt | ⟨_, h_sub_lt⟩
+        · rw [h2] at h_lt; exact (Nat.lt_irrefl _ h_lt).elim
+        · exact (Nat.lt_asymm h1 h_sub_lt).elim-- Error handling helper
+      · rfl
     clear h_sorted h_nonempty
     induction tail generalizing init with
     | nil => rfl
     | cons next xs ih =>
       dsimp [List.foldl]
-      have h_next : ¬(nodeLessFromCoord next init) := h_min next (List.mem_cons_self _ _)
+      have h_next := h_min next (List.mem_cons_self _ _)
       rw [h_next] -- The 'if' condition evaluates to false, choosing 'init'
       apply ih
       intro x hx
@@ -142,6 +136,21 @@ theorem case_1_root_in_subgraph (H : List (Nat × Nat)) (root_idx : Nat)
   rw [min_eq_head_of_sorted H h_sorted h_nonempty]
   exact h_head
 
+/-- 
+  CASE 2: The root does not belong to H.
+  The root is missing, but H remains inherently sorted. The first element 
+  of H, say (k, l), has the lowest remaining distance and lowest lexicographical 
+  node index at that distance, making it the new global minimum.
+-/
+theorem case_2_root_not_in_subgraph (H : List (Nat × Nat)) (k l : Nat)
+    (h_sorted : H.Sorted (fun p1 p2 => p1.1 < p2.1 ∨ (p1.1 = p2.1 ∧ p1.2 < p2.2)))
+    (h_no_root : ∀ x ∈ H, x.1 ≠ 0) (h_head : H.head? = some (k, l)) :
+    getMinCoord H = some (k, l) := by
+  have h_nonempty : H ≠ [] := by 
+    intro h; rw [h] at h_head; contradiction
+  -- Even without a root, the head of a sorted list is the absolute minimum
+  rw [min_eq_head_of_sorted H h_sorted h_nonempty]
+  exact h_head
 /-- 
   CASE 2: The root does not belong to H.
   The root is missing, but H remains inherently sorted. The first element 
