@@ -37,7 +37,6 @@ axiom mce_must_be_minimally_dense (G : SimpleGraph V) (h_mce : IsMinimumCountere
 We tackle your second lemma first, as it acts as the mathematical engine for the overflow contradiction. To resolve the partition `sorry`, we invoke `Finset.card_sdiff_add_card_eq_card`. This requires showing that `localNeighbors` is a structural subset of the induced graph's edge finset.
 
 ```lean
-lemma case_four_density_overflow (k : ℕ) (u_k v : V)
 lemma case_four_density_overflow_v2 (k : ℕ) (u_k v : V) 
     (h_mce : IsMinimumCounterexample G)
     (hv : v ∈ bfsLayerVerts G v₀ (k + 1))
