@@ -6,3 +6,8 @@ structure OrientedGraph (V : Type*) where
 indictive MyVertices
   | A | B | C
   deriving DecidableEq
+
+open MyVertices
+
+def myEdges : MyVertices → MyVertices → Prop
+  | A, B 
