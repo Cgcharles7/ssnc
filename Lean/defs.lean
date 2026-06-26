@@ -10,4 +10,6 @@ indictive MyVertices
 open MyVertices
 
 def myEdges : MyVertices → MyVertices → Prop
-  | A, B 
+  | A, B => True
+  | B, C => True
+  | _, _ => False
