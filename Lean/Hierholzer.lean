@@ -20,18 +20,19 @@ lemma interior_neighborhood_cycle_decomposition (u_k : V)
       inDegree_local G v₀ i k v = outDegree_local G v₀ i k v) :
     ∃ (C : List (List V)), (∀ c ∈ C, IsCycle G c) ∧ (∀ e ∈ localEdgeSet G v₀ i k, ∃ c ∈ C, e ∈ edgesOfC c) := by
   
-  -- 1. We set up induction on the size of the local edge finset
-  remember_expr : (localEdgeSet G v₀ i k).card
-  induction h_card : (localEdgeSet G v₀ i k).card generalizing G with
+  -- 1. Generalize the cardinality to a natural number 'm' and induct on it
+  generalize h_card : (localEdgeSet G v₀ i k).card = m
+  induction m generalizing G with
   | zero => 
-    -- Base Case: 0 edges means the empty list of cycles vacuously satisfies the property
+    -- Base Case: m = 0
     use []
-    simp only [List.not_mem_nil, IsCycle, false_and, implies_true, Finset.card_eq_zero] at h_card
-    constructor
-    · intro c hc; contradiction
-    · intro e he
-      rw [h_card] at he
-      exact Finset.not_mem_empty e he
+    intro e he
+    rw [← h_card, Finset.card_eq_zero] at he
+    -- he says: e ∈ ∅, which is a contradiction
+    exact Finset.not_mem_empty e he
+
+  | succ m ih =>
+    -- Inductive Step: m + 1
 
   | succ m ih =>
     -- Inductive Step: There is at least one edge, so there must be a cycle.
@@ -50,9 +51,38 @@ lemma interior_neighborhood_cycle_decomposition (u_k : V)
       
     have h_prime_balanced : ∀ v ∈ interiorNeighbors G_prime v₀ i k u_k u_k, 
         inDegree_local G_prime v₀ i k v = outDegree_local G_prime v₀ i k v := by
-      -- Deleting a cycle subtracts exactly 1 from both inDegree and outDegree for its members,
-      -- preserving the invariant equality: (deg_in - 1 = deg_out - 1)
-      sorry
+      intro v hv
+      
+      -- 1. Fetch the original balance state for node v
+      have h_orig := h_balanced v (mem_interiorNeighbors_of_mem_G_prime hv)
+      
+      -- 2. Convert local graph deletion directly into natural number subtraction
+      rw [inDegree_local, Finset.card_sdiff (hc₀_sub v)]
+      rw [outDegree_local, Finset.card_sdiff (hc₀_sub v)]
+      
+      -- 3. Case split on whether the cycle c₀ passes through vertex v
+      by_cases hv_in_c₀ : v ∈ c₀
+      · -- Case A: v is on the cycle. The cycle peels away exactly 1 edge from each side.
+        have h_in_peel : (edgesOfC c₀).filter (λ e => e.2 = v).card = 1 := 
+          cycle_inDegree_eq_one_of_mem hc₀_cycle hv_in_c₀
+        have h_out_peel : (edgesOfC c₀).filter (λ e => e.1 = v).card = 1 := 
+          cycle_outDegree_eq_one_of_mem hc₀_cycle hv_in_c₀
+        
+        rw [h_in_peel, h_out_peel]
+        -- Lean evaluates: deg_in - 1 = deg_out - 1. Since deg_in = deg_out, omega closes it!
+        omega
+        
+      · -- Case B: v is NOT on the cycle. The cycle peels away 0 edges from both sides.
+        have h_in_peel : (edgesOfC c₀).filter (λ e => e.2 = v).card = 0 := by
+          rw [Finset.card_eq_zero]
+          exact cycle_inDegree_eq_zero_of_not_mem hc₀_cycle hv_in_c₀
+        have h_out_peel : (edgesOfC c₀).filter (λ e => e.1 = v).card = 0 := by
+          rw [Finset.card_eq_zero]
+          exact cycle_outDegree_eq_zero_of_not_mem hc₀_cycle hv_in_c₀
+          
+        rw [h_in_peel, h_out_peel]
+        -- Lean evaluates: deg_in - 0 = deg_out - 0, which is just h_orig!
+        exact h_orig
 
     -- C. Apply the induction hypothesis to the remaining balanced graph G'
     rcases ih G_prime h_prime_balanced h_card_drop with ⟨C_prime, h_cycles_prime, h_edges_prime⟩
