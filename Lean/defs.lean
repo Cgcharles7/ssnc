@@ -27,3 +27,7 @@ open Finset
 
 variable {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) (O :G.Orientation)
 
+inductive BFSNode : ℕ → ℕ → Type where
+  | root : BFSNode 0 0
+  | childOf {d k : ℕ} (parent : BFSNode d k) (lexIndex : ℕ) : BFSNode (d + 1) lexIndex
+
