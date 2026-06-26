@@ -22,3 +22,8 @@ def mOrientedGraph : OrientedGraph MyVertices where
   asymmetric := by
     intro u v h
     cases u <;> cases v revert h <;> rsimp
+
+open Finset
+
+variable {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) (O :G.Orientation)
+
