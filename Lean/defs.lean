@@ -118,4 +118,8 @@ def ReachableFrom (u v : Nat) (d : Nat) : Type :=
   -- Representing a relative BFS path from u to v of length d
   BfsLex d v
 
+def IsFirstOutNeighbor (u v : Nat) : Type :=
+  ReachableFrom u v 1
 
+def IsSecondOutNeighbor (u v : Nat) : Prop :=
+  (Nonempty (ReachableFrom u v 2)) ∧ (v ≠ u) ∧ ¬(Nonempty (IsFirstOutNeighbor u v))
