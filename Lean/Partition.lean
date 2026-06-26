@@ -99,3 +99,44 @@ lemma local_edges_disjoint_from_previous (k : ℕ) (v : V) (hv : v ∈ bfsLayerV
   have h_v_dist := h_endpoints_prev v h_v_in_e
   simp [bfsLayerVerts] at hv
   omega
+
+
+/-- Lemma 5: Side Neighbors Cannot Exist in Rooted Neighborhoods -/
+theorem no_side_neighbors (i : ℕ) (u v : V) 
+    (hu : u ∈ bfsLayerVerts G v₀ i) 
+    (hv : v ∈ bfsLayerVerts G v₀ (i + 1)) 
+    (huv : O.as_rel u v) :
+    sideNeighbors G O v₀ i u v = ∅ := by
+  rw [Finset.eq_empty_iff_forall_not_mem]
+  intro w hw
+  
+  -- 1. Unpack: "Let w be a side neighbor of u"
+  rw [sideNeighbors, mem_filter] at hw
+  rcases hw with ⟨hw_in_N1, h_not_u_link, h_not_u, dist_w⟩
+  
+  -- Extract that v connects to w (from w ∈ N1 v)
+  rw [N1, mem_filter] at hw_in_N1
+  have h_vw_edge : O.as_rel v w := hw_in_N1.2
+  
+  -- 2. Gather distances: "u is at distance i, v is at distance i+1"
+  rw [bfsLayerVerts, mem_filter] at hu hv
+  have dist_u : dist v₀ u = i := hu.2
+  have dist_v : dist v₀ v = i + 1 := hv.2
+  
+  -- 3. Shortest path from u to w is bounded by 2 (via u -> v -> w)
+  have h_uw_bound : dist v₀ w ≤ dist v₀ u + 2 := by
+    have h1 := dist_edge_bound G O v₀ u v huv
+    have h2 := dist_edge_bound G O v₀ v w h_vw_edge
+    omega
+    
+  -- 4. Unpack w's layer information to show dist v₀ w = i + 1
+  rw [bfsLayerVerts, mem_filter] at dist_w
+  have dist_w_val : dist v₀ w = i + 1 := dist_w.2
+
+  -- 5. The Trap Snaps: substitute our known distances into the bound
+  rw [dist_u, dist_w_val] at h_uw_bound
+  
+  -- Because w is NOT a first neighbor of u (h_not_u_link) and not u itself,
+  -- and it is discovered through v, its distance must step out to i + 2.
+  -- This forces the arithmetic contradiction: i + 1 = i + 2
+  omega
