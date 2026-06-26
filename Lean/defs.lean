@@ -113,3 +113,9 @@ theorem getMinCoord_eq_some_of_head? (H : List (Nat × Nat)) (k l : Nat)
   rw [min_eq_head_of_sorted H h_sorted h_nonempty]
   exact h_head
 
+-- A helper stating that node 'v' is reachable from 'u' at a specific distance
+def ReachableFrom (u v : Nat) (d : Nat) : Type :=
+  -- Representing a relative BFS path from u to v of length d
+  BfsLex d v
+
+
