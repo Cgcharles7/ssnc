@@ -13,3 +13,12 @@ def myEdges : MyVertices → MyVertices → Prop
   | A, B => True
   | B, C => True
   | _, _ => False
+
+def mOrientedGraph : OrientedGraph MyVertices where
+  Adj := myEdges
+  irreflexive := by
+    intro u
+    cases u <;> rsimp
+  asymmetric := by
+    intro u v h
+    cases u <;> cases v revert h <;> rsimp
