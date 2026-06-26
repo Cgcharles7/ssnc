@@ -1,6 +1,3 @@
-
-
-
 lemma lower_layer_neighbors_disjoint (i k : ℕ) (hk : k < i) (u_i v_k : V)
     (hu : u_i ∈ bfsLayerVerts G v₀ i)
     (hv : v_k ∈ bfsLayerVerts G v₀ k) :
