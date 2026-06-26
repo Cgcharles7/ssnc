@@ -123,3 +123,31 @@ def IsFirstOutNeighbor (u v : Nat) : Type :=
 
 def IsSecondOutNeighbor (u v : Nat) : Prop :=
   (Nonempty (ReachableFrom u v 2)) ∧ (v ≠ u) ∧ ¬(Nonempty (IsFirstOutNeighbor u v))
+
+variable (G : SimpleGraph Nat) (v₀ : Nat)
+
+/-- 
+  Interior Neighbors: The intersection of the out-neighbors of u_k and v_{k+1} 
+  that strictly lie within the neighborhood layer k+1.
+-/
+def interiorNeighbors (k : Nat) (u v : Nat) : Set Nat :=
+  { w | w ∈ G.neighborSet u ∧ w ∈ G.neighborSet v ∧ w ∈ bfsLayerVerts G v₀ (k + 1) }
+
+-- A helper predicate for the second out-neighborhood N^{++}(u)
+def secondNeighborSet (G : SimpleGraph Nat) (u w : Nat) : Prop :=
+  w ≠ u ∧ w ∉ G.neighborSet u ∧ ∃ z, z ∈ G.neighborSet u ∧ w ∈ G.neighborSet z
+
+/--
+  Exterior Neighbors: The intersection of the second out-neighbors of u_k
+  and the direct out-neighbors of v_{k+1} that live in layer k+2.
+-/
+def exteriorNeighbors (k : Nat) (u v : Nat) : Set Nat :=
+  { w | secondNeighborSet G u w ∧ w ∈ G.neighborSet v ∧ w ∈ bfsLayerVerts G v₀ (k + 2) }
+
+/-- A vertex is "Seymour" if it has at least as many second neighbors as first neighbors. -/
+def IsSeymour (G : SimpleGraph V) [DecidableRel G.Adj] (u : V) : Prop :=
+  (outNeighbor2 G O u).card ≥ (N1 G O u).card
+
+/-- A vertex is "Non-Seymour" if it has strictly more first neighbors than second neighbors. -/
+def IsNonSeymour (G : SimpleGraph V) [DecidableRel G.Adj] (u : V) : Prop :=
+  (N1 G O u).card > (outNeighbor2 G O u).card
