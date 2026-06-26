@@ -3,17 +3,6 @@ import Mathlib.Data.List.Basic
 
 variable {V : Type*} [Fintype V] [DecidableEq V]
 variable (G : SimpleGraph V) (v₀ : V) (i k : ℕ)
-
--- Minimal stubs matching your local definitions
-def interiorNeighbors (u v : V) : Finset V := sorry
-def inDegree_local (v : V) : ℕ := sorry
-def outDegree_local (v : V) : ℕ := sorry
-def localEdgeSet : Finset (Sym2 V) := sorry
-def edgesOfC (c : List V) : Finset (Sym2 V) := sorry
-def IsCycle (c : List V) : Prop := sorry
-
----
-
 /-- Hierholzer's structural guarantee formalized via edge-cardinality induction. -/
 lemma interior_neighborhood_cycle_decomposition (u_k : V) 
     (h_balanced : ∀ v ∈ interiorNeighbors G v₀ i k u_k u_k, 
