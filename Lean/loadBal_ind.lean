@@ -59,3 +59,23 @@ lemma base_case_pigeonhole (v₀ : V) (h_mce : IsMinimumCounterexample G) :
       · -- Case 3: w ∈ R (k + 2) 
         -- This is the goal!
         exact h_R2
+
+
+lemma base_case_definition (v₀ v : V) :
+    interiorNeighbors G v₀ 0 v₀ v ⊆ N1 G O v₀ := by
+  rw [Finset.subset_iff]
+  intro x hx
+  -- Unfold the interior neighborhood definition
+  rw [interiorNeighbors, Finset.mem_filter] at hx
+  -- hx gives: (x ∈ N1 v) ∧ (x ∈ N1 v₀) ∧ (x ∈ R 1)
+  -- We just pluck out the middle fact!
+  exact hx.2.1
+
+lemma inductive_case_definition (k : ℕ) (u v : V) :
+    interiorNeighbors G v₀ k u v ⊆ N1 G O u := by
+  rw [Finset.subset_iff]
+  intro x hx
+  -- Unfold the definition for layer k
+  rw [interiorNeighbors, Finset.mem_filter] at hx
+  -- hx gives: (x ∈ N1 v) ∧ (x ∈ N1 u) ∧ (x ∈ R (k+1))
+  exact hx.2.1
