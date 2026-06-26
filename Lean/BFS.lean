@@ -166,3 +166,29 @@ theorem case_2_root_not_in_subgraph (H : List (Nat × Nat)) (k l : Nat)
   -- Even without a root, the head of a sorted list is the absolute minimum
   rw [min_eq_head_of_sorted H h_sorted h_nonempty]
   exact h_head
+
+
+/--
+  Theorem: If there is an edge from u to v, v cannot belong to a "later layer"
+  (any layer b ≥ a + 2).
+-/
+lemma later_neighbors_impossible (u v : Nat) (a b : Nat)
+    (hu : u ∈ bfsLayerVerts G v₀ a) 
+    (hv : v ∈ bfsLayerVerts G v₀ b)
+    (h_edge : v ∈ G.neighbors u) 
+    (h_later : b ≥ a + 2) : False := by
+  -- 1. Unfold your layer definitions (similar to your simp [bfsLayerVerts] step)
+  -- This gives you: G.dist v₀ u = a  and  G.dist v₀ v = b
+  have hu_dist : G.dist v₀ u = a := by ...
+  have hv_dist : G.dist v₀ v = b := by ...
+
+  -- 2. Use the graph's shortest path property: 
+  -- The distance to v is at most the distance to u + 1
+  have h_triangle : G.dist v₀ v ≤ G.dist v₀ u + 1 := G.dist_neighbor_le h_edge
+
+  -- 3. Substitute your layer indexes into the inequality
+  rw [hu_dist, hv_dist] at h_triangle
+
+  -- 4. Let omega handle the contradiction!
+  -- We have (b ≤ a + 1) and (b ≥ a + 2), which omega crushes instantly.
+  omega
