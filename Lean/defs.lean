@@ -27,10 +27,18 @@ open Finset
 
 variable {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) (O :G.Orientation)
 
-inductive BFSNode : ℕ → ℕ → Type where
-  | root : BFSNode 0 0
-  | childOf {d k : ℕ} (parent : BFSNode d k) (lexIndex : ℕ) : BFSNode (d + 1) lexIndex
+/--
+  `BfsLex d k` is a structural proof that node `k` is at BFS distance `d`.
+-/
+inductive BfsLex : Nat → Nat → Type where
+  | /-- Property 1: The root node starts at distance 0. -/
+    root (r : Nat) : BfsLex 0 r
 
+  | /-- Property 2: A child node moves to the next neighborhood layer (d + 1). -/
+    childOf {d p : Nat} (parent : BfsLex d p) (curr : Nat) : BfsLex (d + 1) curr
+
+  | /-- Property 3: A neighbor in the exact same neighborhood layer (d). -/
+    sameLayerNeighbor {d n : Nat} (peer : BfsLex d n) (curr : Nat) : BfsLex d curr
 def bfsLexLess {d1 d2 k1 k2 : Nat} (n1 : BfsLex d1 k1) (n2 : BfsLex d2 k2) : Bool :=
   if d1 < d2 then true
   else if d1 == d2 then k1 < k2
@@ -44,7 +52,8 @@ def nodeLessFromCoord (c1 c2 : Nat × Nat) : Bool :=
   else if c1.1 == c2.1 then c1.2 < c2.2
   else false
 
--- 2. The core minimum-finding function operating on our remaining dataset H
+-- 2. The core m
+inimum-finding function operating on our remaining dataset H
 def getMinCoord (H : List (Nat × Nat)) : Option (Nat × Nat) :=
   match H with
   | [] => none
