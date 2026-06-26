@@ -42,7 +42,14 @@ lemma local_edges_disjoint_from_previous (k : ℕ) (v : V) (hv : v ∈ bfsLayerV
   rw [Finset.mem_filter] at h_local
  
   -- 1. h_prev forces both endpoints of e to have distance ≤ k
-  have h_endpoints_prev : ∀ x ∈ e, G.dist v₀ x ≤ k := by sorry
+  have h_endpoints_prev : ∀ x ∈ e, dist v₀ x ≤ k := by
+    intro x hx
+    -- e is in the edge set of the induced subgraph
+    rw [SimpleGraph.induce_edgeFinset_iff] at h_prev
+    -- Therefore, both endpoints of e must be in 'verticesUpTo G v₀ k'
+    have h_in_set := h_prev.1 x hx
+    rw [verticesUpTo, Finset.mem_filter] at h_in_set
+    exact h_in_set.2
  
   -- 2. h_local forces v to be one of the endpoints, meaning v ∈ e
   have h_v_in_e : v ∈ e := h_local.2
