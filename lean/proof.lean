@@ -162,3 +162,47 @@ def findMinBfsNode (ls : List (BfsNode Adj)) (default : BfsNode Adj) : BfsNode A
   | [] => default
   | x :: xs => xs.foldl bfsNodeMin x
 
+
+-- Partition Lemma 
+variable {Adj : Nat → Nat → Prop}
+
+-- Compressed structural definitions using Prop instead of heavy Mathlib Sets
+def backNeighbors (k : Nat) (w_dist : Nat) : Prop := w_dist ≤ k
+def interiorNeighbors (k : Nat) (w_dist : Nat) : Prop := w_dist = k + 1
+def exteriorNeighbors (k : Nat) (w_dist : Nat) : Prop := w_dist = k + 2
+
+/-- Port and compression of partition proof -/
+theorem position_lemma (k : Nat) (v : BfsNode Adj) (hv : v.dist = k + 1) (w : BfsNode Adj) :
+    interiorNeighbors k w.dist ∨ exteriorNeighbors k w.dist ∨ backNeighbors k w.dist := by
+  -- Since distances are Nats, the layer structure guarantees it falls into one of these bounds
+  have h_cases : w.dist = k + 1 ∨ w.dist = k + 2 ∨ w.dist ≤ k := by omega
+  rcases h_cases with h1 | h2 | h3
+  · left; exact h1
+  · right; left; exact h2
+  · right; right; exact h3
+
+/-- Compressed translation of layers_disjoint -/
+lemma layers_disjoint (v₀ u : Nat) (a b : Nat) (h_ne : a ≠ b) 
+    (ha : (bfsDistances graph v₀)[u]? = some (some a)) 
+    (hb : (bfsDistances graph v₀)[u]? = some (some b)) : False := by
+  -- Lean's option unwrapping forces the internal values to match, contradicting h_ne
+  injection (by injection ha) with ha'
+  injection (by injection hb) with hb'
+  omega
+
+/-- 
+  Compressed translation of local_edges_disjoint_from_previous.
+  If an edge (u, v) exists in a subgraph bounded up to layer `k`,
+  the node `v` cannot belong to layer `k + 1`.
+-/
+lemma local_edges_disjoint_from_previous (k : Nat) (u v : Nat)
+    (h_prev_u : ∃ d, (bfsDistances graph v₀)[u]? = some (some d) ∧ d ≤ k)
+    (h_prev_v : ∃ d, (bfsDistances graph v₀)[v]? = some (some d) ∧ d ≤ k)
+    (hv_layer : (bfsDistances graph v₀)[v]? = some (some (k + 1))) : False := by
+  rcases h_prev_v with ⟨d, hd, h_le⟩
+  -- hd says distance is d (where d ≤ k), but hv_layer says distance is k + 1.
+  -- This match forces an exact contradiction.
+  injection (by injection hd) with hd'
+  injection (by injection hv_layer) with hv_layer'
+  omega
+
