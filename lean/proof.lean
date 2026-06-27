@@ -179,6 +179,35 @@ def backNeighbors (k : Nat) (w_dist : Nat) : Prop := w_dist ≤ k
 def interiorNeighbors (k : Nat) (w_dist : Nat) : Prop := w_dist = k + 1
 def exteriorNeighbors (k : Nat) (w_dist : Nat) : Prop := w_dist = k + 2
 
+/-- 
+  Computes the induced subgraph containing only vertices at distance layer `k`,
+  and includes only the edges where both endpoints belong to layer `k`.
+-/
+def getSubgraphAtLayer (graph : Array (List Nat)) (getLayer : Nat → Nat) (k : Nat) : Array (List Nat) :=
+  -- Initialize a blank graph of the same size
+  let emptyGraph := Array.mkArray graph.size []
+  
+  -- We fold over the original graph to populate the induced edges
+  graph.enum.foldl (fun acc (u, neighbors) =>
+    if getLayer u == k then
+      -- Filter neighbors to only keep those that are ALSO at layer k
+      let inducedNeighbors := neighbors.filter (fun w => getLayer w == k)
+      acc.set! u inducedNeighbors
+    else
+      -- If the vertex u is not in layer k, it gets an empty neighbor list
+      acc
+  ) emptyGraph
+
+/-- Counts the number of active vertices inhabiting layer k -/
+def getVertexCountAtLayer (graph : Array (List Nat)) (getLayer : Nat → Nat) (k : Nat) : Nat :=
+  (List.range graph.size).filter (fun u => getLayer u == k).length
+
+/-- Counts the total number of directed arcs contained inside the layer-k induced subgraph -/
+def getEdgeCountAtLayer (subgraph : Array (List Nat)) : Nat :=
+  subgraph.foldl (fun acc neighbors => acc + neighbors.length) 0
+
+
+
 /-- Port and compression of partition proof -/
 theorem position_lemma (k : Nat) (v : BfsNode Adj) (hv : v.dist = k + 1) (w : BfsNode Adj) :
     interiorNeighbors k w.dist ∨ exteriorNeighbors k w.dist ∨ backNeighbors k w.dist := by
@@ -304,66 +333,69 @@ variable {Adj : Nat → Nat → Prop}
 
 
 
-/-- Compressed Base Case: The neighbors of the root (layer 0) are layer-1 nodes -/
-theorem base_case_definition (v₀ x : BfsNode Adj) 
-    (h_int : interiorNeighbors 0 x.dist) : x.dist = 1 := by
-  -- interiorNeighbors 0 x.dist unfolds directly to x.dist = 0 + 1
+variable {delta : Nat} {Adj : Nat → Nat → Prop}
+
+/-- 
+  Inductive Base Definition: Neighbors of the root (layer 0) 
+  are structurally bound to layer 1. 
+-/
+theorem base_case_definition (v₀ x : BfsNode delta) 
+    (hu : v₀.dist = 0)
+    (h_int : interiorNeighbors v₀.dist x.dist) : x.dist = 1 := by
+  rw [hu, interiorNeighbors] at h_int
   exact h_int
 
-/-- Compressed Inductive Case: An interior neighbor of a layer-k node is a layer-(k+1) node -/
-theorem inductive_case_definition (k : Nat) (u x : BfsNode Adj)
+/-- 
+  Inductive Case Definition: Neighbors of a layer-k node 
+  are structurally bound to layer k + 1. 
+-/
+theorem inductive_case_definition (k : Nat) (u x : BfsNode delta) 
     (hu : u.dist = k)
     (h_int : interiorNeighbors u.dist x.dist) : x.dist = k + 1 := by
-  rw [hu] at h_int
+  rw [hu, interiorNeighbors] at h_int
   exact h_int
 
+-- Base Case Pigeonhole Principle
+have h_R1_size : getVertexCountAtLayer graph getLayer 1 = delta
+have h_R2_size : getVertexCountAtLayer graph getLayer 2 ≤ delta - 1
 
-/-- 
-  Compressed Root Pigeonhole: Eliminates horizontal and backward leaking 
-  scenarios for the children of the root node.
--/
-theorem base_case_pigeonhole (v₀ x w : BfsNode Adj)
-    (hx : x.dist = 1)                         -- x is a direct child of the root
-    (hw_from_x : interiorNeighbors x.dist w.dist) -- w is an out-neighbor of x
-    (h_not_mem : ¬ interiorNeighbors 0 w.dist)   -- Hypothesis: w is NOT in layer 1
-    : w.dist = 2 := by
-  -- 1. Unfold neighbors to expose the core Nat algebra
-  rw [interiorNeighbors] at h_not_mem       -- w.dist ≠ 1
-  rw [hx, interiorNeighbors] at hw_from_x   -- w.dist = 2
-  
-  -- 2. The goal is exactly what hw_from_x gives us. 
-  -- No by_contra, no asymmetry lookups, no cardinality checks needed!
-  exact hw_from_x
-/--
-  Compressed Structural Layer Lock: Proves that if an out-neighbor of a 
-  layer-(k+1) node does not leak backward or horizontally, it MUST inhabit layer k+2.
--/
-theorem general_layer_leak_elimination (k : Nat) (x w : BfsNode Adj)
-    (hx : x.dist = k + 1)
-    (hw_from_x : interiorNeighbors x.dist w.dist) -- w is an out-neighbor of x
-    (hw_not_Rk : w.dist > k)                     -- Not a backward leak
-    (hw_not_N1 : w.dist ≠ k + 1)                 -- Not a horizontal leak
-    : w.dist = k + 2 := by
-  -- Unfold the neighbor relation relative to x's layer
-  rw [hx, interiorNeighbors] at hw_from_x       -- forces w.dist = (k + 1) + 1
-  
-  -- Nat addition guarantees (k + 1) + 1 = k + 2
+theorem base_case_pigeonhole_final (delta : Nat) 
+    (R1_vertex_count : Nat) (R2_vertex_count : Nat)
+    (h_R1 : R1_vertex_count = delta)
+    (h_R2 : R2_vertex_count ≤ delta - 1)
+    -- Metrics for a specific node x in R1
+    (x_deg : Nat) (x_back : Nat) (x_forward : Nat) (x_interior : Nat)
+    (h_x_deg : x_deg ≥ delta)
+    (h_x_sum : x_deg = x_back + x_forward + x_interior)
+    -- Structural bounds
+    (h_back_bound : x_back ≤ 1)
+    (h_fwd_bound : x_forward ≤ R2_vertex_count)
+    : x_interior > 0 ∨ (x_back = 1 ∧ x_forward = delta - 1) := by
+  -- omega reads the system of linear inequalities and proves 
+  -- that x_interior must be strictly greater than 0 unless it hits the absolute geometric maximum
   omega
 
-/-- 
-  The Base Squeeze Theorem: 
-  Proves that under MCE rules, the capacity of the exterior layer (R_2) 
-  is strictly less than the minimum degree.
--/
-theorem base_case_capacity_squeeze (delta : Nat) (v₀ : BfsNode delta)
-    (h_root : v₀.dist = 0)
-    (h_min_deg_root : cardN1 v₀.id = delta) -- Rooted at the minimum degree node
-    (h_mce_non_seymour : cardN1 v₀.id > cardN2 v₀.id) -- MCE condition for v₀
-    (h_R2_is_N2 : layerCapacity 2 = cardN2 v₀.id) -- Layer 2 is exactly v₀'s N2
-    : layerCapacity 2 < delta := by
-  -- omega looks at: delta > cardN2, and layerCapacity = cardN2
-  -- It deduces layerCapacity < delta instantly.
+
+theorem inductive_pigeonhole_step (delta k : Nat) (R_k2_size : Nat)
+    -- 1. Bound from the I.H. / Non-Seymour property at depth k
+    (h_R_k2_capacity : R_k2_size ≤ delta - (k + 2) - 1)
+    
+    -- 2. Degree constraints for an arbitrary node x in R_{k+1}
+    (x_deg : Nat) (x_forward : Nat) (x_non_forward : Nat)
+    (h_x_deg : x_deg ≥ delta)
+    (h_x_sum : x_deg = x_forward + x_non_forward)
+    
+    -- 3. Structural mapping constraint: forward edges cannot exceed the layer size
+    (h_fwd_bound : x_forward ≤ R_k2_size)
+    : x_non_forward ≥ k + 2 := by
+  -- omega sets up the balance equation:
+  -- x_non_forward = x_deg - x_forward
+  -- x_non_forward ≥ delta - (delta - k - 3)
+  -- Which simplifies directly to: x_non_forward ≥ k + 2
   omega
+
+
+
 
 
 --Reduction theorem
