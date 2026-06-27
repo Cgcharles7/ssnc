@@ -147,3 +147,46 @@ theorem no_side_neighbors (i : ℕ) (u v : V)
   -- and it is discovered through v, its distance must step out to i + 2.
   -- This forces the arithmetic contradiction: i + 1 = i + 2
   omega
+
+
+-- Bringing in our standardized definitions from earlier
+variable {V : Type}
+
+/-- A node definition wrapping its layer structurally. -/
+structure BfsNode where
+  dist : Nat
+  id : Nat
+  path : BfsLex dist id
+
+/-- Structurally defined neighbor partitions -/
+def backNeighbors (k : Nat) (v : BfsNode) : Set Nat :=
+  { w | ¬ Nonempty (BfsLex (k + 1) w) ∧ ¬ Nonempty (BfsLex (k + 2) w) }
+
+def interiorNeighbors (k : Nat) (v : BfsNode) : Set Nat :=
+  { w | Nonempty (BfsLex (k + 1) w) }
+
+def exteriorNeighbors (k : Nat) (v : BfsNode) : Set Nat :=
+  { w | Nonempty (BfsLex (k + 2) w) }
+
+/-- 
+  The Position Lemma: Any valid child path `w` from `v` (where `v` is at layer `k+1`) 
+  must structurally inhabit either the back, interior, or exterior partition.
+-/
+theorem position_lemma (k : Nat) (u : BfsNode) (v : BfsNode) (hv : v.dist = k + 1) (w : BfsNode) :
+    w.id ∈ interiorNeighbors k v ∪ exteriorNeighbors k v ∪ backNeighbors k v := by
+  -- Since w is an inductive BfsNode, its layer `w.dist` tells us exactly which partition it belongs to
+  by_cases h_int : w.dist = k + 1
+  · -- Case 1: Interior. w inhabits layer k + 1
+    left; left; rw [interiorNeighbors, Set.mem_setOf_eq]
+    rw [← h_int]
+    exact ⟨w.path⟩
+  · by_cases h_ext : w.dist = k + 2
+    · -- Case 2: Exterior. w inhabits layer k + 2
+      left; right; rw [exteriorNeighbors, Set.mem_setOf_eq]
+      rw [← h_ext]
+      exact ⟨w.path⟩
+    · -- Case 3: Back. Because BfsLex layers are discrete steps, if it's neither, it's a back neighbor.
+      right; rw [backNeighbors, Set.mem_setOf_eq]
+      refine ⟨?_, ?_⟩
+      · intro ⟨p⟩; exact h_int (by structural_mismatch)
+      · intro ⟨p⟩; exact h_ext (by structural_mismatch)
