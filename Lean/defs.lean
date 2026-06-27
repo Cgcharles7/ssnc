@@ -151,3 +151,121 @@ def IsSeymour (G : SimpleGraph V) [DecidableRel G.Adj] (u : V) : Prop :=
 /-- A vertex is "Non-Seymour" if it has strictly more first neighbors than second neighbors. -/
 def IsNonSeymour (G : SimpleGraph V) [DecidableRel G.Adj] (u : V) : Prop :=
   (N1 G O u).card > (outNeighbor2 G O u).card
+
+
+import Std.Data.List.Basic
+
+inductive BfsLex : Nat → Nat → Type where
+  | /-- Property 1: The root node starts at distance 0. -/
+    root (r : Nat) : BfsLex 0 r
+  | /-- Property 2: A child node moves to the next neighborhood layer (d + 1). -/
+    childOf {d p : Nat} (parent : BfsLex d p) (curr : Nat) : BfsLex (d + 1) curr
+  | /-- Property 3: A neighbor in the exact same neighborhood layer (d). -/
+    sameLayerNeighbor {d n : Nat} (peer : BfsLex d n) (curr : Nat) : BfsLex d curr
+
+-- Unpacking helper to extract the node ID out of the type
+def BfsLex.nodeId {d k : Nat} (_ : BfsLex d k) : Nat := k
+
+-- Unpacking helper to extract the distance layer out of the type
+def BfsLex.dist {d k : Nat} (_ : BfsLex d k) : Nat := d
+
+/-- Strictly less-than comparison using the parameters extracted from BfsLex instances. -/
+def bfsLexLess {d1 d2 k1 k2 : Nat} (n1 : BfsLex d1 k1) (n2 : BfsLex d2 k2) : Bool :=
+  if d1 < d2 then true
+  else if d1 == d2 then k1 < k2
+  else false
+
+
+/-- A wrapper to allow BfsLex nodes of varying layers and IDs to exist in the same List. -/
+structure WrappedBfsLex where
+  d : Nat
+  k : Nat
+  node : BfsLex d k
+
+/-- Comparison wrapper matching your original nodeLessFromCoord logic -/
+def wrappedLess (w1 w2 : WrappedBfsLex) : Bool :=
+  bfsLexLess w1.node w2.node
+
+/-- Unified minimum-finding function operating entirely on your BfsLex data structure -/
+def getMinBfsLex (H : List WrappedBfsLex) : Option WrappedBfsLex :=
+  match H with
+  | [] => none
+  | first :: tail => 
+    some (tail.foldl (fun currentMin next => 
+      if wrappedLess next currentMin then next else currentMin) first)
+
+-- Assuming u is your reference/root node, 
+-- a path of length 1 to v is exactly represented by a child of a root node.
+def IsFirstOutNeighbor (u v : Nat) : Type :=
+  BfsLex 1 v
+
+/-- Constructive definition of a second-layer neighbor.
+    Contains a BfsLex path of length 2, alongside the proofs that v ≠ u 
+    and that no path of length 1 exists. -/
+structure IsSecondOutNeighbor (u v : Nat) : Type where
+  path : BfsLex 2 v
+  not_self : v ≠ u
+  not_first : IsFirstOutNeighbor u v → Empty
+
+variable (G : SimpleGraph Nat) (v₀ : Nat)
+
+/-- 
+  Helper predicate: w is a second out-neighbor of u.
+  Translates your existential step (u -> z -> w) into structural paths.
+-/
+def secondNeighborSet (u w : Nat) : Prop :=
+  w ≠ u ∧ 
+  ¬ Nonempty (BfsLex 1 w) ∧ 
+  ∃ z, Nonempty (BfsLex 1 z) ∧ w ∈ G.neighborSet z
+
+/--
+  Interior Neighbors: Nodes adjacent to both u and v that live strictly 
+  within layer k + 1.
+-/
+def interiorNeighbors (k : Nat) (u v : Nat) : Set Nat :=
+  { w | w ∈ G.neighborSet u ∧ w ∈ G.neighborSet v ∧ Nonempty (BfsLex (k + 1) w) }
+
+/--
+  Exterior Neighbors: Second out-neighbors of u and direct out-neighbors of v
+  that live strictly within layer k + 2.
+-/
+def exteriorNeighbors (k : Nat) (u v : Nat) : Set Nat :=
+  { w | secondNeighborSet G u w ∧ w ∈ G.neighborSet v ∧ Nonempty (BfsLex (k + 2) w) }
+
+variable {V : Type} [Fintype V] [DecidableEq V] (G : SimpleGraph V)
+
+/-- First out-neighborhood of u as a Finset using BfsLex -/
+def N1Bfs (u : V) : Finset V :=
+  Finset.filter (fun v => Decidable.toBool (Nonempty (BfsLex 1 v))) Finset.univ
+
+/-- Second out-neighborhood of u as a Finset using BfsLex -/
+def N2Bfs (u : V) : Finset V :=
+  Finset.filter (fun w => 
+    w ≠ u ∧ 
+    ¬ Nonempty (BfsLex 1 w) ∧ 
+    ∃ z, Nonempty (BfsLex 1 z) ∧ w ∈ G.neighborSet z
+  ) Finset.univ
+
+/-- A vertex is "Seymour" if it has at least as many second neighbors as first neighbors. -/
+def IsSeymour (u : V) : Prop :=
+  (N2Bfs G u).card ≥ (N1Bfs G u).card
+
+/-- A vertex is "Non-Seymour" if it has strictly more first neighbors than second neighbors. -/
+def IsNonSeymour (u : V) : Prop :=
+  (N1Bfs G u).card > (N2Bfs G u).card
+
+/-- A Node is fundamentally defined by its distance from the root 
+    and its structural BfsLex placement. -/
+structure BfsNode where
+  dist : Nat
+  id : Nat
+  path : BfsLex dist id
+
+/-- Adjacency in your graph is now completely determined by path relationships 
+    within the BfsLex structure. -/
+def BfsGraphAdj (u v : BfsNode) : Prop :=
+  -- u and v are adjacent if one is a child of the other, 
+  -- or if they are peers in the same/adjacent layers
+  (u.dist = v.dist ∧ (∃ (peer : BfsLex u.dist v.id), True)) ∨ 
+  (u.dist + 1 = v.dist) ∨ 
+  (v.dist + 1 = u.dist)
