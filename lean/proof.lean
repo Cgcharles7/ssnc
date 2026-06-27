@@ -261,4 +261,51 @@ theorem next_link_backarc_bound (i k : Nat) (hk : k < i) (u_i v_k w : BfsNode Ad
   · exact h_sub_old h_old
   · exact h_sub_two h_two
 
+-- Load Balance Theorem by Induction 
+variable {Adj : Nat → Nat → Prop}
 
+/-- Compressed Base Case: The neighbors of the root (layer 0) are layer-1 nodes -/
+theorem base_case_definition (v₀ x : BfsNode Adj) 
+    (h_int : interiorNeighbors 0 x.dist) : x.dist = 1 := by
+  -- interiorNeighbors 0 x.dist unfolds directly to x.dist = 0 + 1
+  exact h_int
+
+/-- Compressed Inductive Case: An interior neighbor of a layer-k node is a layer-(k+1) node -/
+theorem inductive_case_definition (k : Nat) (u x : BfsNode Adj)
+    (hu : u.dist = k)
+    (h_int : interiorNeighbors u.dist x.dist) : x.dist = k + 1 := by
+  rw [hu] at h_int
+  exact h_int
+
+
+/-- 
+  Compressed Root Pigeonhole: Eliminates horizontal and backward leaking 
+  scenarios for the children of the root node.
+-/
+theorem base_case_pigeonhole (v₀ x w : BfsNode Adj)
+    (hx : x.dist = 1)                         -- x is a direct child of the root
+    (hw_from_x : interiorNeighbors x.dist w.dist) -- w is an out-neighbor of x
+    (h_not_mem : ¬ interiorNeighbors 0 w.dist)   -- Hypothesis: w is NOT in layer 1
+    : w.dist = 2 := by
+  -- 1. Unfold neighbors to expose the core Nat algebra
+  rw [interiorNeighbors] at h_not_mem       -- w.dist ≠ 1
+  rw [hx, interiorNeighbors] at hw_from_x   -- w.dist = 2
+  
+  -- 2. The goal is exactly what hw_from_x gives us. 
+  -- No by_contra, no asymmetry lookups, no cardinality checks needed!
+  exact hw_from_x
+/--
+  Compressed Structural Layer Lock: Proves that if an out-neighbor of a 
+  layer-(k+1) node does not leak backward or horizontally, it MUST inhabit layer k+2.
+-/
+theorem general_layer_leak_elimination (k : Nat) (x w : BfsNode Adj)
+    (hx : x.dist = k + 1)
+    (hw_from_x : interiorNeighbors x.dist w.dist) -- w is an out-neighbor of x
+    (hw_not_Rk : w.dist > k)                     -- Not a backward leak
+    (hw_not_N1 : w.dist ≠ k + 1)                 -- Not a horizontal leak
+    : w.dist = k + 2 := by
+  -- Unfold the neighbor relation relative to x's layer
+  rw [hx, interiorNeighbors] at hw_from_x       -- forces w.dist = (k + 1) + 1
+  
+  -- Nat addition guarantees (k + 1) + 1 = k + 2
+  omega
