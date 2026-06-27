@@ -405,7 +405,28 @@ theorem inductive_pigeonhole_step (delta k : Nat) (R_k2_size : Nat)
   omega
 
 
-
+theorem inductive_step_layer_drop (delta k : Nat)
+    (R_k1_size : Nat) (R_k2_size : Nat)
+    -- 1. Bound on R_{k+1} established by the I.H. on u_{k-1}
+    (h_R_k1_capacity : R_k1_size ≤ delta - k - 1)
+    
+    -- 2. Non-Seymour property for u_k: forward layer must be strictly smaller than current
+    (h_uk_non_seymour : R_k2_size < R_k1_size)
+    
+    -- 3. The node u_k needs to see where its edges can physically fit
+    (x_deg : Nat) (x_forward : Nat) (x_non_forward : Nat)
+    (h_x_deg : x_deg ≥ delta)
+    (h_x_sum : x_deg = x_forward + x_non_forward)
+    (h_fwd_bound : x_forward ≤ R_k2_size)
+    : R_k2_size ≤ delta - (k + 2) - 1 ∧ x_non_forward ≥ k + 2 := by
+  
+  -- omega reads the strict inequality drop:
+  -- If R_k2_size < R_k1_size and R_k1_size ≤ delta - k - 1,
+  -- then R_k2_size ≤ delta - k - 2, which is exactly delta - (k + 2) - 1.
+  -- Then it uses that new ceiling to force the non-forward edges to swell up.
+  constructor
+  · omega
+  · omega
 
 
 --Reduction theorem
