@@ -192,3 +192,39 @@ lemma later_neighbors_impossible (u v : Nat) (a b : Nat)
   -- 4. Let omega handle the contradiction!
   -- We have (b ≤ a + 1) and (b ≥ a + 2), which omega crushes instantly.
   omega
+
+import Std.Data.HashSet
+
+def bfsDistances (graph : Array (List Nat)) (start : Nat) : Array (Option Nat) := Id.run do
+  let mut distances := Array.mkArray graph.size none
+  let mut visited : Std.HashSet Nat := Std.HashSet.empty
+  let mut queue : List Nat := []
+
+  if h : start < graph.size then
+    distances := distances.set ⟨start, h⟩ (some 0)
+    visited := visited.insert start
+    queue := [start]
+
+  -- Using a manual fuel-based loop or standard recursion to satisfy Lean's totality checker
+  -- For an imperative loop block, we can simulate via a large fuel bound (graph.size * graph.size)
+  let fuel := graph.size * graph.size
+  for _ in [0:fuel] do
+    match queue with
+    | [] => break
+    | curr :: tail =>
+      queue := tail
+
+      if hCurr : curr < graph.size then
+        -- Safe extraction of current distance
+        let currentDist := (distances.get ⟨curr, by compliance⟩).getD 0
+        let neighbors := graph[curr]
+
+        for neighbor in neighbors do
+          if !visited.contains neighbor then
+            visited := visited.insert neighbor
+            queue := queue ++ [neighbor] 
+            
+            if hNeigh : neighbor < distances.size then
+              distances := distances.set ⟨neighbor, hNeigh⟩ (some (currentDist + 1))
+
+  return distances
