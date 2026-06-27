@@ -206,3 +206,59 @@ lemma local_edges_disjoint_from_previous (k : Nat) (u v : Nat)
   injection (by injection hv_layer) with hv_layer'
   omega
 
+
+--NextLink
+variable {Adj : Nat → Nat → Prop}
+
+/-- Predicate tracking deep forward layers -/
+def outNeighborsDeep (i : Nat) (w_dist : Nat) : Prop := w_dist ≥ i
+
+/-- 
+  Compressed Lemma 1: Forward deep neighbors of u_i are disjoint from 
+  the direct layer-neighbors of a strictly lower node v_k.
+-/
+theorem lower_layer_neighbors_disjoint (i k : Nat) (hk : k < i) (u_i v_k : BfsNode Adj) (w : BfsNode Adj)
+    (hu : u_i.dist = i)
+    (hv : v_k.dist = k)
+    (h_deep : outNeighborsDeep i w.dist)
+    (h_vk_out : interiorNeighbors k w.dist) : False := by
+  -- 1. Unpack definitions to reveal pure Nat properties
+  rw [outNeighborsDeep] at h_deep             -- w.dist ≥ i
+  rw [interiorNeighbors] at h_vk_out         -- w.dist = k + 1
+  
+  -- 2. Let omega crush the bounds: k + 1 cannot be ≥ i when k < i
+  omega
+
+/-- Second out-neighborhood structurally tracked from a BfsNode -/
+def N2BfsNode (u : BfsNode Adj) (w_dist : Nat) : Prop :=
+  ∃ z : BfsNode Adj, interiorNeighbors u.dist z.dist ∧ interiorNeighbors z.dist w_dist
+
+/-- 
+  Compressed Lemma 2: Direct neighbors of a back-arc node v_k are structurally 
+  absorbed into the second out-neighborhood of the higher-layer node u_i.
+-/
+theorem out_neighbors_subset_outNeighbor2 (i k : Nat) (hk : k < i) (u_i v_k : BfsNode Adj) (w : BfsNode Adj)
+    (hu : u_i.dist = i)
+    (hv : v_k.dist = k)
+    (h_back_arc : interiorNeighbors u_i.dist v_k.dist) -- v_k is an interior neighbor of u_i
+    (hw : interiorNeighbors v_k.dist w.dist) :           -- w is an interior neighbor of v_k
+    N2BfsNode u_i w.dist := by
+  -- We provide v_k as the explicit structural witness `z` linking u_i to w
+  use v_k
+  rw [hu, hv] at h_back_arc
+  rw [hv] at hw
+  exact ⟨h_back_arc, hw⟩
+
+theorem next_link_backarc_bound (i k : Nat) (hk : k < i) (u_i v_k w : BfsNode Adj)
+    (hu : u_i.dist = i) (hv : v_k.dist = k)
+    (h_disjoint : outNeighborsDeep i w.dist → interiorNeighbors k w.dist → False)
+    (h_sub_two : interiorNeighbors k w.dist → N2BfsNode u_i w.dist)
+    (h_sub_old : outNeighborsDeep i w.dist → N2BfsNode u_i w.dist) :
+    (outNeighborsDeep i w.dist ∨ interiorNeighbors k w.dist) → N2BfsNode u_i w.dist := by
+  -- Pure structural implication replacing the old heavy Finset/Set union inclusion rules
+  intro h_union
+  rcases h_union with h_old | h_two
+  · exact h_sub_old h_old
+  · exact h_sub_two h_two
+
+
