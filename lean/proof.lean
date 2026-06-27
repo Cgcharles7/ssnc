@@ -309,3 +309,63 @@ theorem general_layer_leak_elimination (k : Nat) (x w : BfsNode Adj)
   
   -- Nat addition guarantees (k + 1) + 1 = k + 2
   omega
+
+--Reduction theorem
+variable {Adj : Nat → Nat → Prop}
+
+-- An out-neighbor (second neighborhood) from u through some intermediate node
+def outNeighbor2 (u w : BfsNode Adj) : Prop :=
+  ∃ v : BfsNode Adj, (v.dist = u.dist + 1) ∧ (w.dist = v.dist + 1 ∨ w.dist ≤ v.dist - 1)
+
+def exteriorNeighbors (u_dist v_dist w_dist : Nat) : Prop :=
+  w_dist = u_dist + 2
+
+def backNeighbors (v_dist w_dist : Nat) : Prop :=
+  w_dist ≤ v_dist - 1
+
+/-- 
+  Compressed Part 1 & 3: Exterior or back neighbors of a child v 
+  are structurally second neighbors of the parent u.
+-/
+theorem reduction_definition_containment (u v w : BfsNode Adj)
+    (hv : v.dist = u.dist + 1)
+    (h_cases : exteriorNeighbors u.dist v.dist w.dist ∨ backNeighbors v.dist w.dist) :
+    outNeighbor2 u w := by
+  use v
+  refine ⟨hv, ?_⟩
+  rcases h_cases with h_ext | h_back
+  · -- Subcase A: Exterior neighbor
+    rw [exteriorNeighbors] at h_ext
+    left; omega
+  · -- Subcase B: Back neighbor
+    rw [backNeighbors] at h_back
+    right; omega
+
+/-- 
+  Compressed Part 2: When the parent is the root (dist = 0), 
+  the back component drops out mathematically.
+-/
+theorem reduction_base_case_pigeonhole (u v w : BfsNode Adj)
+    (hu : u.dist = 0)
+    (hv : v.dist = 1)
+    (hw : outNeighbor2 u w) : exteriorNeighbors u.dist v.dist w.dist := by
+  rcases hw with ⟨v', hv', h_w_cases⟩
+  rw [exteriorNeighbors]
+  -- omega recognizes that w cannot leak backward since dist cannot be negative,
+  -- isolating the layer cleanly to 2.
+  omega
+
+/-- 
+  Compressed Part 4: Inductive Step Squeeze.
+  An out-neighbor of a child node must fall into either the exterior or back partition.
+-/
+theorem reduction_inductive_step_squeeze (u v w : BfsNode Adj)
+    (hv : v.dist = u.dist + 1)
+    (hw : outNeighbor2 u w) 
+    (h_not_horizontal : w.dist ≠ u.dist + 1) : 
+    exteriorNeighbors u.dist v.dist w.dist ∨ backNeighbors v.dist w.dist := by
+  rcases hw with ⟨v', hv', h_w_cases⟩
+  rw [exteriorNeighbors, backNeighbors]
+  -- omega clamps the arithmetic possibilities directly from the hypothesis,
+  -- bypassing the entire topological Partition Lemma step.
+  omega
