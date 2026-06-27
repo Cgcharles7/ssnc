@@ -1,5 +1,15 @@
 variable {Adj : Nat → Nat → Prop}
 
+/-- The size of a node's first neighborhood (out-degree) -/
+def cardN1 (G : FiniteGraph Adj) (u : Nat) : Nat :=
+  (G.edges.filter (fun e => e.1 = u)).length
+
+/-- The size of a node's second neighborhood (out-neighbors of out-neighbors, minus shortcuts) -/
+def cardN2 (G : FiniteGraph Adj) (u : Nat) : Nat :=
+  -- Counts unique nodes w where there's a valid path u -> v -> w 
+  -- and w is neither u nor a direct neighbor of u.
+  sorry
+
 /-- 
   Enhanced BfsLex that structurally tracks:
   1. Shortest path layer distance (`d`)
