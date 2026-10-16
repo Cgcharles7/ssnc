@@ -92,3 +92,59 @@ instance : EmptyCollection GraphLevelOrder where
     max_layer := 0,
     graph := default
   }
+
+
+/-
+-------------------------------------------------------------------------------
+Stage 4: Interior and Exterior Neighbors & Formal Theorems
+-------------------------------------------------------------------------------
+-/
+
+def interiorNeighbors (graph : GraphLevelOrder) (u v : GLONode) : Finset Nat :=
+  if graph.nodes.contains u && graph.nodes.contains v && decide (v.dist > u.dist) && v.dist - u.dist == 1 then
+    let u_fir_nbrs := u.out_neighbors
+    let v_fir_nbrs := v.out_neighbors
+    (u_fir_nbrs.inter v_fir_nbrs).toFinset
+  else
+    ∅
+
+def exteriorNeighbors (G : GraphLevelOrder) (u v : GLONode) : Finset Nat :=
+  if G.nodes.contains u && G.nodes.contains v && decide (v.dist > u.dist) && v.dist - u.dist == 1 then
+    let u_sec_nbrs := (FiniteGraph.getN2Finset (G.graph) u.lexId)
+    let v_fir_nbrs := (v.out_neighbors.toFinset)
+    (u_sec_nbrs ∩ v_fir_nbrs)
+  else
+    ∅ -- Must be Finset.empty (∅) instead of []
+namespace GraphLevelOrder
+
+
+theorem interior_neighbors_implies_first_neighbors (graph : GraphLevelOrder) (u v w : GLONode)
+    (h_cond : graph.nodes.contains u && graph.nodes.contains v &&
+              decide (v.dist > u.dist) && v.dist - u.dist == 1) :
+    w.lexId ∈ interiorNeighbors graph u v →
+    w.lexId ∈ u.out_neighbors ∧ w.lexId ∈ v.out_neighbors := by
+  unfold interiorNeighbors
+  rw [if_pos h_cond]
+  intro h
+  simpa [List.mem_toFinset, List.inter, List.mem_filter] using h
+
+
+theorem exterior_neighbor_implies_second_neighbor (G : GraphLevelOrder) (u v w : GLONode)
+    (h_cond : G.nodes.contains u && G.nodes.contains v && decide (v.dist > u.dist) && v.dist - u.dist == 1)
+    (hw : w.lexId ∈ exteriorNeighbors G u v) :
+    w.lexId ∈ FiniteGraph.getN2Finset G.graph u.lexId := by
+  -- 1. Unfold exteriorNeighbors and evaluate the if condition
+  unfold exteriorNeighbors at hw
+  rw [if_pos h_cond] at hw
+
+  -- 2. Simplify the let bindings and apply Finset intersection membership
+  dsimp only at hw
+  rw [Finset.mem_inter] at hw
+
+  -- 3. Extract the first part of the conjunction (membership in u's second-order neighbor finset)
+  rcases hw with ⟨h_u_sec, _⟩
+
+  -- 4. Exact match!
+  exact h_u_sec
+
+end GraphLevelOrder
