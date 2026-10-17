@@ -105,25 +105,18 @@ theorem out_card_split (G : GraphLevelOrder) (v : GLONode)
   sorry  -- toFinset = intL ∪ extL, disjoint by distOf; then card_union_of_disjoint
 
 /-- Case 1: the first irregular child of a parent at distance k cannot exist. -/
-theorem case1
-    (G : GraphLevelOrder) (δ k : Nat) (u v : GLONode)
-    -- structure
-    (hfwd   : fwdArc G u v = true)
-    (hdist  : v.dist = k + 1)
-    (hnd    : v.out_neighbors.Nodup)
-    (hbfs   : ∀ x ∈ v.out_neighbors, ∃ d, G.distOf x = some d ∧ d ≤ v.dist + 1)
-    -- no back arcs (the other branch of the dichotomy)
-    (hnb    : backL G v = ∅)
-    -- v is irregular
-    (hirr   : δ < v.out_neighbors.length)
-    -- INPUT 1: load balance, |int| = k+1 (the assumption you're making)
-    (hint   : (intL G v).card = k + 1)
-    -- INPUT 2: Cor 3.10 for layer k+2
-    (hcor   : (layerIds G (k + 2)).card ≤ δ - (k + 1))
-    -- INPUT 3: no truncation, i.e. k+1 ≤ δ
-    (hk     : k + 1 ≤ δ) :
-    False := by
-  have hsplit := out_card_split G v hnd hbfs hnb
+theorem case1 (G : GraphLevelOrder) (δ k : Nat) (hC : IsCounterexample G)
+    (hmin : IsMinOutDeg G δ) (hnb : NoBackArcs G)
+    (u v : GLONode) (hfwd : fwdArc G u v = true)
+    (hu : u.dist = k) (hudeg : u.out_neighbors.length = δ)
+    (hnd : v.out_neighbors.Nodup)
+    (hbfs : ∀ x ∈ v.out_neighbors, ∃ d, G.distOf x = some d ∧ d ≤ v.dist + 1)
+    (hirr : δ < v.out_neighbors.length) (hk : k + 1 ≤ δ) : False := by
+  have hint := interior_bound_of_nonSeymour G δ k hC hmin hnb u v hfwd hu hudeg
+  have hcor := cor_3_10 G δ hC hmin k
+  have hsplit := out_card_split G v hnd hbfs (by sorry)
+  have hdist : v.dist = k + 1 := by
+    simp [fwdArc] at hfwd; omega
   have hsub := Finset.card_le_card (extL_subset_layer G v)
   rw [hdist] at hsub
   omega
