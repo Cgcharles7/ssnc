@@ -120,3 +120,9 @@ theorem case1 (G : GraphLevelOrder) (δ k : Nat) (hC : IsCounterexample G)
   have hsub := Finset.card_le_card (extL_subset_layer G v)
   rw [hdist] at hsub
   omega
+
+theorem interior_lower_bound (δ k intC extC backC outC : Nat)
+    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
+    (hback : backC = 0)
+    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
+    k + 1 ≤ intC := by omega
