@@ -59,4 +59,18 @@ theorem lemma_rooted_neighborhood_size
       have h := hstep (m + 2) (by omega)
       have e : m + 2 + 1 = m + 1 + 2 := rfl
       rw [e] at h
+
+/-- Pigeonhole: an irregular child cannot fit its exterior in one layer. -/
+theorem irregular_child_false (G : GraphLevelOrder) (δ k : Nat) (v : GLONode)
+    (hk : v.dist = k + 1)
+    (hdeg : δ < v.out_neighbors.length) (hnd : v.out_neighbors.Nodup)
+    (hint : (intL G v).card = k + 1)          -- load balance
+    (hpart : v.out_neighbors.toFinset = intL G v ∪ extL G v)
+    (hdis : Disjoint (intL G v) (extL G v))
+    (hlay : (layerIds G (k + 2)).card ≤ δ - (k + 1)) : False := by
+  have h1 := Finset.card_le_card (extL_subset_layer G v)
+  rw [hk] at h1
+  have h2 : v.out_neighbors.length = (intL G v).card + (extL G v).card := by
+    rw [← List.toFinset_card_of_nodup hnd, hpart, Finset.card_union_of_disjoint hdis]
+  omega
       omega                            -- |R_{m+3}| ≤ |R_{m+2}| - 1 ≤ delta - (m+2)
