@@ -27,6 +27,12 @@ def interiorArcCount (G : GraphLevelOrder) : Nat :=
 def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=
   IsCounterexample G ∧
   ∀ H : GraphLevelOrder, IsCounterexample H →
+
+def ConnectedBack (G : GraphLevelOrder) (u v : GLONode) : Prop :=
+  ∃ x ∈ backL G v, x ∈ u.out_neighbors
+
+def NoConnectedBack (G : GraphLevelOrder) : Prop :=
+  ∀ u v, fwdArc G u v = true → ¬ ConnectedBack G u v
     interiorArcCount G ≤ interiorArcCount H
 
 
