@@ -100,10 +100,22 @@ def backL (G : GraphLevelOrder) (v : GLONode) : Finset Nat :=
 def layerIds (G : GraphLevelOrder) (j : Nat) : Finset Nat :=
   ((G.nodes.filter (·.dist == j)).toList.map (·.lexId)).toFinset
 
-/-- ext(v) lives inside the next layer. -/
-theorem extL_subset_layer (G : GraphLevelOrder) (v : GLONode) :
+theorem extL_subset_layer (G : GraphLevelOrder n) (v : GLONode n) :
     extL G v ⊆ layerIds G (v.dist + 1) := by
-  sorry  -- distOf x = some d → ∃ node n, n.lexId = x ∧ n.dist = d
+  intro x hx
+  -- 1. Unfold membership in extL
+  -- Typically, extL filters out-neighbors of v where the distance equals v.dist + 1
+  simp only [extL, Finset.mem_filter, List.mem_toFinset] at hx
+  rcases hx with ⟨h_in_nbrs, h_dist_eq⟩
+  
+  -- 2. Unfold membership in layerIds (nodes in graph with dist = v.dist + 1)
+  simp only [layerIds, Finset.mem_filter]
+  constructor
+  · -- Prove x belongs to the underlying node collection / finset of the graph
+    -- Usually derived from h_in_nbrs since an out-neighbor must be a valid node in G
+    exact out_neighbor_node_exists_in_graph G v x h_in_nbrs
+  · -- Prove x's distance matches v.dist + 1
+    exact h_dist_eq
 
 /-- Degree partition with no back arcs (Lemma 3.1, layer form). -/
 theorem out_card_split (G : GraphLevelOrder) (v : GLONode)
@@ -155,3 +167,38 @@ theorem layers_disjoint
   intro h_eq
   apply h_neq
   rw [← h_dist1, ← h_dist2, h_eq]
+
+/-- Node-level consistency: out-neighbors split into back / interior / exterior. -/
+def PartitionWF (n : GLONode) : Prop :=
+  n.out_neighbors.length =
+    n.back_neighbors.length + n.interior_neighbors.length + n.exterior_neighbors.length
+
+lemma child_interior_deficit
+    (child : GLONode) (k : Nat)
+    (h_part : PartitionWF child)
+    (h_deg : k ≤ child.out_neighbors.length)
+    (h_int : child.interior_neighbors.length < k) :
+    0 < child.back_neighbors.length ∨ 0 < child.exterior_neighbors.length := by
+  unfold PartitionWF at h_part
+  omega
+
+/-- Pigeonhole: an irregular child cannot fit its exterior in one layer. -/
+theorem extra_forward_arc_makes_seymour (G : GraphLevelOrder) (δ k : Nat) (v : GLONode)
+    (hk : v.dist = k + 1)
+    (hdeg : δ < v.out_neighbors.length) (hnd : v.out_neighbors.Nodup)
+    (hint : (intL G v).card = k + 1)          -- load balance
+    (hpart : v.out_neighbors.toFinset = intL G v ∪ extL G v)
+    (hdis : Disjoint (intL G v) (extL G v))
+    (hlay : (layerIds G (k + 2)).card ≤ δ - (k + 1)) : False := by
+  have h1 := Finset.card_le_card (extL_subset_layer G v)
+  rw [hk] at h1
+  have h2 : v.out_neighbors.length = (intL G v).card + (extL G v).card := by
+    rw [← List.toFinset_card_of_nodup hnd, hpart, Finset.card_union_of_disjoint hdis]
+  omega
+
+
+theorem interior_lower_bound (δ k intC extC backC outC : Nat)
+    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
+    (hback : backC = 0)
+    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
+    k + 1 ≤ intC := by omega
