@@ -28,3 +28,35 @@ def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=
   IsCounterexample G ∧
   ∀ H : GraphLevelOrder, IsCounterexample H →
     interiorArcCount G ≤ interiorArcCount H
+
+
+theorem lemma_rooted_neighborhood_size
+    (g : GraphLevelOrder n) (delta : Nat) (h_delta : delta = g.minOutDegree)
+    (h_dnsp : ∀ u ∈ g.nodes.toList, u.satisfiesDNSP g.adjacency_matrix) (i : Nat) :
+    match i with
+    | 0 => Fintype.card (g.rootedNeighborhood 0) = 1
+    | 1 => Fintype.card (g.rootedNeighborhood 1) = delta
+    | k + 2 => Fintype.card (g.rootedNeighborhood (k + 2)) ≤ delta - (k + 1) := by
+  have h0 : Fintype.card (g.rootedNeighborhood 0) = 1 := by
+    sorry  -- unique node at dist 0
+  have h1 : Fintype.card (g.rootedNeighborhood 1) = delta := by
+    sorry  -- root has out-degree minOutDegree; out-neighbors all lie in layer 1
+  have hstep : ∀ j, 1 ≤ j →
+      Fintype.card (g.rootedNeighborhood (j + 1))
+        ≤ Fintype.card (g.rootedNeighborhood j) - 1 := by
+    intro j hj
+    exact h_dnsp_neighborhood_decrease g j h_dnsp  -- adjust to its real signature
+  match i with
+  | 0 => exact h0
+  | 1 => exact h1
+  | k + 2 =>
+    induction k with
+    | zero =>
+      have := hstep 1 le_rfl
+      simp only [Nat.zero_add] at *   -- normalize 0+2 to 2 if needed
+      omega                            -- |R2| ≤ |R1| - 1 = delta - 1
+    | succ m ih =>
+      have h := hstep (m + 2) (by omega)
+      have e : m + 2 + 1 = m + 1 + 2 := rfl
+      rw [e] at h
+      omega                            -- |R_{m+3}| ≤ |R_{m+2}| - 1 ≤ delta - (m+2)
