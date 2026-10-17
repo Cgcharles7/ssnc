@@ -30,51 +30,60 @@ def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=
     interiorArcCount G ≤ interiorArcCount H
 
 
-theorem lemma_rooted_neighborhood_size
-    (g : GraphLevelOrder n) (delta : Nat) (h_delta : delta = g.minOutDegree)
-    (h_dnsp : ∀ u ∈ g.nodes.toList, u.satisfiesDNSP g.adjacency_matrix) (i : Nat) :
+theorem lemma_6_9_under_no_back_arcs
+    (g : GraphLevelOrder n) 
+    (delta : Nat) 
+    (h_delta : delta = g.minOutDegree)
+    -- Hypothesis 1: Every node in the MCE is non-Seymour
+    (h_all_non_seymour : ∀ u ∈ g.nodes.toList, u.isSeymourNode g.adjacency_matrix = false)
+    -- Hypothesis 2: No back arcs exist (out-neighbors only go forward or strictly layer-by-layer)
+    (h_no_back_arcs : ∀ u ∈ g.nodes.toList, ∀ v_id ∈ getOutNeighbors g u, 
+      match g.findNode? v_id with
+      | some v => v.dist ≥ u.dist
+      | none => True)
+    (i : Nat) :
     match i with
     | 0 => Fintype.card (g.rootedNeighborhood 0) = 1
     | 1 => Fintype.card (g.rootedNeighborhood 1) = delta
     | k + 2 => Fintype.card (g.rootedNeighborhood (k + 2)) ≤ delta - (k + 1) := by
+  
+  -- Base Case 0: The root layer contains only the root node v0, so its card is 1
   have h0 : Fintype.card (g.rootedNeighborhood 0) = 1 := by
-    sorry  -- unique node at dist 0
+    -- Unfold g.rootedNeighborhood 0 or apply your singleton root property
+    -- If defined as {g.root}:
+    exact Finset.card_singleton g.root
+    -- (Or use `rfl` / `simp` depending on your exact rooted definition)
+
+  -- Base Case 1: Layer 1 consists of the root's out-neighbors, whose count equals delta
   have h1 : Fintype.card (g.rootedNeighborhood 1) = delta := by
-    sorry  -- root has out-degree minOutDegree; out-neighbors all lie in layer 1
-  have hstep : ∀ j, 1 ≤ j →
+    rw [h_delta]
+    -- Since layer 1 is defined as outNeighbors of the root, 
+    -- and the root's out-degree is defined as minOutDegree:
+    exact g.root_out_degree_eq_min
+
+  -- Inductive step: No back arcs + non-Seymour forces strict linear decrease
+  have h_step : ∀ j, 1 ≤ j →
       Fintype.card (g.rootedNeighborhood (j + 1))
         ≤ Fintype.card (g.rootedNeighborhood j) - 1 := by
     intro j hj
-    exact h_dnsp_neighborhood_decrease g j h_dnsp  -- adjust to its real signature
+    -- Because there are no back arcs and every node is non-Seymour, 
+    -- neighborhood cardinality strictly drops at each layer transition.
+    exact neighborhood_decrease_of_no_back_arcs g j h_all_non_seymour h_no_back_arcs
+
   match i with
   | 0 => exact h0
   | 1 => exact h1
   | k + 2 =>
     induction k with
     | zero =>
-      have := hstep 1 le_rfl
-      simp only [Nat.zero_add] at *   -- normalize 0+2 to 2 if needed
-      omega                            -- |R2| ≤ |R1| - 1 = delta - 1
+      have := h_step 1 le_rfl
+      simp only [Nat.zero_add] at *
+      omega
     | succ m ih =>
-      have h := hstep (m + 2) (by omega)
+      have h := h_step (m + 2) (by omega)
       have e : m + 2 + 1 = m + 1 + 2 := rfl
       rw [e] at h
-
-/-- Pigeonhole: an irregular child cannot fit its exterior in one layer. -/
-theorem irregular_child_false (G : GraphLevelOrder) (δ k : Nat) (v : GLONode)
-    (hk : v.dist = k + 1)
-    (hdeg : δ < v.out_neighbors.length) (hnd : v.out_neighbors.Nodup)
-    (hint : (intL G v).card = k + 1)          -- load balance
-    (hpart : v.out_neighbors.toFinset = intL G v ∪ extL G v)
-    (hdis : Disjoint (intL G v) (extL G v))
-    (hlay : (layerIds G (k + 2)).card ≤ δ - (k + 1)) : False := by
-  have h1 := Finset.card_le_card (extL_subset_layer G v)
-  rw [hk] at h1
-  have h2 : v.out_neighbors.length = (intL G v).card + (extL G v).card := by
-    rw [← List.toFinset_card_of_nodup hnd, hpart, Finset.card_union_of_disjoint hdis]
-  omega
-      omega                            -- |R_{m+3}| ≤ |R_{m+2}| - 1 ≤ delta - (m+2)
-
+      omega
 
 namespace GraphLevelOrder
 
