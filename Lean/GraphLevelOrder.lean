@@ -100,6 +100,12 @@ Stage 4: Interior and Exterior Neighbors & Formal Theorems
 -------------------------------------------------------------------------------
 -/
 
+/-
+-------------------------------------------------------------------------------
+Stage 4: Interior and Exterior Neighbors & Formal Theorems
+-------------------------------------------------------------------------------
+-/
+
 def interiorNeighbors (graph : GraphLevelOrder) (u v : GLONode) : Finset Nat :=
   if graph.nodes.contains u && graph.nodes.contains v && decide (v.dist > u.dist) && v.dist - u.dist == 1 then
     let u_fir_nbrs := u.out_neighbors
@@ -115,7 +121,22 @@ def exteriorNeighbors (G : GraphLevelOrder) (u v : GLONode) : Finset Nat :=
     (u_sec_nbrs ∩ v_fir_nbrs)
   else
     ∅ -- Must be Finset.empty (∅) instead of []
-namespace GraphLevelOrder
+
+/-- Back arcs leaving v: arcs (v, w) with w in a layer strictly before v's. -/
+def backArcsOf (G : GraphLevelOrder) (v : GLONode) : Finset (Nat × Nat) :=
+  ((G.nodes.filter (fun w =>
+      w.dist < v.dist && v.out_neighbors.contains w.lexId)
+    ).toList.map (fun w => (v.lexId, w.lexId))).toFinset
+
+/-- back(u, v): for a forward arc u → v (v exactly one layer after u),
+    the set of back arcs from v into earlier layers. -/
+def backNeighb1ors (G : GraphLevelOrder) (u v : GLONode) : Finset (Nat × Nat) :=
+  if G.nodes.contains u && G.nodes.contains v
+      && u.out_neighbors.contains v.lexId
+      && v.dist == u.dist + 1 then
+    backArcsOf G v
+  else
+    ∅
 
 
 theorem interior_neighbors_implies_first_neighbors (graph : GraphLevelOrder) (u v w : GLONode)
