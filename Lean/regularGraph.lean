@@ -126,3 +126,15 @@ theorem interior_lower_bound (δ k intC extC backC outC : Nat)
     (hback : backC = 0)
     (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
     k + 1 ≤ intC := by omega
+
+
+/-- Back arcs forced by interior deficiency (no load balance, no minimality). -/
+theorem back_ge_deficiency (δ k intC extC backC outC : Nat)
+    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
+    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
+    (k + 1) - intC ≤ backC := by omega
+
+theorem lemmaA_core (δ k intC extC backC outC : Nat)
+    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
+    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ)
+    (hdef : intC < k + 1) : 0 < backC := by omega
