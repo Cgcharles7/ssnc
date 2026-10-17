@@ -129,10 +129,45 @@ theorem out_card_split (G : GraphLevelOrder) (v : GLONode)
     (hbfs : ∀ x ∈ v.out_neighbors, ∃ d, G.distOf x = some d ∧ d ≤ v.dist + 1)
     (hnb : backL G v = ∅) :
     v.out_neighbors.length = (intL G v).card + (extL G v).card := by
-  sorry  -- toFinset = intL ∪ extL, disjoint by distOf; then card_union_of_disjoint
+  -- 1. List length equals finset cardinality due to Nodup
+  rw [Finset.card_list_toFinset _ hnd]
+  
+  -- 2. Prove that the out-neighbor finset splits exactly into intL and extL
+  have h_union : v.out_neighbors.toFinset = intL G v ∪ extL G v := by
+    ext x
+    simp only [List.mem_toFinset, Finset.mem_union, mem_intL, mem_extL]
+    constructor
+    · intro hx
+      rcases hbfs x hx with ⟨d, hd_some, hd_le⟩
+      -- Because backL G v = ∅, x cannot be a back-arc. 
+      -- Thus its distance is either v.dist (interior) or v.dist + 1 (exterior).
+      have h_not_back : ¬ (d < v.dist) := by
+        intro h_back
+        -- If d < v.dist, x would belong to backL G v, contradicting hnb = ∅
+        have : x ∈ backL G v := by 
+          -- unfolding backL membership using hd_some and h_back
+          sorry 
+        rw [hnb] at this
+        exact Finset.not_mem_empty x this
+      omega
+    · intro h
+      rcases h with h_int | h_ext
+      · -- If in intL, it's an out-neighbor by definition of intL subset out_neighbors
+        exact mem_out_neighbors_of_intL G v x h_int
+      · -- If in extL, it's an out-neighbor by definition of extL subset out_neighbors
+        exact mem_out_neighbors_of_extL G v x h_ext
+
+  rw [h_union]
+
+  -- 3. Apply card_union_of_disjoint since internal and exterior occupy distinct layers
+  apply Finset.card_union_of_disjoint
+  intro x hxi hxe
+  simp only [mem_intL, mem_extL] at hxi hxe
+  -- Distance contradictions (d = v.dist vs d = v.dist + 1) resolved by omega
+  omega
 
 /-- Case 1: the first irregular child of a parent at distance k cannot exist. -/
-theorem case1 (G : GraphLevelOrder) (δ k : Nat) (hC : IsCounterexample G)
+theorem irregularity_extra_exterior_contradiction (G : GraphLevelOrder) (δ k : Nat) (hC : IsCounterexample G)
     (hmin : IsMinOutDeg G δ) (hnb : NoBackArcs G)
     (u v : GLONode) (hfwd : fwdArc G u v = true)
     (hu : u.dist = k) (hudeg : u.out_neighbors.length = δ)
