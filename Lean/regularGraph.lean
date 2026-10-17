@@ -138,3 +138,11 @@ theorem lemmaA_core (δ k intC extC backC outC : Nat)
     (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
     (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ)
     (hdef : intC < k + 1) : 0 < backC := by omega
+
+theorem layers_disjoint
+    (k1 k2 : Nat) (v_k1 v_k2 : GLONode)
+    (h_dist1 : v_k1.dist = k1) (h_dist2 : v_k2.dist = k2)
+    (h_neq : k1 ≠ k2) : v_k1 ≠ v_k2 := by
+  intro h_eq
+  apply h_neq
+  rw [← h_dist1, ← h_dist2, h_eq]
