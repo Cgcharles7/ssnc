@@ -74,3 +74,56 @@ theorem irregular_child_false (G : GraphLevelOrder) (δ k : Nat) (v : GLONode)
     rw [← List.toFinset_card_of_nodup hnd, hpart, Finset.card_union_of_disjoint hdis]
   omega
       omega                            -- |R_{m+3}| ≤ |R_{m+2}| - 1 ≤ delta - (m+2)
+
+
+namespace GraphLevelOrder
+
+/-- Layer-based sets for a node v (ids of out-neighbors by layer). -/
+def intL (G : GraphLevelOrder) (v : GLONode) : Finset Nat :=
+  v.out_neighbors.toFinset.filter (fun x => G.distOf x == some v.dist)
+
+def extL (G : GraphLevelOrder) (v : GLONode) : Finset Nat :=
+  v.out_neighbors.toFinset.filter (fun x => G.distOf x == some (v.dist + 1))
+
+def backL (G : GraphLevelOrder) (v : GLONode) : Finset Nat :=
+  v.out_neighbors.toFinset.filter (fun x => (G.distOf x).any (· < v.dist))
+
+def layerIds (G : GraphLevelOrder) (j : Nat) : Finset Nat :=
+  ((G.nodes.filter (·.dist == j)).toList.map (·.lexId)).toFinset
+
+/-- ext(v) lives inside the next layer. -/
+theorem extL_subset_layer (G : GraphLevelOrder) (v : GLONode) :
+    extL G v ⊆ layerIds G (v.dist + 1) := by
+  sorry  -- distOf x = some d → ∃ node n, n.lexId = x ∧ n.dist = d
+
+/-- Degree partition with no back arcs (Lemma 3.1, layer form). -/
+theorem out_card_split (G : GraphLevelOrder) (v : GLONode)
+    (hnd : v.out_neighbors.Nodup)
+    (hbfs : ∀ x ∈ v.out_neighbors, ∃ d, G.distOf x = some d ∧ d ≤ v.dist + 1)
+    (hnb : backL G v = ∅) :
+    v.out_neighbors.length = (intL G v).card + (extL G v).card := by
+  sorry  -- toFinset = intL ∪ extL, disjoint by distOf; then card_union_of_disjoint
+
+/-- Case 1: the first irregular child of a parent at distance k cannot exist. -/
+theorem case1
+    (G : GraphLevelOrder) (δ k : Nat) (u v : GLONode)
+    -- structure
+    (hfwd   : fwdArc G u v = true)
+    (hdist  : v.dist = k + 1)
+    (hnd    : v.out_neighbors.Nodup)
+    (hbfs   : ∀ x ∈ v.out_neighbors, ∃ d, G.distOf x = some d ∧ d ≤ v.dist + 1)
+    -- no back arcs (the other branch of the dichotomy)
+    (hnb    : backL G v = ∅)
+    -- v is irregular
+    (hirr   : δ < v.out_neighbors.length)
+    -- INPUT 1: load balance, |int| = k+1 (the assumption you're making)
+    (hint   : (intL G v).card = k + 1)
+    -- INPUT 2: Cor 3.10 for layer k+2
+    (hcor   : (layerIds G (k + 2)).card ≤ δ - (k + 1))
+    -- INPUT 3: no truncation, i.e. k+1 ≤ δ
+    (hk     : k + 1 ≤ δ) :
+    False := by
+  have hsplit := out_card_split G v hnd hbfs hnb
+  have hsub := Finset.card_le_card (extL_subset_layer G v)
+  rw [hdist] at hsub
+  omega
