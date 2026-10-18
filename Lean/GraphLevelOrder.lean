@@ -432,65 +432,69 @@ theorem degree_formula_under_no_back_arcs
 namespace GraphLevelOrder
 
 /-- Layer-based sets for a node v (ids of out-neighbors by layer). -/
-def intL (G : GraphLevelOrder) (v : GLONode) : Finset Nat :=
-  v.out_neighbors.toFinset.filter (fun x => G.distOf x == some v.dist)
+def intNbrs (v : GLONode) : Finset Coord :=
+  v.out_neighbors.toFinset.filter (·.1 = v.dist)
 
-def extL (G : GraphLevelOrder) (v : GLONode) : Finset Nat :=
-  v.out_neighbors.toFinset.filter (fun x => G.distOf x == some (v.dist + 1))
+def extNbrs (v : GLONode) : Finset Coord :=
+  v.out_neighbors.toFinset.filter (·.1 = v.dist + 1)
 
-def backL (G : GraphLevelOrder) (v : GLONode) : Finset Nat :=
-  v.out_neighbors.toFinset.filter (fun x => (G.distOf x).any (· < v.dist))
+def backNbrs (v : GLONode) : Finset Coord :=
+  v.out_neighbors.toFinset.filter (·.1 < v.dist)
 
 def layerIds (G : GraphLevelOrder) (j : Nat) : Finset Nat :=
   ((G.nodes.filter (·.dist == j)).toList.map (·.lexId)).toFinset
 
-theorem extL_subset_layer (G : GraphLevelOrder) (v : GLONode) :
-    extL G v ⊆ layerIds G (v.dist + 1) := by
-  intro x hx
-  -- 1. Unfold membership in extL
-  -- Typically, extL filters out-neighbors of v where the distance equals v.dist + 1
-  simp only [extL, Finset.mem_filter, List.mem_toFinset] at hx
-  rcases hx with ⟨h_in_nbrs, h_dist_eq⟩
+def layerCoords (G : GraphLevelOrder) (j : Nat) : Finset Coord :=
+  ((G.nodes.toList.filter (·.dist == j)).map (·.toCoords)).toFinset
 
-  -- 2. Unfold membership in layerIds (nodes in graph with dist = v.dist + 1)
-  simp only [layerIds, Finset.mem_filter]
-  constructor
-  · -- Prove x belongs to the underlying node collection / finset of the graph
-    -- Usually derived from h_in_nbrs since an out-neighbor must be a valid node in G
-    exact out_neighbor_node_exists_in_graph G v x h_in_nbrs
-  · -- Prove x's distance matches v.dist + 1
-    exact h_dist_eq
+def BFSWF (G : GraphLevelOrder) : Prop :=
+  ∀ v ∈ G.nodes, ∀ x ∈ v.out_neighbors,
+    (∃ d ∈ G.nodes, d.toCoords = x) ∧ x.1 ≤ v.dist + 1
+
+theorem extNbrs_subset_layer (G : GraphLevelOrder) (hw : G.BFSWF)
+    (v : GLONode) (hv : v ∈ G.nodes) :
+    extNbrs v ⊆ layerCoords G (v.dist + 1) := by
+  intro x hx
+  -- x is an out-neighbor of v whose layer is v.dist + 1
+  simp only [extNbrs, Finset.mem_filter, List.mem_toFinset] at hx
+  obtain ⟨hin, hlayer⟩ := hx
+  -- BFSWF: x is the coordinate of some real node d of G
+  obtain ⟨⟨d, hd_mem, hd_eq⟩, _⟩ := hw v hv x hin
+  have hdd : d.dist = x.1 := by rw [← hd_eq]; rfl
+  -- membership in layerCoords: x = d.toCoords for some d in layer v.dist + 1
+  simp only [G.layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter,
+    Array.mem_toList, beq_iff_eq]
+  exact ⟨d, ⟨hd_mem, by omega⟩, hd_eq⟩
 
 /-- Case 1: the first irregular child of a parent at distance k cannot exist. -/
 
+def IsMinOutDeg (G : GraphLevelOrder) (δ : Nat) : Prop :=
+  (∀ x ∈ G.graph.vertices, δ ≤ G.graph.cardN1 x) ∧
+  (∃ x ∈ G.graph.vertices, G.graph.cardN1 x = δ)
+
 def NoBackArcs (G : GraphLevelOrder) : Prop :=
-  ∀ v ∈ G.nodes, backL G v = ∅
+  ∀ v ∈ G.nodes, backNbrs v = ∅
 
 theorem irregularity_extra_exterior_contradiction
     (G : GraphLevelOrder) (k : Nat)
     (hC : IsCounterexample G)
     (hmin : IsMinOutDeg G G.delta)
+    (hw : G.BFSWF)
     (hnb : NoBackArcs G)
     (u v : GLONode)
     (hfwd : fwdArc G u v = true)
     (hu : u.dist = k) (hudeg : u.out_neighbors.length = G.delta)
     (hnd : v.out_neighbors.Nodup)
-    (hbfs : ∀ x ∈ v.out_neighbors, ∃ d ∈ G.nodes, x = d.lexId ∧ d.dist ≤ v.dist + 1)
     (hirr : G.delta < v.out_neighbors.length)
     (hk : k + 1 ≤ G.delta) : False := by
-  have hv_node : v ∈ G.nodes := by
-    unfold fwdArc at hfwd
-    simp at hfwd
-    exact hfwd.1.1.2          -- adjust to the shape simp produces
-  have hdist : v.dist = k + 1 := by
-    unfold fwdArc at hfwd
-    simp at hfwd
-    omega
+  obtain ⟨_, hv_node, _, hdist'⟩ := (fwdArc_spec G u v).mp hfwd
+  have hdist : v.dist = k + 1 := by omega
   have hint := interior_bound_of_nonSeymour G k hC hmin hnb u v hfwd hu hudeg
-  have hcor : (layerIds G (v.dist + 1)).card ≤ G.delta - (k + 1) := by
+  have hcor : (layerCoords G (v.dist + 1)).card ≤ G.delta - (k + 1) := by
     rw [hdist]; exact cor_3_10 G hC hmin k
-  have hsplit := out_card_split G v hnd hbfs (hnb v hv_node)
-  have hsub := Finset.card_le_card (extL_subset_layer G v)
+  have hsplit := out_card_split v hnd
+    (fun x hx => (hw v hv_node x hx).2) (hnb v hv_node)
+  have hsub := Finset.card_le_card (extNbrs_subset_layer G hw v hv_node)
   omega
 
 end GraphLevelOrder
@@ -521,6 +525,19 @@ theorem layers_disjoint
   apply h_neq
   rw [← h_dist1, ← h_dist2, h_eq]
 
+theorem layerCoords_disjoint (G : GraphLevelOrder)
+    (j₁ j₂ : Nat) (hne : j₁ ≠ j₂) :
+    Disjoint (G.layerCoords j₁) (G.layerCoords j₂) := by
+  rw [Finset.disjoint_left]
+  intro c h1 h2
+  simp only [GraphLevelOrder.layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter,
+    beq_iff_eq] at h1 h2
+  obtain ⟨a, ⟨_, ha⟩, rfl⟩ := h1
+  obtain ⟨b, ⟨_, hb⟩, hab⟩ := h2
+  -- hab : b.toCoords = a.toCoords, so b.dist = a.dist
+  have : b.dist = a.dist := congrArg Prod.fst hab
+  omega
+
 /-- Node-level consistency: out-neighbors split into back / interior / exterior. -/
 def PartitionWF (n : GLONode) : Prop :=
   n.out_neighbors.length =
@@ -535,14 +552,38 @@ lemma child_interior_deficit
   unfold PartitionWF at h_part
   omega
 
-/-- Pigeonhole: an irregular child cannot fit its exterior in one layer. -/
-theorem extra_forward_arc_makes_seymour (G : GraphLevelOrder) (δ k : Nat) (v : GLONode)
+theorem extra_forward_arc_contradiction
+    (G : GraphLevelOrder) (hw : G.BFSWF) (k : Nat) (u v : GLONode)
+    (hfwd : fwdArc G u v = true) (hv : v ∈ G.nodes)
     (hk : v.dist = k + 1)
-    (hdeg : δ < v.out_neighbors.length) (hnd : v.out_neighbors.Nodup)
-    (hint : (intL G v).card = k + 1)          -- load balance
-    (hpart : v.out_neighbors.toFinset = intL G v ∪ extL G v)
+    (hdeg : G.delta < v.out_neighbors.length)
+    (hnd : v.out_neighbors.Nodup)
+    (hnb : G.backNeighbors u v = ∅)
+    (hno_same : ∀ x ∈ v.out_neighbors, x.1 = v.dist → x ∈ u.out_neighbors)
+    (hint : (G.interiorNeighbors u v).card ≤ k + 1)   -- to be derived
+    (hlay : (G.layerCoords (k + 2)).card ≤ G.delta - (k + 1))
+    (hk' : k + 1 ≤ G.delta) : False := by
+  have hpart : v.out_neighbors.toFinset
+      = G.interiorNeighbors u v ∪ G.exteriorNeighbors u v := sorry  -- out_sub_int_ext + reverse
+  have hdis : Disjoint (G.interiorNeighbors u v) (G.exteriorNeighbors u v) :=
+    int_ext_disjoint G u v hfwd
+  have h2 : v.out_neighbors.length
+      = (G.interiorNeighbors u v).card + (G.exteriorNeighbors u v).card := by
+    rw [← List.toFinset_card_of_nodup hnd, hpart, Finset.card_union_of_disjoint hdis]
+  have h1 := Finset.card_le_card
+    ((extNeighbors_subset_extNbrs G u v hfwd hnb hno_same).trans
+      (extNbrs_subset_layer G hw v hv))
+  rw [hk] at h1
+  omega
+
+/-- Pigeonhole: an irregular child cannot fit its exterior in one layer. -/
+theorem extra_forward_arc_makes_seymour (G : GraphLevelOrder) (k : Nat) (u v : GLONode)
+    (hk : v.dist = k + 1)
+    (hdeg : G.delta < v.out_neighbors.length) (hnd : v.out_neighbors.Nodup)
+    (hint : (G.interiorNeighbors u v).card = k + 1) -- MCE Assumption
+    (hpart : (v.out_neighbors.toFinset).card = (G.interiorNeighbors u v).card ∨ (G.exteriorNeighbors u v).card
     (hdis : Disjoint (intL G v) (extL G v))
-    (hlay : (layerIds G (k + 2)).card ≤ δ - (k + 1)) : False := by
+    (hlay : (layerIds G (k + 2)).card ≤ G.delta - (k + 1)) : False := by
   have h1 := Finset.card_le_card (extL_subset_layer G v)
   rw [hk] at h1
   have h2 : v.out_neighbors.length = (intL G v).card + (extL G v).card := by
