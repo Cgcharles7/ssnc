@@ -165,7 +165,36 @@ theorem exterior_neighbor_implies_second_neighbor (G : GraphLevelOrder) (u v w :
   -- 3. Extract the first part of the conjunction (membership in u's second-order neighbor finset)
   rcases hw with ⟨h_u_sec, _⟩
 
-  -- 4. Exact match!
+  -- 4. Exact match!theorem layer_bound_of_step (s : Nat → Nat) (δ : Nat)
+    (h1 : s 1 = δ) (hstep : ∀ j, 1 ≤ j → s (j + 1) ≤ s j - 1) :
+    ∀ m, s (m + 2) ≤ δ - (m + 1) := by
+  intro m
+  induction m with
+  | zero =>
+    have h : s 2 ≤ s 1 - 1 := hstep 1 le_rfl
+    show s 2 ≤ δ - (0 + 1)
+    omega
+  | succ m ih =>
+    have h : s (m + 3) ≤ s (m + 2) - 1 := hstep (m + 2) (by omega)
+    show s (m + 3) ≤ δ - (m + 1 + 1)
+    omega
+
+theorem degree_formula_under_no_back_arcs
+    (g : GraphLevelOrder) (delta : Nat) (h_delta : delta = g.delta)
+    (h_all_non_seymour : ∀ u ∈ g.nodes.toList, g.isNonSeymour u.dist u.lexId = true)
+    (k : Nat)
+    (h_no_back_upto : ∀ x ∈ g.nodes, x.dist ≤ k → ∀ y ∈ g.nodes, y.dist = k + 1 → g.backNeighbors x y = ∅)
+    (h0 : Fintype.card (getLayerAtDistance g 0) = 1)
+    (h1 : Fintype.card (getLayerAtDistance g 1) = delta)
+    (h_step : ∀ j, 1 ≤ j →
+      Fintype.card (getLayerAtDistance g (j + 1))
+        ≤ Fintype.card (getLayerAtDistance g j) - 1)
+    (m : Nat) :
+    Fintype.card (getLayerAtDistance g (m + 2)) ≤ delta - (m + 1) :=
+  layer_bound_of_step (fun j => Fintype.card (getLayerAtDistance g j)) delta h1 h_step m
+
   exact h_u_sec
 
 end GraphLevelOrder
+
+
