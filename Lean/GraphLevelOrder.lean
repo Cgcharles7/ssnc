@@ -840,3 +840,61 @@ theorem extra_forward_arc_makes_seymour (G : GraphLevelOrder) (k : Nat) (u v : G
   have h2 : v.out_neighbors.length = (intL G v).card + (extL G v).card := by
     rw [← List.toFinset_card_of_nodup hnd, hpart, Finset.card_union_of_disjoint hdis]
   omega
+
+theorem out_eq_int_union_ext
+    (G : GraphLevelOrder) (hu : G.CoordUnique) (hw : G.BFSWF)
+    (k : Nat) (u v : GLONode)
+    (hfwd : fwdArc G u v = true)
+    (hk : v.dist = k + 1)
+    (hnb : G.backNeighbors u v = ∅)
+    (hno_same : ∀ x ∈ v.out_neighbors, x.1 = v.dist → x ∈ u.out_neighbors) :
+    v.out_neighbors.toFinset
+      = G.interiorNeighbors u v ∪ G.exteriorNeighbors u v := by
+  obtain ⟨hu_node, hv_node, hadj, hdist⟩ := (fwdArc_spec G u v).mp hfwd
+  -- hadj : v.toCoords ∈ u.out_neighbors  (shape assumed from fwdArc_spec)
+  have hcond : (G.nodes.contains u && G.nodes.contains v
+                && v.dist == u.dist + 1) = true := by
+    simp [hu_node, hv_node, hdist]        -- Array.contains lemma names are version-sensitive
+  ext x
+  constructor
+  · intro hx
+    have hxv : x ∈ v.out_neighbors := List.mem_toFinset.mp hx
+    have hle := (hw v hv_node x hxv).2
+    -- no back arcs: x is not below v's layer
+    have hge : v.dist ≤ x.1 := by
+      by_contra hlt
+      have : x ∈ G.backNeighbors u v := by
+        unfold GraphLevelOrder.backNeighbors
+        rw [if_pos hcond]
+        simp [hxv]; omega
+      rw [hnb] at this; simp at this
+    by_cases heq : x.1 = v.dist
+    · -- same layer as v: interior
+      apply Finset.mem_union_left
+      unfold GraphLevelOrder.interiorNeighbors
+      rw [if_pos hcond]
+      simp [hxv, hno_same x hxv heq]
+    · -- layer v.dist + 1: exterior
+      apply Finset.mem_union_right
+      unfold GraphLevelOrder.exteriorNeighbors
+      rw [if_pos hcond]
+      refine Finset.mem_inter.mpr ⟨?_, by simpa using hxv⟩
+      have hx2 : x.1 = u.dist + 2 := by omega
+      unfold GraphLevelOrder.getN2Finset
+      simp only [Finset.mem_filter, Finset.mem_biUnion]
+      refine ⟨⟨v.toCoords, ?_, ?_⟩, ?_, ?_⟩
+      · rw [GraphLevelOrder.getN1Finset_eq G hu u hu_node]; simpa using hadj
+      · rw [GraphLevelOrder.getN1Finset_eq G hu v hv_node]; simpa using hxv
+      · intro h; have := congrArg Prod.fst h; simp [GLONode.toCoords] at this; omega
+      · rw [GraphLevelOrder.getN1Finset_eq G hu u hu_node]
+        intro hmem
+        have := (hw u hu_node x (List.mem_toFinset.mp hmem)).2
+        omega
+  · intro hx
+    rcases Finset.mem_union.mp hx with h | h
+    · unfold GraphLevelOrder.interiorNeighbors at h
+      rw [if_pos hcond] at h
+      exact (Finset.mem_inter.mp h).2
+    · unfold GraphLevelOrder.exteriorNeighbors at h
+      rw [if_pos hcond] at h
+      exact (Finset.mem_inter.mp h).2
