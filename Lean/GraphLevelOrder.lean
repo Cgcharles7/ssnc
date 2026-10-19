@@ -898,3 +898,26 @@ theorem out_eq_int_union_ext
     · unfold GraphLevelOrder.exteriorNeighbors at h
       rw [if_pos hcond] at h
       exact (Finset.mem_inter.mp h).2
+
+
+namespace GraphLevelOrder
+
+theorem int_ext_disjoint (G : GraphLevelOrder) (hu : G.CoordUnique)
+    (u v : GLONode) (hu_node : u ∈ G.nodes) :
+    Disjoint (G.interiorNeighbors u v) (G.exteriorNeighbors u v) := by
+  rw [Finset.disjoint_left]
+  intro x hxi hxe
+  by_cases hc : (G.nodes.contains u && G.nodes.contains v
+                  && v.dist == u.dist + 1) = true
+  · rw [interiorNeighbors, if_pos hc] at hxi
+    rw [exteriorNeighbors, if_pos hc] at hxe
+    have h1 : x ∈ u.out_neighbors.toFinset := (Finset.mem_inter.mp hxi).1
+    have h2 := (Finset.mem_inter.mp hxe).1
+    unfold getN2Finset at h2
+    simp only [Finset.mem_filter] at h2
+    rw [getN1Finset_eq G hu u hu_node] at h2
+    exact h2.2.2 h1
+  · rw [interiorNeighbors, if_neg hc] at hxi
+    simp at hxi
+
+end GraphLevelOrder
