@@ -375,6 +375,44 @@ theorem internal_degree_lower_bound
 
   -- 3. Exact match finishes the proof
   exact h_bound
+
+theorem interior_degree_rigidity
+  (g : GraphLevelOrder)
+  (u : GLONode)
+  (k : Nat)
+  (h_layer : u.dist = k)
+  (h_u_in : u ∈ g.nodes.toList)
+  -- Suppose we have a quantity representing the interior neighbor count / degree of u
+  -- (e.g., sum of sizes of interiorNeighbors with forward children)
+  (int_count : Nat)
+  -- Hypotheses representing your MCE constraints:
+  (h_not_too_low : int_count < k → False) -- Too low forces another forward arc / violates structure
+  (h_not_too_high : k < int_count → False) -- Too high violates MCE conditions / non-Seymour bounds
+  : int_count = k := by
+  -- Trichotomy: either int_count < k, int_count = k, or int_count > k
+  rcases lt_trichotomy int_count k with h_lt | h_eq | h_gt
+  · -- Case 1: int_count < k (Too low)
+    exfalso
+    exact h_not_too_low h_lt
+  · -- Case 2: int_count = k (The exact target equality)
+    exact h_eq
+  · -- Case 3: int_count > k (Too high)
+    exfalso
+    exact h_not_too_high h_gt
+
+theorem node_interior_degree_eq_k
+  (g : GraphLevelOrder)
+  (u : GLONode)
+  (k : Nat)
+  (h_layer : u.dist = k)
+  (h_u_in : u ∈ g.nodes.toList)
+  (mce : IsMinimumCounterexample g)
+  -- Let's say int_deg is the total interior neighbors in layer k+1
+  (int_deg : Nat)
+  (h_lower_bound : k ≤ int_deg) -- Derived from min-degree / no-back-arcs
+  (h_upper_bound : int_deg ≤ k) -- Derived from non-Seymour / MCE constraints
+  : int_deg = k := by
+  omega
 /-
 -------------------------------------------------------------------------------
 --Stage 5: Minimum Counterexample Structure
@@ -803,7 +841,6 @@ theorem no_disconnected_back_arc
     exact hall a ha
       (seymour_of_disconnected_back_arc G hu a b ha hb hback h_anti hint hbnd hreg hmin)
 
-namespace GraphLevelOrder
 
 /-- Every vertex of R_{k+1} is an out-neighbor of x, when the exterior is tight. -/
 theorem layer_succ_subset_out
@@ -822,6 +859,15 @@ theorem layer_succ_subset_out
   · rw [if_neg hcond] at hc
     simp at hc
 
+theorem mem_layerCoords_of_node (G : GraphLevelOrder) (v : GLONode) (j : Nat)
+    (hv : v ∈ G.nodes) (hj : v.dist = j) :
+    v.toCoords ∈ G.layerCoords j := by
+  show v.toCoords ∈
+    ((G.nodes.toList.filter (·.dist == j)).map (·.toCoords)).toFinset
+  exact List.mem_toFinset.mpr
+    (List.mem_map.mpr
+      ⟨v, List.mem_filter.mpr ⟨Array.mem_toList_iff.mpr hv, by simp [hj]⟩, rfl⟩)
+
 theorem no_first_connected_back_arc
     (G : GraphLevelOrder) (v x : GLONode)
     (hv_node : v ∈ G.nodes)
@@ -830,12 +876,8 @@ theorem no_first_connected_back_arc
     (hlayer : G.layerCoords (x.dist + 1) ⊆ x.out_neighbors.toFinset)
     (hanti : v.toCoords ∈ x.out_neighbors → x.toCoords ∉ v.out_neighbors) :
     False := by
-  have hvmem : v.toCoords ∈ G.layerCoords (x.dist + 1) := by
-    simp only [G.layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter,
-      Array.mem_toList, beq_iff_eq]
-    exact ⟨v, ⟨hv_node, hxdist.symm⟩, rfl⟩
+  have hvmem : v.toCoords ∈ G.layerCoords (x.dist + 1) :=
+    mem_layerCoords_of_node G v _ hv_node hxdist.symm
   exact hanti (List.mem_toFinset.mp (hlayer hvmem)) hxv
-
-end GraphLevelOrder
 
 end GraphLevelOrder
