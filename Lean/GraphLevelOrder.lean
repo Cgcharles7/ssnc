@@ -803,5 +803,39 @@ theorem no_disconnected_back_arc
     exact hall a ha
       (seymour_of_disconnected_back_arc G hu a b ha hb hback h_anti hint hbnd hreg hmin)
 
+namespace GraphLevelOrder
+
+/-- Every vertex of R_{k+1} is an out-neighbor of x, when the exterior is tight. -/
+theorem layer_succ_subset_out
+    (G : GraphLevelOrder) (u' x : GLONode)
+    (hext_sub : G.exteriorNeighbors u' x ⊆ G.layerCoords (x.dist + 1))
+    (hcard : (G.layerCoords (x.dist + 1)).card ≤ (G.exteriorNeighbors u' x).card) :
+    G.layerCoords (x.dist + 1) ⊆ x.out_neighbors.toFinset := by
+  have heq := Finset.eq_of_subset_of_card_le hext_sub hcard
+  intro c hc
+  rw [← heq] at hc
+  unfold exteriorNeighbors at hc
+  by_cases hcond : (G.nodes.contains u' && G.nodes.contains x
+                      && x.dist == u'.dist + 1) = true
+  · rw [if_pos hcond] at hc
+    exact (Finset.mem_inter.mp hc).2
+  · rw [if_neg hcond] at hc
+    simp at hc
+
+theorem no_first_connected_back_arc
+    (G : GraphLevelOrder) (v x : GLONode)
+    (hv_node : v ∈ G.nodes)
+    (hxdist : x.dist + 1 = v.dist)
+    (hxv : x.toCoords ∈ v.out_neighbors)
+    (hlayer : G.layerCoords (x.dist + 1) ⊆ x.out_neighbors.toFinset)
+    (hanti : v.toCoords ∈ x.out_neighbors → x.toCoords ∉ v.out_neighbors) :
+    False := by
+  have hvmem : v.toCoords ∈ G.layerCoords (x.dist + 1) := by
+    simp only [G.layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter,
+      Array.mem_toList, beq_iff_eq]
+    exact ⟨v, ⟨hv_node, hxdist.symm⟩, rfl⟩
+  exact hanti (List.mem_toFinset.mp (hlayer hvmem)) hxv
+
+end GraphLevelOrder
 
 end GraphLevelOrder
