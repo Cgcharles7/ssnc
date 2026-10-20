@@ -123,7 +123,7 @@ structure GLONode where
   back_neighbors     : List Coord
   parent             : Option Coord
   toNumber           : Nat
-  deriving Inhabited, BEq, Repr, Hashable, DecidableEq
+  deriving Inhabited, Repr, Hashable, DecidableEq
 
 namespace GLONode
 
@@ -296,8 +296,6 @@ theorem exterior_neighbor_implies_second_neighbor
   rw [if_pos h_cond] at hc
   exact (Finset.mem_inter.mp hc).1
 
-end GraphLevelOrder
-
 /-
 -------------------------------------------------------------------------------
 Stage 5: Minimum Counterexample Structure
@@ -318,11 +316,29 @@ def IsCounterexample (G : GraphLevelOrder) : Prop :=
   0 < G.nodes.size ∧
   ∀ x ∈ G.nodes, G.isNonSeymour (x.dist, x.lexId) = true
 
+def layerInteriorArcCount (G : GraphLevelOrder) (k : Nat) : Nat :=
+  G.nodes.foldl (fun acc u =>
+    if u.dist == k then
+      G.nodes.foldl (fun acc' v =>
+        acc' + (if fwdArc G u v then (G.interiorNeighbors u v).card else 0)) acc
+    else acc) 0
+
 /-- Total interior arcs: sum of |int(u,v)| over forward arcs u → v. -/
 def interiorArcCount (G : GraphLevelOrder) : Nat :=
   G.nodes.foldl (fun acc u =>
     G.nodes.foldl (fun acc' v =>
       acc' + (if fwdArc G u v then (G.interiorNeighbors u v).card else 0)) acc) 0
+
+def getLayerAtDistance (g : GraphLevelOrder) (k : Nat) : Finset (GLONode) :=
+  -- Assuming g.nodes has a conversion to Finset or is a Finset/List
+  (g.nodes.toList.filter (fun u => u.dist == k)).toFinset
+
+/-- Neighborhood density at layer k, defined as the ratio of interior arcs to layer size. -/
+def neighborhood_density (G : GraphLevelOrder) (k : Nat) : Rat :=
+  let layerSize := (getLayerAtDistance G k).card
+  let arcCount := layerInteriorArcCount G k
+  if layerSize = 0 then 0
+  else (arcCount : Rat) / (layerSize : Rat)
 
 def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=
   IsCounterexample G ∧
@@ -340,10 +356,6 @@ lemma node_out_degree_ge_delta
   -- Unfold the definition of minOutDegree or invoke your graph's minimum degree invariant
   -- Use the property that minOutDegree is less than or equal to the degree of any node in the list
   exact h_min u hu_in
-
-def getLayerAtDistance (g : GraphLevelOrder) (k : Nat) : Finset (GLONode) :=
-  -- Assuming g.nodes has a conversion to Finset or is a Finset/List
-  (g.nodes.toList.filter (fun u => u.dist == k)).toFinset
 
 theorem internal_degree_lower_bound
   {n : Nat}
@@ -415,7 +427,7 @@ theorem layer_bound_of_step (s : Nat → Nat) (δ : Nat)
     omega
 
 theorem degree_formula_under_no_back_arcs
-    (g : GraphLevelOrder) (delta : Nat) (h_delta : delta = g.delta)
+    (g : GraphLevelOrder) (delta : Nat)
     (h_all_non_seymour : ∀ u ∈ g.nodes.toList, g.isNonSeymour (u.dist, u.lexId) = true)
     (k : Nat)
     (h_no_back_upto : ∀ x ∈ g.nodes, x.dist ≤ k → ∀ y ∈ g.nodes, y.dist = k + 1 → g.backNeighbors x y = ∅)
@@ -423,274 +435,21 @@ theorem degree_formula_under_no_back_arcs
     (h1 : Fintype.card (getLayerAtDistance g 1) = delta)
     (h_step : ∀ j, 1 ≤ j →
       Fintype.card (getLayerAtDistance g (j + 1))
-        ≤ Fintype.card (getLayerAtDistance g j) - 1)
+        = Fintype.card (getLayerAtDistance g j) - 1)
     (m : Nat) :
-    Fintype.card (getLayerAtDistance g (m + 2)) ≤ delta - (m + 1) :=
-  layer_bound_of_step (fun j => Fintype.card (getLayerAtDistance g j)) delta h1 h_step m
-
-
-namespace GraphLevelOrder
-
-/-- Layer-based sets for a node v (ids of out-neighbors by layer). -/
-def intNbrs (v : GLONode) : Finset Coord :=
-  v.out_neighbors.toFinset.filter (·.1 = v.dist)
-
-def extNbrs (v : GLONode) : Finset Coord :=
-  v.out_neighbors.toFinset.filter (·.1 = v.dist + 1)
-
-def backNbrs (v : GLONode) : Finset Coord :=
-  v.out_neighbors.toFinset.filter (·.1 < v.dist)
-
-def layerIds (G : GraphLevelOrder) (j : Nat) : Finset Nat :=
-  ((G.nodes.filter (·.dist == j)).toList.map (·.lexId)).toFinset
-
-def layerCoords (G : GraphLevelOrder) (j : Nat) : Finset Coord :=
-  ((G.nodes.toList.filter (·.dist == j)).map (·.toCoords)).toFinset
-
-def BFSWF (G : GraphLevelOrder) : Prop :=
-  ∀ v ∈ G.nodes, ∀ x ∈ v.out_neighbors,
-    (∃ d ∈ G.nodes, d.toCoords = x) ∧ x.1 ≤ v.dist + 1
-
-theorem extNbrs_subset_layer (G : GraphLevelOrder) (hw : G.BFSWF)
-    (v : GLONode) (hv : v ∈ G.nodes) :
-    extNbrs v ⊆ layerCoords G (v.dist + 1) := by
-  intro x hx
-  -- x is an out-neighbor of v whose layer is v.dist + 1
-  simp only [extNbrs, Finset.mem_filter, List.mem_toFinset] at hx
-  obtain ⟨hin, hlayer⟩ := hx
-  -- BFSWF: x is the coordinate of some real node d of G
-  obtain ⟨⟨d, hd_mem, hd_eq⟩, _⟩ := hw v hv x hin
-  have hdd : d.dist = x.1 := by rw [← hd_eq]; rfl
-  -- membership in layerCoords: x = d.toCoords for some d in layer v.dist + 1
-  simp only [G.layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter,
-    Array.mem_toList, beq_iff_eq]
-  exact ⟨d, ⟨hd_mem, by omega⟩, hd_eq⟩
-
-/-- Case 1: the first irregular child of a parent at distance k cannot exist. -/
-
-def IsMinOutDeg (G : GraphLevelOrder) (δ : Nat) : Prop :=
-  (∀ x ∈ G.graph.vertices, δ ≤ G.graph.cardN1 x) ∧
-  (∃ x ∈ G.graph.vertices, G.graph.cardN1 x = δ)
-
-def NoBackArcs (G : GraphLevelOrder) : Prop :=
-  ∀ v ∈ G.nodes, backNbrs v = ∅
-
-theorem irregularity_extra_exterior_contradiction
-    (G : GraphLevelOrder) (k : Nat)
-    (hC : IsCounterexample G)
-    (hmin : IsMinOutDeg G G.delta)
-    (hw : G.BFSWF)
-    (hnb : NoBackArcs G)
-    (u v : GLONode)
-    (hfwd : fwdArc G u v = true)
-    (hu : u.dist = k) (hudeg : u.out_neighbors.length = G.delta)
-    (hnd : v.out_neighbors.Nodup)
-    (hirr : G.delta < v.out_neighbors.length)
-    (hk : k + 1 ≤ G.delta) : False := by
-  obtain ⟨_, hv_node, _, hdist'⟩ := (fwdArc_spec G u v).mp hfwd
-  have hdist : v.dist = k + 1 := by omega
-  have hint := interior_bound_of_nonSeymour G k hC hmin hnb u v hfwd hu hudeg
-  have hcor : (layerCoords G (v.dist + 1)).card ≤ G.delta - (k + 1) := by
-    rw [hdist]; exact cor_3_10 G hC hmin k
-  have hsplit := out_card_split v hnd
-    (fun x hx => (hw v hv_node x hx).2) (hnb v hv_node)
-  have hsub := Finset.card_le_card (extNbrs_subset_layer G hw v hv_node)
-  omega
-
-end GraphLevelOrder
-
-theorem interior_lower_bound (δ k intC extC backC outC : Nat)
-    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
-    (hback : backC = 0)
-    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
-    k + 1 ≤ intC := by omega
-
-
-/-- Back arcs forced by interior deficiency (no load balance, no minimality). -/
-theorem back_ge_deficiency (δ k intC extC backC outC : Nat)
-    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
-    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
-    (k + 1) - intC ≤ backC := by omega
-
-theorem lemmaA_core (δ k intC extC backC outC : Nat)
-    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
-    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ)
-    (hdef : intC < k + 1) : 0 < backC := by omega
-
-theorem layers_disjoint
-    (k1 k2 : Nat) (v_k1 v_k2 : GLONode)
-    (h_dist1 : v_k1.dist = k1) (h_dist2 : v_k2.dist = k2)
-    (h_neq : k1 ≠ k2) : v_k1 ≠ v_k2 := by
-  intro h_eq
-  apply h_neq
-  rw [← h_dist1, ← h_dist2, h_eq]
-
-theorem layerCoords_disjoint (G : GraphLevelOrder)
-    (j₁ j₂ : Nat) (hne : j₁ ≠ j₂) :
-    Disjoint (G.layerCoords j₁) (G.layerCoords j₂) := by
-  rw [Finset.disjoint_left]
-  intro c h1 h2
-  simp only [GraphLevelOrder.layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter,
-    beq_iff_eq] at h1 h2
-  obtain ⟨a, ⟨_, ha⟩, rfl⟩ := h1
-  obtain ⟨b, ⟨_, hb⟩, hab⟩ := h2
-  -- hab : b.toCoords = a.toCoords, so b.dist = a.dist
-  have : b.dist = a.dist := congrArg Prod.fst hab
-  omega
-
-/-- Node-level consistency: out-neighbors split into back / interior / exterior. -/
-def PartitionWF (n : GLONode) : Prop :=
-  n.out_neighbors.length =
-    n.back_neighbors.length + n.interior_neighbors.length + n.exterior_neighbors.length
-
-lemma child_interior_deficit
-    (child : GLONode) (k : Nat)
-    (h_part : PartitionWF child)
-    (h_deg : k ≤ child.out_neighbors.length)
-    (h_int : child.interior_neighbors.length < k) :
-    0 < child.back_neighbors.length ∨ 0 < child.exterior_neighbors.length := by
-  unfold PartitionWF at h_part
-  omega
-
----
--/
-/-- Layer of the node with id x (assumes ids are looked up globally). -/
-def distOf (G : GraphLevelOrder) (x : Nat) : Option Nat :=
-  (G.nodes.find? (fun n => n.lexId == x)).map (·.dist)
-
-/-- Forward arc u → v with v exactly one layer after u. -/
-def fwdArc (G : GraphLevelOrder) (u v : GLONode) : Bool :=
-  G.nodes.contains u && G.nodes.contains v
-    && u.out_neighbors.contains v.toCoords && v.dist == u.dist + 1
-
-def IsCounterexample (G : GraphLevelOrder) : Prop :=
-  G.CoordUnique ∧
-  G.IsOriented ∧
-  0 < G.nodes.size ∧
-  ∀ x ∈ G.nodes, G.isNonSeymour (x.dist, x.lexId) = true
-
-/-- Total interior arcs: sum of |int(u,v)| over forward arcs u → v. -/
-def interiorArcCount (G : GraphLevelOrder) : Nat :=
-  G.nodes.foldl (fun acc u =>
-    G.nodes.foldl (fun acc' v =>
-      acc' + (if fwdArc G u v then (G.interiorNeighbors u v).card else 0)) acc) 0
-
-def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=
-  IsCounterexample G ∧
-  ∀ H : GraphLevelOrder, IsCounterexample H →
-    interiorArcCount G ≤ interiorArcCount H
-
--- Check/Proof that any valid node in the graph satisfies out-degree ≥ delta
-lemma node_out_degree_ge_delta
-    (g : GraphLevelOrder)
-    (u : GLONode)
-    (hu_in : u ∈ g.nodes.toList)
-    (delta : Nat)
-    (h_min : ∀ x ∈ g.nodes.toList, delta ≤ x.out_neighbors.length) :
-    delta ≤ u.out_neighbors.length := by
-  -- Unfold the definition of minOutDegree or invoke your graph's minimum degree invariant
-  -- Use the property that minOutDegree is less than or equal to the degree of any node in the list
-  exact h_min u hu_in
-
-def getLayerAtDistance (g : GraphLevelOrder) (k : Nat) : Finset (GLONode) :=
-  -- Assuming g.nodes has a conversion to Finset or is a Finset/List
-  (g.nodes.toList.filter (fun u => u.dist == k)).toFinset
-
-theorem internal_degree_lower_bound
-  {n : Nat}
-  (g : GraphLevelOrder)
-  (ui : GLONode)
-  (i : Nat)
-  (h_layer : ui.dist = i) -- ui.dist.val is a Nat
-  (h_ui_in : ui ∈ g.nodes.toList)
-  (h_min_degree : ∀ v ∈ g.nodes.toList, v.out_neighbors.length ≥ v.dist) :
-  ui.out_neighbors.length ≥ i := by
-
-  -- 1. Apply the minimum degree hypothesis to ui
-  have h_bound := h_min_degree ui h_ui_in
-
-  -- 2. Substitute ui.dist.val = i into the bound using rw
-  rw [h_layer] at h_bound
-
-  -- 3. Exact match finishes the proof
-  exact h_bound
-/-
--------------------------------------------------------------------------------
---Stage 5: Minimum Counterexample Structure
--------------------------------------------------------------------------------
--/
-
--- /-- Two nodes u and v are connected by a back-path/arc if there is a node x
---     in v's back-neighbors that is also an out-neighbor of u. -/
-def ConnectedBack (G : GraphLevelOrder) (u v : GLONode) : Prop :=
-  ∃ x ∈ G.backNeighbors u v, x ∈ u.out_neighbors
-
--- /-- A graph has no connected back-arcs if no forward arc
---     coexists with a connected back-arc structure. -/
-def NoConnectedBack (G : GraphLevelOrder) : Prop :=
-  ∀ u v, fwdArc G u v = true → ¬ ConnectedBack G u v
-
-def IsRoot (G : GraphLevelOrder) (r : GLONode) : Prop :=
-  r ∈ G.nodes ∧ ∀ n ∈ G.nodes, n ≠ r → GLONode.Lt r n
-
-theorem root_unique (G : GraphLevelOrder) (r₁ r₂ : GLONode)
-    (h1 : IsRoot G r₁) (h2 : IsRoot G r₂) : r₁ = r₂ := by
-  by_contra hne
-  have a := h1.2 r₂ h2.1 (Ne.symm hne)   -- Lt r₁ r₂
-  have b := h2.2 r₁ h1.1 hne             -- Lt r₂ r₁
-  unfold GLONode.Lt at a b
-  omega
-
-/-- The least node sits in layer 0, provided layer 0 is nonempty. -/
-theorem root_dist_zero (G : GraphLevelOrder) (r : GLONode) (hr : IsRoot G r)
-    (h0 : ∃ n ∈ G.nodes, n.dist = 0) : r.dist = 0 := by
-  obtain ⟨n, hn, hn0⟩ := h0
-  by_cases h : n = r
-  · subst h; exact hn0
-  · have := hr.2 n hn h
-    unfold GLONode.Lt at this
-    omega
-
-theorem layer_bound_of_step (s : Nat → Nat) (δ : Nat)
-    (h1 : s 1 = δ) (hstep : ∀ j, 1 ≤ j → s (j + 1) ≤ s j - 1) :
-    ∀ m, s (m + 2) ≤ δ - (m + 1) := by
-  intro m
+    Fintype.card (getLayerAtDistance g (m + 2)) = delta - (m + 1) := by
   induction m with
   | zero =>
-    have h : s 2 ≤ s 1 - 1 := hstep 1 le_rfl
-    show s 2 ≤ δ - (0 + 1)
-    omega
+    -- Base case: m = 0, we need to show layer 2 size ≤ delta - 1
+    have h2 : Fintype.card (getLayerAtDistance g 2) = Fintype.card (getLayerAtDistance g 1) - 1 := h_step 1 le_rfl
+    rw [h1] at h2
+    rw [h2]
   | succ m ih =>
-    have h : s (m + 3) ≤ s (m + 2) - 1 := hstep (m + 2) (by omega)
-    show s (m + 3) ≤ δ - (m + 1 + 1)
+    -- Inductive step: assume result for m, prove for m + 1
+    have h_next : Fintype.card (getLayerAtDistance g (m + 3)) = Fintype.card (getLayerAtDistance g (m + 2)) - 1 := h_step (m + 2) (by omega)
+    rw [h_next]
     omega
 
-theorem degree_formula_under_no_back_arcs
-    (g : GraphLevelOrder) (delta : Nat) (h_delta : delta = g.delta)
-    (h_all_non_seymour : ∀ u ∈ g.nodes.toList, g.isNonSeymour (u.dist, u.lexId) = true)
-    (k : Nat)
-    (h_no_back_upto : ∀ x ∈ g.nodes, x.dist ≤ k → ∀ y ∈ g.nodes, y.dist = k + 1 → g.backNeighbors x y = ∅)
-    (h0 : Fintype.card (getLayerAtDistance g 0) = 1)
-    (h1 : Fintype.card (getLayerAtDistance g 1) = delta)
-    (h_step : ∀ j, 1 ≤ j →
-      Fintype.card (getLayerAtDistance g (j + 1))
-        ≤ Fintype.card (getLayerAtDistance g j) - 1)
-    (m : Nat) :
-    Fintype.card (getLayerAtDistance g (m + 2)) ≤ delta - (m + 1) :=
-  layer_bound_of_step (fun j => Fintype.card (getLayerAtDistance g j)) delta h1 h_step m
-
-
-namespace GraphLevelOrder
-
-/-- Layer-based sets for a node v (ids of out-neighbors by layer). -/
-def intNbrs (v : GLONode) : Finset Coord :=
-  v.out_neighbors.toFinset.filter (·.1 = v.dist)
-
-def extNbrs (v : GLONode) : Finset Coord :=
-  v.out_neighbors.toFinset.filter (·.1 = v.dist + 1)
-
-def backNbrs (v : GLONode) : Finset Coord :=
-  v.out_neighbors.toFinset.filter (·.1 < v.dist)
 
 def layerIds (G : GraphLevelOrder) (j : Nat) : Finset Nat :=
   ((G.nodes.filter (·.dist == j)).toList.map (·.lexId)).toFinset
@@ -702,144 +461,126 @@ def BFSWF (G : GraphLevelOrder) : Prop :=
   ∀ v ∈ G.nodes, ∀ x ∈ v.out_neighbors,
     (∃ d ∈ G.nodes, d.toCoords = x) ∧ x.1 ≤ v.dist + 1
 
-theorem extNbrs_subset_layer (G : GraphLevelOrder) (hw : G.BFSWF)
-    (v : GLONode) (hv : v ∈ G.nodes) :
-    extNbrs v ⊆ layerCoords G (v.dist + 1) := by
-  intro x hx
-  -- x is an out-neighbor of v whose layer is v.dist + 1
-  simp only [extNbrs, Finset.mem_filter, List.mem_toFinset] at hx
-  obtain ⟨hin, hlayer⟩ := hx
-  -- BFSWF: x is the coordinate of some real node d of G
-  obtain ⟨⟨d, hd_mem, hd_eq⟩, _⟩ := hw v hv x hin
-  have hdd : d.dist = x.1 := by rw [← hd_eq]; rfl
-  -- membership in layerCoords: x = d.toCoords for some d in layer v.dist + 1
-  simp only [G.layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter,
-    Array.mem_toList, beq_iff_eq]
-  exact ⟨d, ⟨hd_mem, by omega⟩, hd_eq⟩
+theorem fwdArc_spec (G : GraphLevelOrder) (u v : GLONode) :
+    fwdArc G u v = true ↔
+      u ∈ G.nodes ∧ v ∈ G.nodes ∧ v.toCoords ∈ u.out_neighbors
+        ∧ v.dist = u.dist + 1 := by
+  unfold fwdArc
+  simp only [Bool.and_eq_true, beq_iff_eq]
+  constructor
+  · rintro ⟨⟨⟨hu, hv⟩, huv⟩, hd⟩
+    exact ⟨Array.mem_of_contains_eq_true hu, Array.mem_of_contains_eq_true hv,
+      List.mem_of_elem_eq_true huv, hd⟩
+  · rintro ⟨hu, hv, huv, hd⟩
+    exact ⟨⟨⟨Array.contains_eq_true_of_mem hu, Array.contains_eq_true_of_mem hv⟩,
+      List.elem_eq_true_of_mem huv⟩, hd⟩
 
-/-- Case 1: the first irregular child of a parent at distance k cannot exist. -/
-
-def IsMinOutDeg (G : GraphLevelOrder) (δ : Nat) : Prop :=
-  (∀ x ∈ G.graph.vertices, δ ≤ G.graph.cardN1 x) ∧
-  (∃ x ∈ G.graph.vertices, G.graph.cardN1 x = δ)
-
-def NoBackArcs (G : GraphLevelOrder) : Prop :=
-  ∀ v ∈ G.nodes, backNbrs v = ∅
-
-theorem irregularity_extra_exterior_contradiction
-    (G : GraphLevelOrder) (k : Nat)
-    (hC : IsCounterexample G)
-    (hmin : IsMinOutDeg G G.delta)
-    (hw : G.BFSWF)
-    (hnb : NoBackArcs G)
-    (u v : GLONode)
-    (hfwd : fwdArc G u v = true)
-    (hu : u.dist = k) (hudeg : u.out_neighbors.length = G.delta)
-    (hnd : v.out_neighbors.Nodup)
-    (hirr : G.delta < v.out_neighbors.length)
-    (hk : k + 1 ≤ G.delta) : False := by
-  obtain ⟨_, hv_node, _, hdist'⟩ := (fwdArc_spec G u v).mp hfwd
-  have hdist : v.dist = k + 1 := by omega
-  have hint := interior_bound_of_nonSeymour G k hC hmin hnb u v hfwd hu hudeg
-  have hcor : (layerCoords G (v.dist + 1)).card ≤ G.delta - (k + 1) := by
-    rw [hdist]; exact cor_3_10 G hC hmin k
-  have hsplit := out_card_split v hnd
-    (fun x hx => (hw v hv_node x hx).2) (hnb v hv_node)
-  have hsub := Finset.card_le_card (extNbrs_subset_layer G hw v hv_node)
-  omega
-
-end GraphLevelOrder
-
-theorem interior_lower_bound (δ k intC extC backC outC : Nat)
-    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
-    (hback : backC = 0)
-    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
-    k + 1 ≤ intC := by omega
-
-
-/-- Back arcs forced by interior deficiency (no load balance, no minimality). -/
-theorem back_ge_deficiency (δ k intC extC backC outC : Nat)
-    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
-    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
-    (k + 1) - intC ≤ backC := by omega
-
-theorem lemmaA_core (δ k intC extC backC outC : Nat)
-    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
-    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ)
-    (hdef : intC < k + 1) : 0 < backC := by omega
-
-theorem layers_disjoint
-    (k1 k2 : Nat) (v_k1 v_k2 : GLONode)
-    (h_dist1 : v_k1.dist = k1) (h_dist2 : v_k2.dist = k2)
-    (h_neq : k1 ≠ k2) : v_k1 ≠ v_k2 := by
-  intro h_eq
-  apply h_neq
-  rw [← h_dist1, ← h_dist2, h_eq]
-
-theorem layerCoords_disjoint (G : GraphLevelOrder)
-    (j₁ j₂ : Nat) (hne : j₁ ≠ j₂) :
-    Disjoint (G.layerCoords j₁) (G.layerCoords j₂) := by
-  rw [Finset.disjoint_left]
-  intro c h1 h2
-  simp only [GraphLevelOrder.layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter,
-    beq_iff_eq] at h1 h2
-  obtain ⟨a, ⟨_, ha⟩, rfl⟩ := h1
-  obtain ⟨b, ⟨_, hb⟩, hab⟩ := h2
-  -- hab : b.toCoords = a.toCoords, so b.dist = a.dist
-  have : b.dist = a.dist := congrArg Prod.fst hab
-  omega
-
-/-- Node-level consistency: out-neighbors split into back / interior / exterior. -/
-def PartitionWF (n : GLONode) : Prop :=
-  n.out_neighbors.length =
-    n.back_neighbors.length + n.interior_neighbors.length + n.exterior_neighbors.length
-
-lemma child_interior_deficit
-    (child : GLONode) (k : Nat)
-    (h_part : PartitionWF child)
-    (h_deg : k ≤ child.out_neighbors.length)
-    (h_int : child.interior_neighbors.length < k) :
-    0 < child.back_neighbors.length ∨ 0 < child.exterior_neighbors.length := by
-  unfold PartitionWF at h_part
-  omega
-
-theorem extra_forward_arc_contradiction
-    (G : GraphLevelOrder) (hw : G.BFSWF) (k : Nat) (u v : GLONode)
-    (hfwd : fwdArc G u v = true) (hv : v ∈ G.nodes)
-    (hk : v.dist = k + 1)
-    (hdeg : G.delta < v.out_neighbors.length)
-    (hnd : v.out_neighbors.Nodup)
+theorem exteriorNeighbors_subset_layer
+    (G : GraphLevelOrder) (hu : G.CoordUnique) (hw : G.BFSWF)
+    (u v : GLONode) (hfwd : fwdArc G u v = true)
     (hnb : G.backNeighbors u v = ∅)
-    (hno_same : ∀ x ∈ v.out_neighbors, x.1 = v.dist → x ∈ u.out_neighbors)
-    (hint : (G.interiorNeighbors u v).card ≤ k + 1)   -- to be derived
-    (hlay : (G.layerCoords (k + 2)).card ≤ G.delta - (k + 1))
-    (hk' : k + 1 ≤ G.delta) : False := by
-  have hpart : v.out_neighbors.toFinset
-      = G.interiorNeighbors u v ∪ G.exteriorNeighbors u v := sorry  -- out_sub_int_ext + reverse
-  have hdis : Disjoint (G.interiorNeighbors u v) (G.exteriorNeighbors u v) :=
-    int_ext_disjoint G u v hfwd
-  have h2 : v.out_neighbors.length
-      = (G.interiorNeighbors u v).card + (G.exteriorNeighbors u v).card := by
-    rw [← List.toFinset_card_of_nodup hnd, hpart, Finset.card_union_of_disjoint hdis]
-  have h1 := Finset.card_le_card
-    ((extNeighbors_subset_extNbrs G u v hfwd hnb hno_same).trans
-      (extNbrs_subset_layer G hw v hv))
-  rw [hk] at h1
+    (hsame : ∀ x ∈ v.out_neighbors, x.1 = v.dist → x ∈ u.out_neighbors) :
+    G.exteriorNeighbors u v ⊆ G.layerCoords (v.dist + 1) := by
+  obtain ⟨hu_mem, hv_mem, _, hd⟩ := (fwdArc_spec G u v).mp hfwd
+  intro x hx
+  have hguard : (G.nodes.contains u && G.nodes.contains v
+      && v.dist == u.dist + 1) = true := by
+    simp only [Bool.and_eq_true, beq_iff_eq]
+    exact ⟨⟨Array.contains_eq_true_of_mem hu_mem,
+            Array.contains_eq_true_of_mem hv_mem⟩, hd⟩
+  unfold exteriorNeighbors at hx
+  rw [if_pos hguard] at hx
+  obtain ⟨hN2, hxv⟩ := Finset.mem_inter.mp hx
+  have hxv' : x ∈ v.out_neighbors := List.mem_toFinset.mp hxv
+  -- x ∉ N1(u) = out(u)
+  have hnotu : x ∉ u.out_neighbors := by
+    have h := (Finset.mem_filter.mp hN2).2.2        -- x ∉ getN1Finset G u.toCoords
+    rw [getN1Finset_eq G hu u hu_mem] at h
+    simpa using h
+  -- layer bounds
+  have hle := (hw v hv_mem x hxv').2
+  have hge : v.dist ≤ x.1 := by
+    by_contra hlt
+    have : x ∈ G.backNeighbors u v := by
+      unfold backNeighbors; rw [if_pos hguard]
+      simp [hxv', Nat.lt_of_not_le hlt]
+    rw [hnb] at this; simp at this
+  have hlay : x.1 = v.dist + 1 := by
+    rcases Nat.lt_or_ge v.dist x.1 with h | h
+    · omega
+    · exact absurd (hsame x hxv' (by omega)) hnotu
+  obtain ⟨⟨d, hd_mem, hd_eq⟩, _⟩ := hw v hv_mem x hxv'
+  have hdd : d.dist = x.1 := by rw [← hd_eq]; rfl
+  simp only [layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter, beq_iff_eq]
+  exact ⟨d, ⟨Array.mem_def.mp hd_mem, by omega⟩, hd_eq⟩
+
+/-- Case 1: the first irregular child of a parent at distance k cannot exist. -/
+
+def IsMinOutDeg (G : GraphLevelOrder) (δ : Nat) : Prop :=
+  (∀ x ∈ G.graph.vertices, δ ≤ G.graph.cardN1 x) ∧
+  (∃ x ∈ G.graph.vertices, G.graph.cardN1 x = δ)
+
+def NoBackArcs (G : GraphLevelOrder) : Prop :=
+  ∀ v ∈ G.nodes, ∀ u ∈ G.nodes, G.backNeighbors u v = ∅
+
+theorem interior_lower_bound (δ k intC extC backC outC : Nat)
+    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
+    (hback : backC = 0)
+    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
+    k + 1 ≤ intC := by omega
+
+/-- Back arcs forced by interior deficiency (no load balance, no minimality). -/
+theorem back_ge_deficiency (δ k intC extC backC outC : Nat)
+    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
+    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ) :
+    (k + 1) - intC ≤ backC := by omega
+
+theorem too_few_interior (δ k intC extC backC outC : Nat)
+    (hout : δ ≤ outC) (hsplit : outC = backC + intC + extC)
+    (hlayer : extC ≤ δ - (k + 1)) (hk : k + 1 ≤ δ)
+    (hdef : intC < k + 1) : 0 < backC := by omega
+
+theorem layers_disjoint
+    (k1 k2 : Nat) (v_k1 v_k2 : GLONode)
+    (h_dist1 : v_k1.dist = k1) (h_dist2 : v_k2.dist = k2)
+    (h_neq : k1 ≠ k2) : v_k1 ≠ v_k2 := by
+  intro h_eq
+  apply h_neq
+  rw [← h_dist1, ← h_dist2, h_eq]
+
+theorem layerCoords_disjoint (G : GraphLevelOrder)
+    (j₁ j₂ : Nat) (hne : j₁ ≠ j₂) :
+    Disjoint (G.layerCoords j₁) (G.layerCoords j₂) := by
+  rw [Finset.disjoint_left]
+  intro c h1 h2
+  simp only [GraphLevelOrder.layerCoords, List.mem_toFinset, List.mem_map, List.mem_filter,
+    beq_iff_eq] at h1 h2
+  obtain ⟨a, ⟨_, ha⟩, rfl⟩ := h1
+  obtain ⟨b, ⟨_, hb⟩, hab⟩ := h2
+  -- hab : b.toCoords = a.toCoords, so b.dist = a.dist
+  have : b.dist = a.dist := congrArg Prod.fst hab
   omega
 
-/-- Pigeonhole: an irregular child cannot fit its exterior in one layer. -/
-theorem extra_forward_arc_makes_seymour (G : GraphLevelOrder) (k : Nat) (u v : GLONode)
-    (hk : v.dist = k + 1)
-    (hdeg : G.delta < v.out_neighbors.length) (hnd : v.out_neighbors.Nodup)
-    (hint : (G.interiorNeighbors u v).card = k + 1) -- MCE Assumption
-    (hpart : (v.out_neighbors.toFinset).card = (G.interiorNeighbors u v).card ∨ (G.exteriorNeighbors u v).card
-    (hdis : Disjoint (intL G v) (extL G v))
-    (hlay : (layerIds G (k + 2)).card ≤ G.delta - (k + 1)) : False := by
-  have h1 := Finset.card_le_card (extL_subset_layer G v)
-  rw [hk] at h1
-  have h2 : v.out_neighbors.length = (intL G v).card + (extL G v).card := by
-    rw [← List.toFinset_card_of_nodup hnd, hpart, Finset.card_union_of_disjoint hdis]
+/-- Node-level consistency: out-neighbors split into back / interior / exterior. -/
+def PartitionWF (n : GLONode) : Prop :=
+  n.out_neighbors.length =
+    n.back_neighbors.length + n.interior_neighbors.length + n.exterior_neighbors.length
+
+lemma child_interior_deficit
+    (child : GLONode) (k : Nat)
+    (h_part : PartitionWF child)
+    (h_deg : k ≤ child.out_neighbors.length)
+    (h_int : child.interior_neighbors.length < k) :
+    0 < child.back_neighbors.length ∨ 0 < child.exterior_neighbors.length := by
+  unfold PartitionWF at h_part
   omega
+
+/-
+-------------------------------------------------------------------------------
+--Stage 5: Minimum Counterexample Structure
+-------------------------------------------------------------------------------
+-/
+/-- Case 1: the first irregular child of a parent at distance k cannot exist. -/
 
 theorem out_eq_int_union_ext
     (G : GraphLevelOrder) (hu : G.CoordUnique) (hw : G.BFSWF)
@@ -900,8 +641,6 @@ theorem out_eq_int_union_ext
       exact (Finset.mem_inter.mp h).2
 
 
-namespace GraphLevelOrder
-
 theorem int_ext_disjoint (G : GraphLevelOrder) (hu : G.CoordUnique)
     (u v : GLONode) (hu_node : u ∈ G.nodes) :
     Disjoint (G.interiorNeighbors u v) (G.exteriorNeighbors u v) := by
@@ -919,5 +658,150 @@ theorem int_ext_disjoint (G : GraphLevelOrder) (hu : G.CoordUnique)
     exact h2.2.2 h1
   · rw [interiorNeighbors, if_neg hc] at hxi
     simp at hxi
+
+theorem extra_forward_arc_produces_seymour_vertex
+    (G : GraphLevelOrder) (hu : G.CoordUnique) (u v : GLONode)
+    (h_cond : (G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1) = true)
+    (hfwd : fwdArc G u v = true)
+    (hu_deg : G.cardN1 u.toCoords = G.delta)
+    (h_ext_bound : G.cardN1 u.toCoords ≤ (G.exteriorNeighbors u v).card) :
+    G.cardN1 u.toCoords ≤ G.cardN2 u.toCoords := by
+  -- 1. Show exteriorNeighbors G u v is a subset of getN2Finset G u.toCoords
+  have h_sub : G.exteriorNeighbors u v ⊆ G.getN2Finset u.toCoords := by
+    intro c hc
+    exact exterior_neighbor_implies_second_neighbor G u v c h_cond hc
+
+  -- 2. Take cardinalities: |exteriorNeighbors| <= |N2(u)|
+  have h_card_le := Finset.card_le_card h_sub
+
+  -- 3. Chain inequalities: |N1(u)| <= |exteriorNeighbors| <= |N2(u)|
+  exact h_ext_bound.trans h_card_le
+
+/-- A counterexample G with fewer/excess arcs breaking minimality
+    contradicts the Minimum Counterexample H. -/
+theorem extra_interior_violates_mce_density
+    (G H : GraphLevelOrder)
+    (h_mce : IsMinimumCounterexample H)
+    (h_G_counter : IsCounterexample G)
+    (k : Nat)
+    (h_smaller_arcs : interiorArcCount G < interiorArcCount H) :
+    False := by
+  -- 1. Unpack the minimality property of H (H ≤ G for any counterexample G)
+  obtain ⟨_, h_min⟩ := h_mce
+
+  -- 2. Apply minimality of H to G
+  have h_le := h_min G h_G_counter
+
+  -- 3. Now we have: H ≤ G and G < H, which omega resolves instantly!
+  omega
+
+theorem cond_of_nodes {G : GraphLevelOrder} {u v : GLONode}
+    (hu : u ∈ G.nodes) (hv : v ∈ G.nodes) (hd : v.dist = u.dist + 1) :
+    (G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1) = true := by
+  simp [hu, hv, hd]
+
+theorem mem_getN2Finset_iff (G : GraphLevelOrder) (c x : Coord) :
+    x ∈ getN2Finset G c ↔
+      (∃ a ∈ getN1Finset G c, x ∈ getN1Finset G a)
+        ∧ x ≠ c ∧ x ∉ getN1Finset G c := by
+  simp only [getN2Finset, Finset.mem_filter, Finset.mem_biUnion]
+
+theorem out_subset_int_union_ext_general
+    (G : GraphLevelOrder) (hu : G.CoordUnique)
+    (u v : GLONode) (hu_node : u ∈ G.nodes) (hv_node : v ∈ G.nodes)
+    (hadj : v.toCoords ∈ u.out_neighbors)
+    (hd : v.dist = u.dist + 1)
+    (h_anti : u.toCoords ∉ v.out_neighbors) :
+    v.out_neighbors.toFinset
+      ⊆ G.interiorNeighbors u v ∪ G.exteriorNeighbors u v := by
+  have hc := cond_of_nodes hu_node hv_node hd
+  intro x hx
+  have hxv : x ∈ v.out_neighbors := List.mem_toFinset.mp hx
+  by_cases hxu : x ∈ u.out_neighbors
+  · apply Finset.mem_union_left
+    rw [interiorNeighbors, if_pos hc]
+    exact Finset.mem_inter.mpr ⟨List.mem_toFinset.mpr hxu, hx⟩
+  · apply Finset.mem_union_right
+    rw [exteriorNeighbors, if_pos hc]
+    refine Finset.mem_inter.mpr ⟨?_, hx⟩
+    rw [mem_getN2Finset_iff, getN1Finset_eq G hu u hu_node]
+    refine ⟨⟨v.toCoords, List.mem_toFinset.mpr hadj, ?_⟩, ?_, ?_⟩
+    · rw [getN1Finset_eq G hu v hv_node]; exact hx
+    · intro h; exact h_anti (h ▸ hxv)
+    · exact fun hmem => hxu (List.mem_toFinset.mp hmem)
+
+theorem out_length_le_int_add_ext_general
+    (G : GraphLevelOrder) (hu : G.CoordUnique)
+    (u v : GLONode) (hu_node : u ∈ G.nodes) (hv_node : v ∈ G.nodes)
+    (hadj : v.toCoords ∈ u.out_neighbors) (hd : v.dist = u.dist + 1)
+    (h_anti : u.toCoords ∉ v.out_neighbors)
+    (hnd : v.out_neighbors.Nodup) :
+    v.out_neighbors.length
+      ≤ (G.interiorNeighbors u v).card + (G.exteriorNeighbors u v).card := by
+  rw [← List.toFinset_card_of_nodup hnd]
+  exact (Finset.card_le_card
+    (out_subset_int_union_ext_general G hu u v hu_node hv_node hadj hd h_anti)).trans
+    (Finset.card_union_le _ _)
+
+theorem chain_ends_measure {α : Type*} (μ : α → Nat) (P Closes : α → Prop)
+    (h0 : ∃ a, P a)
+    (hstep : ∀ a, P a → Closes a ∨ ∃ b, P b ∧ μ b < μ a) :
+    ∃ a, P a ∧ Closes a := by
+  obtain ⟨a, ha, hmin⟩ :=
+    (InvImage.wf μ wellFounded_lt).has_min {a | P a} h0
+  rcases hstep a ha with hc | ⟨b, hb, hlt⟩
+  · exact ⟨a, ha, hc⟩
+  · exact absurd hlt (hmin b hb)
+
+/-- Branch 1: no overlap between N⁺(b) and N⁺(a) makes `a` Seymour. -/
+theorem seymour_of_disconnected_back_arc
+    (G : GraphLevelOrder) (hu : G.CoordUnique)
+    (a b : GLONode) (ha : a ∈ G.nodes) (hb : b ∈ G.nodes)
+    (hback : b.toCoords ∈ a.out_neighbors)
+    (h_anti : a.toCoords ∉ b.out_neighbors)
+    (h_disc : ∀ z ∈ b.out_neighbors, z ∉ a.out_neighbors)
+    (hbnd : b.out_neighbors.Nodup)
+    (hreg : a.out_neighbors.length ≤ G.delta)
+    (hmin : G.delta ≤ b.out_neighbors.length) :
+    G.cardN1 a.toCoords ≤ G.cardN2 a.toCoords := by
+  have h1 : G.cardN1 a.toCoords ≤ a.out_neighbors.length := by
+    unfold cardN1
+    rw [getN1Finset_eq G hu a ha]
+    exact List.toFinset_card_le _
+  have h2 : b.out_neighbors.length = b.out_neighbors.toFinset.card :=
+    (List.toFinset_card_of_nodup hbnd).symm
+  have h3 : b.out_neighbors.toFinset ⊆ getN2Finset G a.toCoords := by
+    intro x hx
+    have hxb := List.mem_toFinset.mp hx
+    rw [mem_getN2Finset_iff, getN1Finset_eq G hu a ha]
+    refine ⟨⟨b.toCoords, List.mem_toFinset.mpr hback, ?_⟩, ?_, ?_⟩
+    · rw [getN1Finset_eq G hu b hb]; exact hx
+    · intro h; exact h_anti (h ▸ hxb)
+    · exact fun hmem => h_disc x hxb (List.mem_toFinset.mp hmem)
+  have h4 := Finset.card_le_card h3
+  unfold cardN2
+  omega
+
+/-- Disconnected back arcs cannot exist in a counterexample.
+    `hpath` is branch 2, stated as a stake. -/
+theorem no_disconnected_back_arc
+    (G : GraphLevelOrder) (hu : G.CoordUnique)
+    (hall : ∀ x ∈ G.nodes, ¬ (G.cardN1 x.toCoords ≤ G.cardN2 x.toCoords))
+    (a b : GLONode) (ha : a ∈ G.nodes) (hb : b ∈ G.nodes)
+    (hback : b.toCoords ∈ a.out_neighbors)
+    (h_anti : a.toCoords ∉ b.out_neighbors)
+    (hbnd : b.out_neighbors.Nodup)
+    (hreg : a.out_neighbors.length ≤ G.delta)
+    (hmin : G.delta ≤ b.out_neighbors.length)
+    (hpath : (∃ z ∈ b.out_neighbors, z ∈ a.out_neighbors) →
+        ∃ x ∈ G.nodes, G.cardN1 x.toCoords ≤ G.cardN2 x.toCoords) :
+    False := by
+  by_cases hint : ∃ z ∈ b.out_neighbors, z ∈ a.out_neighbors
+  · obtain ⟨x, hx, hle⟩ := hpath hint
+    exact hall x hx hle
+  · push_neg at hint
+    exact hall a ha
+      (seymour_of_disconnected_back_arc G hu a b ha hb hback h_anti hint hbnd hreg hmin)
+
 
 end GraphLevelOrder
