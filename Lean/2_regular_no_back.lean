@@ -353,7 +353,7 @@ lemma node_out_degree_ge_delta
     (delta : Nat)
     (h_min : ∀ x ∈ g.nodes.toList, delta ≤ x.out_neighbors.length) :
     delta ≤ u.out_neighbors.length := by
-  -- Unfold the definition of minOutDegree or invoke your graph's minimum degree invariant
+  -- Unfold the definition of minOutDegree or invoke the minimum degree invariant
   -- Use the property that minOutDegree is less than or equal to the degree of any node in the list
   exact h_min u hu_in
 
@@ -385,7 +385,7 @@ theorem interior_degree_rigidity
   -- Suppose we have a quantity representing the interior neighbor count / degree of u
   -- (e.g., sum of sizes of interiorNeighbors with forward children)
   (int_count : Nat)
-  -- Hypotheses representing your MCE constraints:
+  -- Hypotheses representing MCE constraints:
   (h_not_too_low : int_count < k → False) -- Too low forces another forward arc / violates structure
   (h_not_too_high : k < int_count → False) -- Too high violates MCE conditions / non-Seymour bounds
   : int_count = k := by
