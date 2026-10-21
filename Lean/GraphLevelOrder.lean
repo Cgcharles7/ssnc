@@ -880,4 +880,46 @@ theorem no_first_connected_back_arc
     mem_layerCoords_of_node G v _ hv_node hxdist.symm
   exact hanti (List.mem_toFinset.mp (hlayer hvmem)) hxv
 
+theorem interior_subset_layer (G : GraphLevelOrder) (hw : G.BFSWF)
+    (u v : GLONode) (hu_node : u ∈ G.nodes) (hv_node : v ∈ G.nodes)
+    (hd : v.dist = u.dist + 1) (hnb : G.backNeighbors u v = ∅) :
+    G.interiorNeighbors u v ⊆ G.layerCoords v.dist := by
+  have hc := cond_of_nodes hu_node hv_node hd
+  intro x hx
+  rw [interiorNeighbors, if_pos hc] at hx
+  obtain ⟨hxu, hxv⟩ := Finset.mem_inter.mp hx
+  have hle : x.1 ≤ u.dist + 1 := (hw u hu_node x (List.mem_toFinset.mp hxu)).2
+  have hge : v.dist ≤ x.1 := by
+    by_contra hlt
+    push_neg at hlt
+    have hb : x ∈ G.backNeighbors u v := by
+      rw [backNeighbors, if_pos hc]
+      exact Finset.mem_filter.mpr ⟨hxv, hlt⟩
+    rw [hnb] at hb
+    simp at hb
+  obtain ⟨⟨d, hd_mem, hd_eq⟩, _⟩ := hw v hv_node x (List.mem_toFinset.mp hxv)
+  have hdd : d.dist = x.1 := by rw [← hd_eq]; rfl
+  rw [← hd_eq]
+  exact mem_layerCoords_of_node G d _ hd_mem (by omega)
+
+theorem oriented_arcs_le {α : Type*} [DecidableEq α] (R : Finset α)
+    (A : Finset (α × α)) (hA : A ⊆ R.offDiag)
+    (hanti : ∀ p ∈ A, (p.2, p.1) ∉ A) :
+    2 * A.card ≤ R.card * R.card - R.card := by
+  have hsw : (A.image Prod.swap) ⊆ R.offDiag := by
+    intro p hp
+    obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp hp
+    have := Finset.mem_offDiag.mp (hA hq)
+    exact Finset.mem_offDiag.mpr ⟨this.2.1, this.1, fun h => this.2.2 h.symm⟩
+  have hdis : Disjoint A (A.image Prod.swap) := by
+    rw [Finset.disjoint_left]
+    intro p hpA hpI
+    obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp hpI
+    exact hanti q hq hpA
+  have hcard : (A.image Prod.swap).card = A.card :=
+    Finset.card_image_of_injective _ Prod.swap_injective
+  have := Finset.card_le_card (Finset.union_subset hA hsw)
+  rw [Finset.card_union_of_disjoint hdis, hcard, Finset.offDiag_card] at this
+  omega
+
 end GraphLevelOrder
