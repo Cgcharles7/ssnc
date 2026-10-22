@@ -353,7 +353,7 @@ lemma node_out_degree_ge_delta
     (delta : Nat)
     (h_min : ∀ x ∈ g.nodes.toList, delta ≤ x.out_neighbors.length) :
     delta ≤ u.out_neighbors.length := by
-  -- Unfold the definition of minOutDegree or invoke the minimum degree invariant
+  -- Unfold the definition of minOutDegree or invoke your graph's minimum degree invariant
   -- Use the property that minOutDegree is less than or equal to the degree of any node in the list
   exact h_min u hu_in
 
@@ -385,7 +385,7 @@ theorem interior_degree_rigidity
   -- Suppose we have a quantity representing the interior neighbor count / degree of u
   -- (e.g., sum of sizes of interiorNeighbors with forward children)
   (int_count : Nat)
-  -- Hypotheses representing MCE constraints:
+  -- Hypotheses representing your MCE constraints:
   (h_not_too_low : int_count < k → False) -- Too low forces another forward arc / violates structure
   (h_not_too_high : k < int_count → False) -- Too high violates MCE conditions / non-Seymour bounds
   : int_count = k := by
@@ -741,3 +741,35 @@ theorem int_not_too_low
     : ¬ int_d < k := by
   intro h_low
   omega
+
+lemma child_interior_deficit_no_back
+    (G : GraphLevelOrder)
+    (child : GLONode) (k : Nat)
+    (h_part : PartitionWF child)
+    (h_deg : G.delta ≤ child.out_neighbors.length)
+    (h_no_back : child.back_neighbors.length = 0)
+    (h_int : child.interior_neighbors.length < k) :
+    G.delta < child.exterior_neighbors.length + k := by
+  unfold PartitionWF at h_part
+  omega
+
+theorem fewer_interior_implies_extra_forward
+    (G : GraphLevelOrder) (hu : G.CoordUnique) (u v : GLONode)
+    (h_mce : IsMinimumCounterexample G)
+    (h_cond : (G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1) = true)
+    (hfwd : fwdArc G u v = true)
+    (hu_deg : G.cardN1 u.toCoords = G.delta)
+    (h_ext_bound : G.cardN1 u.toCoords ≤ (G.exteriorNeighbors u v).card) :
+    G.cardN1 u.toCoords ≤ G.cardN2 u.toCoords := by
+  -- 1. Show exteriorNeighbors G u v is a subset of getN2Finset G u.toCoords
+  have h_sub : G.exteriorNeighbors u v ⊆ G.getN2Finset u.toCoords := by
+    intro c hc
+    exact exterior_neighbor_implies_second_neighbor G u v c h_cond hc
+
+  -- 2. Take cardinalities: |exteriorNeighbors| <= |N2(u)|
+  have h_card_le := Finset.card_le_card h_sub
+
+  -- 3. Chain inequalities: |N1(u)| <= |exteriorNeighbors| <= |N2(u)|
+  exact h_ext_bound.trans h_card_le
+
+end GraphLevelOrder
