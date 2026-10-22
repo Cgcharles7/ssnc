@@ -732,3 +732,12 @@ theorem extra_interior_violates_mce_density
 
   -- 3. Now we have: H ≤ G and G < H, which omega resolves instantly!
   omega
+
+theorem int_not_too_low
+    (δ k int_d fwd_d back_d : Nat)
+    (h_deg   : δ ≤ int_d + fwd_d + back_d)   -- out-degree ≥ δ
+    (h_noback : back_d = 0)
+    (h_case1 : fwd_d + k ≤ δ)                -- case 1: no extra forward arcs
+    : ¬ int_d < k := by
+  intro h_low
+  omega
