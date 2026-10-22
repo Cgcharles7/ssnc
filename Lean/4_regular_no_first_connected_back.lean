@@ -918,3 +918,5 @@ theorem no_first_connected_back_arc
   have hvmem : v.toCoords ∈ G.layerCoords (x.dist + 1) :=
     mem_layerCoords_of_node G v _ hv_node hxdist.symm
   exact hanti (List.mem_toFinset.mp (hlayer hvmem)) hxv
+
+end GraphLevelOrder
