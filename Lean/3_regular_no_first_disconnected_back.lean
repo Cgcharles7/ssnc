@@ -881,4 +881,3 @@ theorem no_disconnected_back_arc
       (seymour_of_disconnected_back_arc G hu a b ha hb hback h_anti hint hbnd hreg hmin)
 
 end GraphLevelOrder
-end GraphLevelOrder
