@@ -879,3 +879,6 @@ theorem no_disconnected_back_arc
   · push_neg at hint
     exact hall a ha
       (seymour_of_disconnected_back_arc G hu a b ha hb hback h_anti hint hbnd hreg hmin)
+
+end GraphLevelOrder
+end GraphLevelOrder
