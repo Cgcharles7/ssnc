@@ -340,10 +340,34 @@ def neighborhood_density (G : GraphLevelOrder) (k : Nat) : Rat :=
   if layerSize = 0 then 0
   else (arcCount : Rat) / (layerSize : Rat)
 
+def interiorInDegree (G : GraphLevelOrder) (v : GLONode) (k : Nat): Nat :=
+  (G.nodes.filter ( fun u => u.toCoords ∈ v.out_neighbors ∧ u.dist = k ∧ v.dist = k)).size
+
+def interiorOutDegree (G : GraphLevelOrder) (u : GLONode) (k : Nat) : Nat :=
+  u.out_neighbors.countP (fun v => v.1 = k)
+
+def totalInteriorDegree (G : GraphLevelOrder) (v : GLONode) (k : Nat): Nat :=
+  interiorInDegree G v k + interiorOutDegree G v k
+
+def maxTotalInteriorDegree (G : GraphLevelOrder) : Nat :=
+  (G.nodes.map (fun u => totalInteriorDegree G u u.dist)).toList.foldl max 0
+
+def mceMetric (G : GraphLevelOrder) : Nat × Nat :=
+  (interiorArcCount G, maxTotalInteriorDegree G)
+
 def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=
   IsCounterexample G ∧
   ∀ H : GraphLevelOrder, IsCounterexample H →
-    interiorArcCount G ≤ interiorArcCount H
+    mceMetric G ≤ mceMetric H
+
+/-- A graph is cycle-packed if every node has balanced interior degrees
+    (in-degree 1, out-degree 1) resulting in a total interior degree of exactly 2. -/
+
+def IsCyclePacked (G : GraphLevelOrder) : Prop :=
+  ∀ u ∈ G.nodes,
+    interiorInDegree G u u.dist = 1 ∧
+    interiorOutDegree G u u.dist = 1 ∧
+    totalInteriorDegree G u u.dist = 2
 
 -- Check/Proof that any valid node in the graph satisfies out-degree ≥ delta
 lemma node_out_degree_ge_delta
