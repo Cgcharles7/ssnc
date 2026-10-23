@@ -741,21 +741,15 @@ theorem extra_forward_arc_produces_seymour_vertex
 
 /-- A counterexample G with fewer/excess arcs breaking minimality
     contradicts the Minimum Counterexample H. -/
-theorem extra_interior_violates_mce_density
+theorem extra_interior_violates_mce_metric
     (G H : GraphLevelOrder)
     (h_mce : IsMinimumCounterexample H)
     (h_G_counter : IsCounterexample G)
-    (k : Nat)
-    (h_smaller_arcs : interiorArcCount G < interiorArcCount H) :
+    (h_smaller_metric : mceMetric G < mceMetric H) :
     False := by
-  -- 1. Unpack the minimality property of H (H ≤ G for any counterexample G)
   obtain ⟨_, h_min⟩ := h_mce
-
-  -- 2. Apply minimality of H to G
-  have h_le := h_min G h_G_counter
-
-  -- 3. Now we have: H ≤ G and G < H, which omega resolves instantly!
-  omega
+  have h_le : mceMetric H ≤ mceMetric G := h_min G h_G_counter
+  exact absurd h_smaller_metric (not_lt_of_ge h_le)
 
 theorem int_not_too_low
     (δ k int_d fwd_d back_d : Nat)
