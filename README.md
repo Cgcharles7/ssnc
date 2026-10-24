@@ -1,4 +1,4 @@
-# A Constructive Proof of the Seymour Second Neighborhood Conjecture via Graph Level Order (GLOVER)
+# A Constructive Proof of the Seymour Second Neighborhood Conjecture via the Graph Level Order (GLOVER)
 
 
 * **Author:** Charles N. Glover
@@ -12,13 +12,13 @@
 This repository provides an open-source, computationally auditable verification environment for a constructive proof of **Seymour's Second Neighborhood Conjecture (SSNC)**. 
 
 ### A 20+ Year Journey in Silence 
-The code in this repository was created over my mathematical journey. I love this problem not only because of it is simple to state, but because I used it to introduce me to many graph and mathematical algorithms. When I started working on the problem, I didn't know how to read math papers. I literally sent an expert a sketch of my idea thinking I solved it trivially. I didn't. But even back then I could code. I began this site, to see what I was missing and what could be corrected. 
+The code in this repository was created over my mathematical journey. I love this problem not only because of it is simple to state, but because I used it to introduce me to many graph and mathematical algorithms. When I started working on the problem, I didn't know how to read math papers. I literally sent an expert a sketch of my idea thinking I solved it trivially. I didn't. But even back then I could code. I began these programs to see what I was missing and what could be corrected. 
 
 
 ### Why This Repository Exists
-The graph theory community approaches the SSNC through many existential methods. They have used random graphs and Constraint Satisfaction Problems (CSPs) most recently. These both assert the existence of a Seymour vertex without explaining why. Computer-assisted approaches generally imply brute-force approach. Again this fails to uncover the structural truth.
+The graph theory community approaches the SSNC through many existential methods. They have used random graphs and Constraint Satisfaction Problems (CSPs) most recently. These both assert the existence of a Seymour vertex without explaining why. Computer-assisted approaches generally imply a brute-force approach. Again, this fails to uncover the structural truth.
 
-This project bridges the gap between these two worlds. It is built for graph theorists, discrete mathematicians, theoretical computer scientists, and anyone interested in the Seymour Second Neighborhood Conjecture and the underlying structure of the problem.
+This project goes to bridge the gap between these two worlds. It is built for graph theorists, discrete mathematicians, theoretical computer scientists, and anyone interested in the Seymour Second Neighborhood Conjecture and the structure of the problem.
 
 ---
 
@@ -32,10 +32,10 @@ Rather than testing individual graphs, this framework **tames the infinite searc
 In a locally finite infinite graph (or a standard finite graph), the minimum degree node has a finite degree. By anchoring our analysis at this minimum out-degree node, we execute a Breadth-First Search (BFS) decomposition paired with a lexicographical ordering. 
 
 This establishes a coordinate system or a **well-ordering** on the graph's vertices. It maps every node to an exact spatial coordinate: 
-$$\text{Node Coordinate} = (\text{distance}, lexNodeId)$$
+$$\text{Node Coordinate} = (\text{distance}, lexId)$$
 
 ### 2. Operating in the Dual Space: Vertex Packing
-Instead of passively searching for a needle-in-a-haystack Seymour vertex, this framework operates entirely within the **dual space**. We systematically **"pack" non-Seymour vertices** inside a strict Minimum Counterexample (MCE) environment until the structural boundaries collapse and a valid Seymour vertex is forced to emerge.
+Instead of searching for a needle-in-a-haystack Seymour vertex, this framework operates entirely within the **dual space**. We systematically **"pack" non-Seymour vertices** inside a strict Minimum Counterexample (MCE) environment until the structural boundaries collapse and a valid Seymour vertex is forced to emerge.
 
 ### 3. "Kicking the Can Down the Road": Forward-Facing Transitive Triangles
 In traditional literature, transitive triangles are often viewed negatively as structural noise. However, inside the dual optimization space, they possess a powerful feature: **they allow parent vertices to pass the Seymour property onto their children, enabling the parents to remain non-Seymour.**
