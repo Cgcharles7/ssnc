@@ -810,46 +810,39 @@ theorem fewer_interior_implies_extra_forward
   -- 3. Chain inequalities: |N1(u)| <= |exteriorNeighbors| <= |N2(u)|
   exact h_ext_bound.trans h_card_le
 
-theorem interior_degree_bounds_strong
-    (G : GraphLevelOrder) (hu : G.CoordUnique) (u v : GLONode)
-    (h_mce : IsMinimumCounterexample G)
+theorem interior_degree_bounds
+    (G : GraphLevelOrder) (u v : GLONode)
     (h_cond : (G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1) = true)
-    (hfwd : fwdArc G u v = true)
     (hu_deg : G.cardN1 u.toCoords = G.delta)
-    -- layer structure (hypotheses of degree_formula_under_no_back_arcs)
-    (h_all_non_seymour : ∀ w ∈ G.nodes.toList, G.isNonSeymour (w.dist, w.lexId) = true)
-    (k : Nat) (hk : 1 ≤ k) (hkδ : k ≤ G.delta) (hu_dist : u.dist = k)
-    (h_no_back_upto : ∀ x ∈ G.nodes, x.dist ≤ k → ∀ y ∈ G.nodes, y.dist = k + 1 →
-        G.backNeighbors x y = ∅)
-    (h0 : Fintype.card (getLayerAtDistance G 0) = 1)
-    (h1 : Fintype.card (getLayerAtDistance G 1) = G.delta)
-    (h_step : ∀ j, 1 ≤ j →
-        Fintype.card (getLayerAtDistance G (j + 1)) = Fintype.card (getLayerAtDistance G j) - 1)
-    -- ASSUMED (needs proof): exterior neighbors of u via v live in layer k+1
-    (h_ext_layer : (G.exteriorNeighbors u v).card ≤ Fintype.card (getLayerAtDistance G (k + 1)))
-    -- ASSUMED definition: interior degree = N1 minus exterior neighbours
-    (interiorDeg : ℕ)
-    (h_int : interiorDeg = G.cardN1 u.toCoords - (G.exteriorNeighbors u v).card)
-    -- ASSUMED reduction: interior degree above B yields a smaller counterexample
-    (B : ℕ)
-    (h_reduce : B < interiorDeg →
-        ∃ H : GraphLevelOrder, IsCounterexample H ∧ mceMetric H < mceMetric G) :
-    k ≤ interiorDeg ∧ interiorDeg ≤ B := by
-  -- Layer k+1 has size δ - k, from the degree formula with m = k - 1
-  have h_layer : Fintype.card (getLayerAtDistance G (k + 1)) = G.delta - k := by
-    have h := degree_formula_under_no_back_arcs G G.delta h_all_non_seymour k
-      h_no_back_upto h0 h1 h_step (k - 1)
-    have e : k - 1 + 2 = k + 1 := by omega
-    rw [e] at h
-    omega
+    (h_no_seymour_u : G.cardN2 u.toCoords < G.cardN1 u.toCoords)
+    (hcard1 : G.cardN1 u.toCoords = u.out_neighbors.toFinset.card)
+    (hv_deg : G.delta ≤ v.out_neighbors.toFinset.card)
+    (hv_in : v.toCoords ∈ u.out_neighbors.toFinset)          -- from fwdArc G u v
+    (hv_noloop : v.toCoords ∉ v.out_neighbors.toFinset)       -- no loops
+    (hv_cover : v.out_neighbors.toFinset ⊆
+        interiorNeighbors G u v ∪ exteriorNeighbors G u v) :  -- N2 definition + oriented
+    1 ≤ (interiorNeighbors G u v).card ∧
+    (interiorNeighbors G u v).card ≤ G.delta - 1 := by
+  have h_ext_le : (exteriorNeighbors G u v).card ≤ G.cardN2 u.toCoords :=
+    Finset.card_le_card (fun c hc =>
+      exterior_neighbor_implies_second_neighbor G u v c h_cond hc)
+  have h_union : v.out_neighbors.toFinset.card ≤
+      (interiorNeighbors G u v).card + (exteriorNeighbors G u v).card :=
+    (Finset.card_le_card hv_cover).trans (Finset.card_union_le _ _)
   constructor
-  · -- Lower bound: at most δ - k exterior neighbours, so at least k interior ones
-    rw [h_int, hu_deg]
+  · omega
+  · have hsub : interiorNeighbors G u v ⊆ u.out_neighbors.toFinset.erase v.toCoords := by
+      intro c hc
+      have hc' : c ∈ u.out_neighbors.toFinset ∩ v.out_neighbors.toFinset := by
+        unfold interiorNeighbors at hc
+        rw [if_pos h_cond] at hc
+        exact hc
+      rw [Finset.mem_inter] at hc'
+      rw [Finset.mem_erase]
+      exact ⟨fun h => hv_noloop (h ▸ hc'.2), hc'.1⟩
+    have := Finset.card_le_card hsub
+    rw [Finset.card_erase_of_mem hv_in] at this
     omega
-  · -- Upper bound: otherwise a smaller counterexample contradicts minimality
-    by_contra h_not
-    obtain ⟨H, hH, hmetric⟩ := h_reduce (not_le.mp h_not)
-    exact extra_interior_violates_mce_metric H G h_mce hH hmetric
 
 theorem cond_of_nodes {G : GraphLevelOrder} {u v : GLONode}
     (hu : u ∈ G.nodes) (hv : v ∈ G.nodes) (hd : v.dist = u.dist + 1) :
