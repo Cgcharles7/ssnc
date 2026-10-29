@@ -340,20 +340,40 @@ def neighborhood_density (G : GraphLevelOrder) (k : Nat) : Rat :=
   if layerSize = 0 then 0
   else (arcCount : Rat) / (layerSize : Rat)
 
-def interiorInDegree (G : GraphLevelOrder) (v : GLONode) (k : Nat): Nat :=
-  (G.nodes.filter ( fun u => u.toCoords ∈ v.out_neighbors ∧ u.dist = k ∧ v.dist = k)).size
+def interiorInDegree (G : GraphLevelOrder) (u v : GLONode) (k : Nat) : Finset GLONode :=
+  if G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1 then
+    (G.nodes.filter (fun w => w.toCoords ∈ v.out_neighbors ∧ w.dist = k)).toList.toFinset
+  else
+    ∅
 
-def interiorOutDegree (G : GraphLevelOrder) (u : GLONode) (k : Nat) : Nat :=
-  u.out_neighbors.countP (fun v => v.1 = k)
+def interiorOutDegree (G : GraphLevelOrder) (u v : GLONode) (k : Nat) : Finset GLONode :=
+  if G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1 then
+    -- Filter the graph nodes and convert the resulting Array to a Finset GLONode
+    (G.nodes.filter (fun w => w.toCoords ∈ v.out_neighbors ∧ w.dist = k)).toList.toFinset
+  else
+    ∅
 
-def totalInteriorDegree (G : GraphLevelOrder) (v : GLONode) (k : Nat): Nat :=
-  interiorInDegree G v k + interiorOutDegree G v k
+def totalInteriorDegree (G : GraphLevelOrder) (u v : GLONode) (k : Nat): Finset GLONode :=
+  if G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1 then
+    interiorInDegree G u v k ∪ interiorOutDegree G u v k
+  else
+    ∅
 
-def maxTotalInteriorDegree (G : GraphLevelOrder) : Nat :=
-  (G.nodes.map (fun u => totalInteriorDegree G u u.dist)).toList.foldl max 0
+def maxTotalInteriorDegree (G : GraphLevelOrder) (k : Nat) : Nat :=
+  G.nodes.foldl (fun maxVal u =>
+    if u.dist == k then
+      G.nodes.foldl (fun innerMax v =>
+        if v.dist == u.dist + 1 then
+          max innerMax (totalInteriorDegree G u v k).card
+        else
+          innerMax
+      ) maxVal
+    else
+      maxVal
+  ) 0
 
-def mceMetric (G : GraphLevelOrder) : Nat × Nat :=
-  (interiorArcCount G, maxTotalInteriorDegree G)
+def mceMetric (G : GraphLevelOrder) (k : Nat) : Nat × Nat :=
+  (interiorArcCount G, maxTotalInteriorDegree G k)
 
 def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=
   IsCounterexample G ∧
@@ -363,11 +383,11 @@ def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=
 /-- A graph is cycle-packed if every node has balanced interior degrees
     (in-degree 1, out-degree 1) resulting in a total interior degree of exactly 2. -/
 
-def IsCyclePacked (G : GraphLevelOrder) : Prop :=
-  ∀ u ∈ G.nodes,
-    interiorInDegree G u u.dist = 1 ∧
-    interiorOutDegree G u u.dist = 1 ∧
-    totalInteriorDegree G u u.dist = 2
+--def IsCyclePacked (G : GraphLevelOrder) : Prop :=
+--  ∀ u ∈ G.nodes,
+--    interiorInDegree G u u.dist = 1 ∧
+--    interiorOutDegree G u u.dist = 1 ∧
+--    totalInteriorDegree G u u.dist = 2
 
 -- Check/Proof that any valid node in the graph satisfies out-degree ≥ delta
 lemma node_out_degree_ge_delta
@@ -786,5 +806,42 @@ theorem fewer_interior_implies_extra_forward
 
   -- 2. Take cardinalities: |exteriorNeighbors| <= |N2(u)|
   have h_card_le := Finset.card_le_card h_sub
+
+  -- 3. Chain inequalities: |N1(u)| <= |exteriorNeighbors| <= |N2(u)|
+  exact h_ext_bound.trans h_card_le
+
+theorem interior_degree_bounds
+    (G : GraphLevelOrder) (u v : GLONode)
+    (h_cond : (G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1) = true)
+    (hu_deg : G.cardN1 u.toCoords = G.delta)
+    (h_no_seymour_u : G.cardN2 u.toCoords < G.cardN1 u.toCoords)
+    (hcard1 : G.cardN1 u.toCoords = u.out_neighbors.toFinset.card)
+    (hv_deg : G.delta ≤ v.out_neighbors.toFinset.card)
+    (hv_in : v.toCoords ∈ u.out_neighbors.toFinset)          -- from fwdArc G u v
+    (hv_noloop : v.toCoords ∉ v.out_neighbors.toFinset)       -- no loops
+    (hv_cover : v.out_neighbors.toFinset ⊆
+        interiorNeighbors G u v ∪ exteriorNeighbors G u v) :  -- N2 definition + oriented
+    1 ≤ (interiorNeighbors G u v).card ∧
+    (interiorNeighbors G u v).card ≤ G.delta - 1 := by
+  have h_ext_le : (exteriorNeighbors G u v).card ≤ G.cardN2 u.toCoords :=
+    Finset.card_le_card (fun c hc =>
+      exterior_neighbor_implies_second_neighbor G u v c h_cond hc)
+  have h_union : v.out_neighbors.toFinset.card ≤
+      (interiorNeighbors G u v).card + (exteriorNeighbors G u v).card :=
+    (Finset.card_le_card hv_cover).trans (Finset.card_union_le _ _)
+  constructor
+  · omega
+  · have hsub : interiorNeighbors G u v ⊆ u.out_neighbors.toFinset.erase v.toCoords := by
+      intro c hc
+      have hc' : c ∈ u.out_neighbors.toFinset ∩ v.out_neighbors.toFinset := by
+        unfold interiorNeighbors at hc
+        rw [if_pos h_cond] at hc
+        exact hc
+      rw [Finset.mem_inter] at hc'
+      rw [Finset.mem_erase]
+      exact ⟨fun h => hv_noloop (h ▸ hc'.2), hc'.1⟩
+    have := Finset.card_le_card hsub
+    rw [Finset.card_erase_of_mem hv_in] at this
+    omega
 
 end GraphLevelOrder
