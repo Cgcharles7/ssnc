@@ -1,0 +1,477 @@
+[
+  {
+    "name": "FiniteGraph",
+    "type": "structure",
+    "explanation": "Defines a finite graph consisting of a finset of vertices, a finset of edges, and a proof validity condition ensuring that every edge connects two valid vertices."
+  },
+  {
+    "name": "FiniteGraph.Adj",
+    "type": "definition",
+    "explanation": "Adjacency predicate stating that two vertices u and v are adjacent if the pair (u, v) is in the graph's edge set."
+  },
+  {
+    "name": "FiniteGraph.getN1Finset",
+    "type": "definition",
+    "explanation": "Computes the set of out-neighbors (N1) for a given vertex u by filtering the edges originating from u and mapping them to their destination."
+  },
+  {
+    "name": "FiniteGraph.cardN1",
+    "type": "definition",
+    "explanation": "Calculates the out-degree (cardinality of N1) of a vertex u."
+  },
+  {
+    "name": "FiniteGraph.getN2Finset",
+    "type": "definition",
+    "explanation": "Computes the second-stage neighborhood (N2) of a vertex u, consisting of vertices reachable in two steps that are not u itself and not in N1(u)."
+  },
+  {
+    "name": "FiniteGraph.cardN2",
+    "type": "definition",
+    "explanation": "Calculates the size of the second-stage neighborhood (N2) for a vertex u."
+  },
+  {
+    "name": "FiniteGraph.isSeymour",
+    "type": "definition",
+    "explanation": "Boolean check for whether a vertex u satisfies Seymour's condition (i.e., |N2(u)| ≥ |N1(u)|)."
+  },
+  {
+    "name": "FiniteGraph.isNonSeymour",
+    "type": "definition",
+    "explanation": "Boolean check for whether a vertex u fails Seymour's condition (i.e., |N2(u)| < |N1(u)|)."
+  },
+  {
+    "name": "FiniteGraph.IsIrreflexive",
+    "type": "definition",
+    "explanation": "Property stating that no vertex has a self-loop (no vertex is adjacent to itself)."
+  },
+  {
+    "name": "FiniteGraph.IsAntisymmetric",
+    "type": "definition",
+    "explanation": "Property stating that the graph contains no 2-cycles (if u is adjacent to v and v is adjacent to u, then u must equal v)."
+  },
+  {
+    "name": "FiniteGraph.IsOriented",
+    "type": "definition",
+    "explanation": "Defines an oriented graph as one that is both irreflexive and antisymmetric."
+  },
+  {
+    "name": "FiniteGraph.IsSeymourProp",
+    "type": "definition",
+    "explanation": "Propositional version of Seymour's condition: |N1(u)| ≤ |N2(u)|."
+  },
+  {
+    "name": "FiniteGraph.isSeymour_iff",
+    "type": "theorem",
+    "explanation": "Proves that the boolean `isSeymour` function is equivalent to the logical `IsSeymourProp` proposition."
+  },
+  {
+    "name": "GloLex",
+    "type": "inductive",
+    "explanation": "Inductive coordinate system (BFS-Lex) representing paths and layer assignments starting from a root vertex through child and same-layer neighbor transitions."
+  },
+  {
+    "name": "GloLex.pathLength",
+    "type": "definition",
+    "explanation": "Computes the path length or distance from the root for a given GloLex path object."
+  },
+  {
+    "name": "GloLex.toVertex",
+    "type": "definition",
+    "explanation": "Extracts the vertex identifier from a GloLex path element."
+  },
+  {
+    "name": "GloLex.toDist",
+    "type": "definition",
+    "explanation": "Extracts the distance layer index from a GloLex path element."
+  },
+  {
+    "name": "Coord",
+    "type": "abbrev",
+    "explanation": "Abbreviation for a coordinate pair representing (distance, lexId)."
+  },
+  {
+    "name": "GLONode",
+    "type": "structure",
+    "explanation": "Represents a node in the graph level order with its distance, lexical ID, various neighbor lists (out, interior, exterior, back), parent, and sequential node number."
+  },
+  {
+    "name": "GLONode.toProd",
+    "type": "definition",
+    "explanation": "Converts a GLONode into a raw product pair of its distance and lex ID."
+  },
+  {
+    "name": "GLONode.toCoords",
+    "type": "definition",
+    "explanation": "Extracts the coordinate pair (dist, lexId) from a GLONode."
+  },
+  {
+    "name": "GLONode.Lt",
+    "type": "definition",
+    "explanation": "Lexicographical strict less-than relation between two GLONodes based on distance first, then lexical ID."
+  },
+  {
+    "name": "defaultGLONode",
+    "type": "definition",
+    "explanation": "Provides a default, zero-initialized GLONode instance."
+  },
+  {
+    "name": "gloNode_lt_wellFounded",
+    "type": "theorem",
+    "explanation": "Proves that the GLONode less-than relation (`GLONode.Lt`) is well-founded."
+  },
+  {
+    "name": "GraphLevelOrder",
+    "type": "structure",
+    "explanation": "Represents a graph structured hierarchically into layers of GLONodes under a BFS-Lex traversal, along with delta parameters and max layer limits."
+  },
+  {
+    "name": "GraphLevelOrder.getNode?",
+    "type": "definition",
+    "explanation": "Looks up a GLONode in the graph array matching a given coordinate."
+  },
+  {
+    "name": "GraphLevelOrder.getN1Finset",
+    "type": "definition",
+    "explanation": "Retrieves the out-neighbor finset for a node at a given coordinate in the level order."
+  },
+  {
+    "name": "GraphLevelOrder.cardN1",
+    "type": "definition",
+    "explanation": "Calculates the size of N1 for a node coordinate in the level order."
+  },
+  {
+    "name": "GraphLevelOrder.getN2Finset",
+    "type": "definition",
+    "explanation": "Computes the second-stage neighborhood finset for a node coordinate in the level order."
+  },
+  {
+    "name": "GraphLevelOrder.cardN2",
+    "type": "definition",
+    "explanation": "Calculates the size of N2 for a node coordinate in the level order."
+  },
+  {
+    "name": "GraphLevelOrder.isSeymour",
+    "type": "definition",
+    "explanation": "Boolean check if a coordinate satisfies Seymour's condition within the level-ordered graph."
+  },
+  {
+    "name": "GraphLevelOrder.isNonSeymour",
+    "type": "definition",
+    "explanation": "Boolean check if a coordinate fails Seymour's condition within the level-ordered graph."
+  },
+  {
+    "name": "GraphLevelOrder.IsIrreflexive",
+    "type": "definition",
+    "explanation": "Property stating no node contains its own coordinates in its out-neighbors."
+  },
+  {
+    "name": "GraphLevelOrder.Adj",
+    "type": "definition",
+    "explanation": "Defines a directed arc between two GLONodes by verifying they belong to the graph and v's coordinates are in u's out-neighbors."
+  },
+  {
+    "name": "GraphLevelOrder.IsAntisymmetric",
+    "type": "definition",
+    "explanation": "Property stating that directed arcs are antisymmetric (no 2-cycles between nodes)."
+  },
+  {
+    "name": "GraphLevelOrder.IsOriented",
+    "type": "definition",
+    "explanation": "Combined property that the level-ordered graph is both irreflexive and antisymmetric."
+  },
+  {
+    "name": "GraphLevelOrder.CoordUnique",
+    "type": "definition",
+    "explanation": "Property ensuring that node coordinates (dist and lexId) uniquely identify each node in the graph."
+  },
+  {
+    "name": "GraphLevelOrder.getN1Finset_eq",
+    "type": "theorem",
+    "explanation": "Proves that looking up N1 for a node's coordinates matches its out-neighbors finset under coordinate uniqueness."
+  },
+  {
+    "name": "GraphLevelOrder.cardN1_eq",
+    "type": "theorem",
+    "explanation": "Relates the level-order cardN1 function to the cardinality of the node's out-neighbors finset."
+  },
+  {
+    "name": "GraphLevelOrder.cardN1_eq_length",
+    "type": "theorem",
+    "explanation": "Proves cardN1 equals the list length of out-neighbors when list entries have no duplicates."
+  },
+  {
+    "name": "interiorNeighbors",
+    "type": "definition",
+    "explanation": "Computes interior neighbors shared between adjacent nodes u and v residing on consecutive layers."
+  },
+  {
+    "name": "exteriorNeighbors",
+    "type": "definition",
+    "explanation": "Computes exterior neighbors for a forward pair u and v, lying in N2(u) intersected with v's out-neighbors."
+  },
+  {
+    "name": "backNeighbors",
+    "type": "definition",
+    "explanation": "Computes back-neighbors for a forward pair u and v, consisting of v's out-neighbors that point back to earlier layers."
+  },
+  {
+    "name": "interior_neighbors_implies_first_neighbors",
+    "type": "theorem",
+    "explanation": "Proves that an interior neighbor of a forward pair belongs to the out-neighbors of both parent u and child v."
+  },
+  {
+    "name": "exterior_neighbor_implies_second_neighbor",
+    "type": "theorem",
+    "explanation": "Proves that an exterior neighbor of a forward pair belongs to the second-stage neighborhood N2 of u."
+  },
+  {
+    "name": "distOf",
+    "type": "definition",
+    "explanation": "Retrieves the distance layer of a node given its lexical ID."
+  },
+  {
+    "name": "fwdArc",
+    "type": "definition",
+    "explanation": "Boolean predicate checking if u and v form a valid forward arc where v is exactly one layer after u."
+  },
+  {
+    "name": "IsCounterexample",
+    "type": "definition",
+    "explanation": "Defines a graph counterexample structure with unique coordinates, orientation, non-empty nodes, and where every node violates Seymour's condition."
+  },
+  {
+    "name": "layerInteriorArcCount",
+    "type": "definition",
+    "explanation": "Counts the total interior arcs present across nodes in layer k."
+  },
+  {
+    "name": "getLayerAtDistance",
+    "type": "definition",
+    "explanation": "Extracts the finset of all GLONodes located at a specific distance layer k."
+  },
+  {
+    "name": "neighborhood_density",
+    "type": "definition",
+    "explanation": "Defines neighborhood density at layer k as the ratio of interior arc count to layer size."
+  },
+  {
+    "name": "interiorArcs",
+    "type": "definition",
+    "explanation": "Constructs the finset of directed interior arc pairs connecting u and v to their shared interior neighbors."
+  },
+  {
+    "name": "allInteriorArcs",
+    "type": "definition",
+    "explanation": "Collects all interior arcs across every valid forward pair in the graph."
+  },
+  {
+    "name": "interiorOutDegree",
+    "type": "definition",
+    "explanation": "Calculates the interior out-degree of a coordinate node."
+  },
+  {
+    "name": "interiorInDegree",
+    "type": "definition",
+    "explanation": "Calculates the interior in-degree of a coordinate node."
+  },
+  {
+    "name": "totalInteriorDegree",
+    "type": "definition",
+    "explanation": "Computes the total interior degree (in-degree plus out-degree) for a coordinate node."
+  },
+  {
+    "name": "maxTotalInteriorDegree",
+    "type": "definition",
+    "explanation": "Finds the maximum total interior degree across all nodes in the graph."
+  },
+  {
+    "name": "interiorArcCount",
+    "type": "definition",
+    "explanation": "Computes the total number of interior arcs in the graph."
+  },
+  {
+    "name": "mceMetric",
+    "type": "definition",
+    "explanation": "Defines the lexicographical metric pair (interior arc count, max total interior degree) used to measure minimality for counterexamples."
+  },
+  {
+    "name": "IsMinimumCounterexample",
+    "type": "definition",
+    "explanation": "Defines a minimum counterexample as a counterexample graph that minimizes the MCE metric among all counterexamples."
+  },
+  {
+    "name": "maxInDeg_eq_one_iff_bijective",
+    "type": "theorem",
+    "explanation": "Proves that a function has bounded in-degree ≤ 1 for all targets if and only if it is bijective (for finite types)."
+  },
+  {
+    "name": "node_out_degree_ge_delta",
+    "type": "lemma",
+    "explanation": "Verifies that any valid node in the graph list satisfies the minimum out-degree delta condition."
+  },
+  {
+    "name": "internal_degree_lower_bound",
+    "type": "theorem",
+    "explanation": "Proves that a node's out-degree is bounded below by its distance layer index i."
+  },
+  {
+    "name": "interior_degree_rigidity",
+    "type": "theorem",
+    "explanation": "Proves by trichotomy that an interior neighbor count must equal its distance layer k under upper and lower bound constraints."
+  },
+  {
+    "name": "node_interior_degree_eq_k",
+    "type": "theorem",
+    "explanation": "Specialized theorem enforcing that a node's interior degree equals its layer index k using omega."
+  },
+  {
+    "name": "ConnectedBack",
+    "type": "definition",
+    "explanation": "Predicate stating two nodes u and v are connected by a back-path if a back-neighbor of v is also an out-neighbor of u."
+  },
+  {
+    "name": "NoConnectedBack",
+    "type": "definition",
+    "explanation": "Property stating that no forward arc coexists with a connected back-arc structure."
+  },
+  {
+    "name": "IsRoot",
+    "type": "definition",
+    "explanation": "Defines the root node as an existing node that is strictly less than all other nodes in the graph under GLONode.Lt."
+  },
+  {
+    "name": "root_unique",
+    "type": "theorem",
+    "explanation": "Proves that the root node is unique."
+  },
+  {
+    "name": "root_dist_zero",
+    "type": "theorem",
+    "explanation": "Proves that the root node must sit at distance layer 0, assuming layer 0 is non-empty."
+  },
+  {
+    "name": "layer_bound_of_step",
+    "type": "theorem",
+    "explanation": "Derives a layer size upper bound formula given a step decrement function."
+  },
+  {
+    "name": "degree_formula_under_no_back_arcs",
+    "type": "theorem",
+    "explanation": "Establishes the size formula for graph layers under the assumption of no back arcs."
+  },
+  {
+    "name": "layerIds",
+    "type": "definition",
+    "explanation": "Extracts the finset of lexical IDs for nodes at a given distance layer j."
+  },
+  {
+    "name": "layerCoords",
+    "type": "definition",
+    "explanation": "Extracts the finset of coordinates for nodes at a given distance layer j."
+  },
+  {
+    "name": "BFSWF",
+    "type": "definition",
+    "explanation": "Defines BFS well-formedness, ensuring every out-neighbor has a corresponding node in the graph and its distance increases by at most 1."
+  },
+  {
+    "name": "fwdArc_spec",
+    "type": "theorem",
+    "explanation": "Specification equivalence for `fwdArc` detailing node membership, adjacency, and the strict +1 layer distance."
+  },
+  {
+    "name": "exteriorNeighbors_subset_layer",
+    "type": "theorem",
+    "explanation": "Proves that the exterior neighbors of a forward arc are subset-contained within the subsequent layer coordinates."
+  },
+  {
+    "name": "IsMinOutDeg",
+    "type": "definition",
+    "explanation": "Defines the minimum out-degree property for a finite graph."
+  },
+  {
+    "name": "NoBackArcs",
+    "type": "definition",
+    "explanation": "Property stating that back-neighbors are empty for all node pairs."
+  },
+  {
+    "name": "interior_lower_bound",
+    "type": "theorem",
+    "explanation": "Arithmetic lower bound constraint establishing that interior neighbor count is at least k + 1."
+  },
+  {
+    "name": "back_ge_deficiency",
+    "type": "theorem",
+    "explanation": "Proves that interior deficiencies force back-arcs."
+  },
+  {
+    "name": "too_few_interior",
+    "type": "theorem",
+    "explanation": "Proves that having too few interior neighbors guarantees positive back-arcs."
+  },
+  {
+    "name": "layers_disjoint",
+    "type": "theorem",
+    "explanation": "Proves that nodes residing at different distance layers cannot be equal."
+  },
+  {
+    "name": "layerCoords_disjoint",
+    "type": "theorem",
+    "explanation": "Proves that coordinate sets of distinct layers are disjoint."
+  },
+  {
+    "name": "PartitionWF",
+    "type": "definition",
+    "explanation": "Well-formedness partition condition requiring a node's total out-degree length to equal the sum of its back, interior, and exterior neighbor list lengths."
+  },
+  {
+    "name": "child_interior_deficit",
+    "type": "lemma",
+    "explanation": "Proves that an interior neighbor deficit forces either positive back or exterior neighbors."
+  },
+  {
+    "name": "out_eq_int_union_ext",
+    "type": "theorem",
+    "explanation": "Proves that a child's out-neighbor finset equals the union of interior and exterior neighbors under no back-arcs."
+  },
+  {
+    "name": "int_ext_disjoint",
+    "type": "theorem",
+    "explanation": "Proves that interior and exterior neighbor sets are disjoint for a forward pair."
+  },
+  {
+    "name": "extra_forward_arc_produces_seymour_vertex",
+    "type": "theorem",
+    "explanation": "Proves that sufficient exterior neighbors force the parent vertex to satisfy Seymour's condition."
+  },
+  {
+    "name": "extra_interior_violates_mce_metric",
+    "type": "theorem",
+    "explanation": "Contradiction theorem showing that a smaller MceMetric violates the minimality of a minimum counterexample."
+  },
+  {
+    "name": "int_not_too_low",
+    "type": "theorem",
+    "explanation": "Rules out interior counts falling below layer requirements."
+  },
+  {
+    "name": "child_interior_deficit_no_back",
+    "type": "lemma",
+    "explanation": "Establishes a degree bound when interior deficit occurs without back-arcs."
+  },
+  {
+    "name": "fewer_interior_implies_extra_forward",
+    "type": "theorem",
+    "explanation": "Relates fewer interior neighbors to extra forward structure and Seymour bounds."
+  },
+  {
+    "name": "interior_degree_bounds",
+    "type": "theorem",
+    "explanation": "Establishes lower and upper bounds on the cardinality of interior neighbors for a parent vertex."
+  },
+  {
+    "name": "cond_of_nodes",
+    "type": "theorem",
+    "explanation": "Helper theorem proving that two nodes in the graph with a +1 distance relationship evaluate the boolean inclusion guard to true."
+  }
+]
