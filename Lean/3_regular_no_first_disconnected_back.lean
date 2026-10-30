@@ -4,7 +4,8 @@ import Mathlib.Data.Finset.Image
 import Mathlib.Data.Finset.Union
 import Mathlib.Combinatorics.SimpleGraph.Basic
 import Mathlib.Data.List.Basic
-
+import Mathlib.Data.Finset.Lattice.Fold   -- newer layout; older: Mathlib.Data.Finset.Lattice
+import Mathlib.Data.Prod.Lex   -- or just `import Mathlib`
 /-
 -------------------------------------------------------------------------------
 Stage 1: Finite Graph & Seymour Conjecture Primitives
@@ -323,12 +324,6 @@ def layerInteriorArcCount (G : GraphLevelOrder) (k : Nat) : Nat :=
         acc' + (if fwdArc G u v then (G.interiorNeighbors u v).card else 0)) acc
     else acc) 0
 
-/-- Total interior arcs: sum of |int(u,v)| over forward arcs u → v. -/
-def interiorArcCount (G : GraphLevelOrder) : Nat :=
-  G.nodes.foldl (fun acc u =>
-    G.nodes.foldl (fun acc' v =>
-      acc' + (if fwdArc G u v then (G.interiorNeighbors u v).card else 0)) acc) 0
-
 def getLayerAtDistance (g : GraphLevelOrder) (k : Nat) : Finset (GLONode) :=
   -- Assuming g.nodes has a conversion to Finset or is a Finset/List
   (g.nodes.toList.filter (fun u => u.dist == k)).toFinset
@@ -340,54 +335,58 @@ def neighborhood_density (G : GraphLevelOrder) (k : Nat) : Rat :=
   if layerSize = 0 then 0
   else (arcCount : Rat) / (layerSize : Rat)
 
-def interiorInDegree (G : GraphLevelOrder) (u v : GLONode) (k : Nat) : Finset GLONode :=
+/-- Arcs u→c and v→c for each interior neighbour c of the forward pair (u,v). -/
+def interiorArcs (G : GraphLevelOrder) (u v : GLONode) : Finset (Coord × Coord) :=
   if G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1 then
-    (G.nodes.filter (fun w => w.toCoords ∈ v.out_neighbors ∧ w.dist = k)).toList.toFinset
+    (interiorNeighbors G u v).image (fun c => (u.toCoords, c)) ∪
+    (interiorNeighbors G u v).image (fun c => (v.toCoords, c))
   else
     ∅
 
-def interiorOutDegree (G : GraphLevelOrder) (u v : GLONode) (k : Nat) : Finset GLONode :=
-  if G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1 then
-    -- Filter the graph nodes and convert the resulting Array to a Finset GLONode
-    (G.nodes.filter (fun w => w.toCoords ∈ v.out_neighbors ∧ w.dist = k)).toList.toFinset
-  else
-    ∅
+/-- All interior arcs of G, over every forward pair. -/
+def allInteriorArcs (G : GraphLevelOrder) : Finset (Coord × Coord) :=
+  G.nodes.toList.toFinset.biUnion fun u =>
+    G.nodes.toList.toFinset.biUnion fun v => interiorArcs G u v
 
-def totalInteriorDegree (G : GraphLevelOrder) (u v : GLONode) (k : Nat): Finset GLONode :=
-  if G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1 then
-    interiorInDegree G u v k ∪ interiorOutDegree G u v k
-  else
-    ∅
+def interiorOutDegree (G : GraphLevelOrder) (x : Coord) : Nat :=
+  ((allInteriorArcs G).filter (fun a => a.1 = x)).card
 
-def maxTotalInteriorDegree (G : GraphLevelOrder) (k : Nat) : Nat :=
-  G.nodes.foldl (fun maxVal u =>
-    if u.dist == k then
-      G.nodes.foldl (fun innerMax v =>
-        if v.dist == u.dist + 1 then
-          max innerMax (totalInteriorDegree G u v k).card
-        else
-          innerMax
-      ) maxVal
-    else
-      maxVal
-  ) 0
+def interiorInDegree (G : GraphLevelOrder) (x : Coord) : Nat :=
+  ((allInteriorArcs G).filter (fun a => a.2 = x)).card
 
-def mceMetric (G : GraphLevelOrder) (k : Nat) : Nat × Nat :=
-  (interiorArcCount G, maxTotalInteriorDegree G k)
+def totalInteriorDegree (G : GraphLevelOrder) (x : Coord) : Nat :=
+  interiorInDegree G x + interiorOutDegree G x
+
+def maxTotalInteriorDegree (G : GraphLevelOrder) : Nat :=
+  G.nodes.toList.toFinset.sup fun w => totalInteriorDegree G w.toCoords
+
+def interiorArcCount (G : GraphLevelOrder) : Nat := (allInteriorArcs G).card
+
+def mceMetric (G : GraphLevelOrder) : Lex (Nat × Nat) :=
+  toLex (interiorArcCount G, maxTotalInteriorDegree G)
 
 def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=
   IsCounterexample G ∧
-  ∀ H : GraphLevelOrder, IsCounterexample H →
-    mceMetric G ≤ mceMetric H
+  ∀ H, IsCounterexample H → mceMetric G ≤ mceMetric H
 
-/-- A graph is cycle-packed if every node has balanced interior degrees
-    (in-degree 1, out-degree 1) resulting in a total interior degree of exactly 2. -/
+theorem maxInDeg_eq_one_iff_bijective {α : Type*} [Fintype α] [DecidableEq α]
+    (f : α → α) :
+    (∀ y, (Finset.univ.filter (fun x => f x = y)).card ≤ 1) ↔ Function.Bijective f := by
+  rw [← Finite.injective_iff_bijective]
+  constructor
+  · intro h x x' hxx'
+    by_contra hne
+    have h2 : 1 < (Finset.univ.filter (fun z => f z = f x)).card := by
+      rw [Finset.one_lt_card]
+      exact ⟨x, by simp, x', by simp [hxx'.symm], hne⟩
+    have := h (f x)
+    omega
+  · intro hinj y
+    apply Finset.card_le_one.mpr
+    intro a ha b hb
+    simp at ha hb
+    exact hinj (ha.trans hb.symm)
 
---def IsCyclePacked (G : GraphLevelOrder) : Prop :=
---  ∀ u ∈ G.nodes,
---    interiorInDegree G u u.dist = 1 ∧
---    interiorOutDegree G u u.dist = 1 ∧
---    totalInteriorDegree G u u.dist = 2
 
 -- Check/Proof that any valid node in the graph satisfies out-degree ≥ delta
 lemma node_out_degree_ge_delta
