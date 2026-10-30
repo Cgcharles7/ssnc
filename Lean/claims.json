@@ -2,253 +2,361 @@
   {
     "name": "FiniteGraph",
     "type": "structure",
-    "explanation": "Defines a finite graph consisting of a finset of vertices, a finset of edges, and a proof validity condition ensuring that every edge connects two valid vertices.",
+    "explanation": "Defines the base model for a finite directed graph consisting of a finite set of vertices (`vertices`), a finite set of directed edges represented as coordinate pairs (`edges`), and a validity proof (`edge_valid`) guaranteeing that every edge connects two valid vertices that actually belong to the vertex set. This serves as the foundational discrete structure before introducing layering and traversal coordinate systems.",
     "dependencies": []
   },
   {
     "name": "FiniteGraph.Adj",
     "type": "definition",
-    "explanation": "Adjacency predicate stating that two vertices u and v are adjacent if the pair (u, v) is in the graph's edge set.",
+    "explanation": "Defines the adjacency predicate for the base `FiniteGraph` structure. Two vertices `u` and `v` are considered adjacent if the ordered pair `(u, v)` is explicitly a member of the graph's edge set. It also supplies a decider instance to enable computable graph operations.",
     "dependencies": ["FiniteGraph"]
   },
   {
     "name": "FiniteGraph.getN1Finset",
     "type": "definition",
-    "explanation": "Computes the set of out-neighbors (N1) for a given vertex u by filtering the edges originating from u and mapping them to their destination.",
+    "explanation": "Computes the first-stage neighborhood ($N_1$) for a given vertex `u` in a `FiniteGraph`. It filters the graph's edge set for all edges whose first element matches `u` and then maps those matching edges to their destination vertices, yielding a `Finset Nat` representing all direct out-neighbors of `u`.",
     "dependencies": ["FiniteGraph", "FiniteGraph.Adj"]
   },
   {
     "name": "FiniteGraph.cardN1",
     "type": "definition",
-    "explanation": "Calculates the out-degree (cardinality of N1) of a vertex u.",
+    "explanation": "Calculates the out-degree of a vertex `u` by taking the cardinality of its first-stage neighborhood finset (`getN1Finset`). This represents the number of direct outward connections leaving vertex `u`.",
     "dependencies": ["FiniteGraph.getN1Finset"]
   },
   {
     "name": "FiniteGraph.getN2Finset",
     "type": "definition",
-    "explanation": "Computes the second-stage neighborhood (N2) of a vertex u, consisting of vertices reachable in two steps that are not u itself and not in N1(u).",
+    "explanation": "Computes the second-stage neighborhood ($N_2$) of a vertex `u`. It takes the union of the first-stage neighborhoods of all out-neighbors of `u` (i.e., nodes reachable in two steps) and filters out the original vertex `u` itself as well as any vertices that are already direct out-neighbors in $N_1$.",
     "dependencies": ["FiniteGraph.getN1Finset"]
   },
   {
     "name": "FiniteGraph.cardN2",
     "type": "definition",
-    "explanation": "Calculates the size of the second-stage neighborhood (N2) for a vertex u.",
+    "explanation": "Calculates the cardinality of the second-stage neighborhood ($N_2$) for a vertex `u`. This value is central to Seymour's conjecture, which posits that every oriented graph has at least one vertex where the size of $N_2$ is greater than or equal to the size of $N_1$.",
     "dependencies": ["FiniteGraph.getN2Finset"]
   },
   {
     "name": "FiniteGraph.isSeymour",
     "type": "definition",
-    "explanation": "Boolean check for whether a vertex u satisfies Seymour's condition (i.e., |N2(u)| ≥ |N1(u)|).",
+    "explanation": "A boolean check that evaluates whether a vertex `u` satisfies Seymour's condition in a `FiniteGraph`, returning true if the cardinality of $N_2(u)$ is greater than or equal to the cardinality of $N_1(u)$.",
     "dependencies": ["FiniteGraph.cardN1", "FiniteGraph.cardN2"]
   },
   {
     "name": "FiniteGraph.isNonSeymour",
     "type": "definition",
-    "explanation": "Boolean check for whether a vertex u fails Seymour's condition (i.e., |N2(u)| < |N1(u)|).",
+    "explanation": "A boolean check that evaluates whether a vertex `u` violates Seymour's condition, returning true strictly when the size of $N_2(u)$ is less than the size of $N_1(u)$. Graphs where all nodes satisfy this condition are candidate counterexamples.",
     "dependencies": ["FiniteGraph.cardN1", "FiniteGraph.cardN2"]
   },
   {
     "name": "FiniteGraph.IsIrreflexive",
     "type": "definition",
-    "explanation": "Property stating that no vertex has a self-loop (no vertex is adjacent to itself).",
+    "explanation": "Expresses the irreflexivity property for a `FiniteGraph`, stating that no vertex has a self-loop (i.e., for every vertex `u` in the vertex set, `u` is not adjacent to itself). This is a core requirement for oriented graphs.",
     "dependencies": ["FiniteGraph", "FiniteGraph.Adj"]
   },
   {
     "name": "FiniteGraph.IsAntisymmetric",
     "type": "definition",
-    "explanation": "Property stating that the graph contains no 2-cycles (if u is adjacent to v and v is adjacent to u, then u must equal v).",
+    "explanation": "Expresses the antisymmetry property for a `FiniteGraph`, asserting that the graph contains no 2-cycles. If vertex `u` has an edge to `v` and `v` has an edge to `u`, then `u` and `v` must be the exact same vertex.",
     "dependencies": ["FiniteGraph", "FiniteGraph.Adj"]
   },
   {
     "name": "FiniteGraph.IsOriented",
     "type": "definition",
-    "explanation": "Defines an oriented graph as one that is both irreflexive and antisymmetric.",
+    "explanation": "Combines irreflexivity and antisymmetry to define an oriented graph, which is a directed graph derived from an underlying simple graph with no self-loops and no mutual 2-cycle edges between any pair of distinct vertices.",
     "dependencies": ["FiniteGraph.IsIrreflexive", "FiniteGraph.IsAntisymmetric"]
   },
   {
     "name": "FiniteGraph.IsSeymourProp",
     "type": "definition",
-    "explanation": "Propositional version of Seymour's condition: |N1(u)| ≤ |N2(u)|.",
+    "explanation": "The logical propositional counterpart to the boolean `isSeymour` function, stating mathematically that the size of $N_1(u)$ is less than or equal to the size of $N_2(u)$ for a given vertex `u`.",
     "dependencies": ["FiniteGraph.cardN1", "FiniteGraph.cardN2"]
   },
   {
     "name": "FiniteGraph.isSeymour_iff",
     "type": "theorem",
-    "explanation": "Proves that the boolean `isSeymour` function is equivalent to the logical `IsSeymourProp` proposition.",
+    "explanation": "Bridges computation and logic by proving that the boolean function `isSeymour` evaluating to true is logically equivalent to the proposition `IsSeymourProp` holding true, allowing seamless transitions between reflective code checks and mathematical proofs.",
     "dependencies": ["FiniteGraph.isSeymour", "FiniteGraph.IsSeymourProp"]
   },
   {
     "name": "GloLex",
     "type": "inductive",
-    "explanation": "Inductive coordinate system (BFS-Lex) representing paths and layer assignments starting from a root vertex through child and same-layer neighbor transitions.",
+    "explanation": "An inductive type defining the Breadth-First Search Lexicographical (BFS-Lex) coordinate system. It constructs paths step-by-step from a designated root vertex through child transitions (`childOf`) or peer/same-layer neighbor transitions (`sameLayerNeighbor`), tracking depth distance and traversal structure.",
     "dependencies": ["FiniteGraph"]
   },
   {
     "name": "GloLex.pathLength",
     "type": "definition",
-    "explanation": "Computes the path length or distance from the root for a given GloLex path object.",
+    "explanation": "Calculates the total path length (distance from the root) associated with a `GloLex` derivation step by recursively summing child increments while keeping peer transitions at the same level.",
     "dependencies": ["GloLex"]
   },
   {
     "name": "GloLex.toVertex",
     "type": "definition",
-    "explanation": "Extracts the vertex identifier from a GloLex path element.",
+    "explanation": "A projection helper function that extracts the underlying vertex identifier from a given `GloLex` path constructor object.",
     "dependencies": ["GloLex"]
   },
   {
     "name": "GloLex.toDist",
     "type": "definition",
-    "explanation": "Extracts the distance layer index from a GloLex path element.",
+    "explanation": "A projection helper function that extracts the distance layer index (`d`) associated with a given `GloLex` path object.",
     "dependencies": ["GloLex"]
   },
   {
     "name": "Coord",
     "type": "abbrev",
-    "explanation": "Abbreviation for a coordinate pair representing (distance, lexId).",
+    "explanation": "Type abbreviation representing a 2D coordinate pair `Nat × Nat` corresponding to `(distance, lexId)`, which uniquely pinpoints a node's position within the stratified level-order graph architecture.",
     "dependencies": []
   },
   {
     "name": "GLONode",
     "type": "structure",
-    "explanation": "Represents a node in the graph level order with its distance, lexical ID, various neighbor lists (out, interior, exterior, back), parent, and sequential node number.",
+    "explanation": "Represents an individual node in the Graph Level Order architecture. It stores its distance layer, lexical ID, categorized neighbor lists (out-neighbors, interior neighbors, exterior neighbors, back neighbors), an optional parent coordinate, and a sequential node number.",
     "dependencies": ["Coord"]
   },
   {
     "name": "GLONode.toProd",
     "type": "definition",
-    "explanation": "Converts a GLONode into a raw product pair of its distance and lex ID.",
+    "explanation": "Converts a `GLONode` structure into a standard product pair `(dist, lexId)` to facilitate lexicographical sorting and well-founded relation proofs.",
     "dependencies": ["GLONode"]
   },
   {
     "name": "GLONode.toCoords",
     "type": "definition",
-    "explanation": "Extracts the coordinate pair (dist, lexId) from a GLONode.",
+    "explanation": "Extracts the standard `Coord` alias `(dist, lexId)` directly from a `GLONode` instance for neighborhood lookups and set operations.",
     "dependencies": ["GLONode", "Coord"]
   },
   {
     "name": "GLONode.Lt",
     "type": "definition",
-    "explanation": "Lexicographical strict less-than relation between two GLONodes based on distance first, then lexical ID.",
+    "explanation": "Defines a strict lexicographical less-than relation between two `GLONode` instances. A node `a` is less than `b` if its distance is smaller, or if they reside in the same distance layer (`a.dist = b.dist`) but `a` has a smaller lexical ID (`a.lexId < b.lexId`).",
     "dependencies": ["GLONode"]
   },
   {
     "name": "defaultGLONode",
     "type": "definition",
-    "explanation": "Provides a default, zero-initialized GLONode instance.",
+    "explanation": "Provides a canonical default-initialized instance of a `GLONode` with zeroed distances, empty neighbor lists, and none options, satisfying the `Inhabited` typeclass requirement.",
     "dependencies": ["GLONode"]
   },
   {
     "name": "gloNode_lt_wellFounded",
     "type": "theorem",
-    "explanation": "Proves that the GLONode less-than relation (`GLONode.Lt`) is well-founded.",
+    "explanation": "Proves that the custom lexicographical relation `GLONode.Lt` is well-founded. It maps nodes to their product representations and leverages standard product-lex well-foundedness lemmas from Mathlib to ensure termination in recursive functions over nodes.",
     "dependencies": ["GLONode.Lt", "GLONode.toProd"]
   },
   {
     "name": "GraphLevelOrder",
     "type": "structure",
-    "explanation": "Represents a graph structured hierarchically into layers of GLONodes under a BFS-Lex traversal, along with delta parameters and max layer limits.",
+    "explanation": "Encapsulates a graph structured into layers of `GLONode` elements under a BFS-Lex traversal. It bundles an array of nodes, a degree parameter `delta`, a maximum layer bound, and a reference back to the underlying `FiniteGraph`.",
     "dependencies": ["GLONode", "FiniteGraph"]
   },
   {
     "name": "GraphLevelOrder.getNode?",
     "type": "definition",
-    "explanation": "Looks up a GLONode in the graph array matching a given coordinate.",
+    "explanation": "Performs an optional lookup in a `GraphLevelOrder` node array to find a `GLONode` whose distance and lexical ID match a specified target `Coord` pair.",
     "dependencies": ["GraphLevelOrder", "Coord", "GLONode"]
   },
   {
     "name": "GraphLevelOrder.getN1Finset",
     "type": "definition",
-    "explanation": "Retrieves the out-neighbor finset for a node at a given coordinate in the level order.",
+    "explanation": "Retrieves the finset of out-neighbors for a node specified by its `Coord` within a `GraphLevelOrder`. It safely looks up the node via `getNode?` and converts its out-neighbor list to a finset, returning empty if the node is absent.",
     "dependencies": ["GraphLevelOrder", "Coord", "GraphLevelOrder.getNode?"]
   },
   {
     "name": "GraphLevelOrder.cardN1",
     "type": "definition",
-    "explanation": "Calculates the size of N1 for a node coordinate in the level order.",
+    "explanation": "Calculates the out-degree cardinality of a node coordinate within the level-ordered graph structure by taking the size of its `getN1Finset`.",
     "dependencies": ["GraphLevelOrder.getN1Finset"]
   },
   {
     "name": "GraphLevelOrder.getN2Finset",
     "type": "definition",
-    "explanation": "Computes the second-stage neighborhood finset for a node coordinate in the level order.",
+    "explanation": "Computes the second-stage neighborhood finset for a given node coordinate in the `GraphLevelOrder` by expanding $N_1$ and filtering out the origin node and direct $N_1$ neighbors.",
     "dependencies": ["GraphLevelOrder.getN1Finset"]
   },
   {
     "name": "GraphLevelOrder.cardN2",
     "type": "definition",
-    "explanation": "Calculates the size of N2 for a node coordinate in the level order.",
+    "explanation": "Calculates the cardinality of the second-stage neighborhood finset (`getN2Finset`) for a coordinate in the level-ordered graph structure.",
     "dependencies": ["GraphLevelOrder.getN2Finset"]
   },
   {
     "name": "GraphLevelOrder.isSeymour",
     "type": "definition",
-    "explanation": "Boolean check if a coordinate satisfies Seymour's condition within the level-ordered graph.",
+    "explanation": "Evaluates whether a node coordinate satisfies Seymour's condition within a `GraphLevelOrder` using a decidable comparison between $N_1$ and $N_2$ cardinalities.",
     "dependencies": ["GraphLevelOrder.cardN1", "GraphLevelOrder.cardN2"]
   },
   {
     "name": "GraphLevelOrder.isNonSeymour",
     "type": "definition",
-    "explanation": "Boolean check if a coordinate fails Seymour's condition within the level-ordered graph.",
+    "explanation": "Evaluates whether a node coordinate violates Seymour's condition (`cardN2 < cardN1`) within a `GraphLevelOrder`, serving as the property tested for all nodes in counterexample graphs.",
     "dependencies": ["GraphLevelOrder.cardN1", "GraphLevelOrder.cardN2"]
   },
   {
     "name": "GraphLevelOrder.IsIrreflexive",
     "type": "definition",
-    "explanation": "Property stating no node contains its own coordinates in its out-neighbors.",
+    "explanation": "Defines irreflexivity for a `GraphLevelOrder` graph, asserting that no node contains its own coordinate in its out-neighbor list.",
     "dependencies": ["GraphLevelOrder", "GLONode"]
   },
   {
     "name": "GraphLevelOrder.Adj",
     "type": "definition",
-    "explanation": "Defines a directed arc between two GLONodes by verifying they belong to the graph and v's coordinates are in u's out-neighbors.",
+    "explanation": "Defines a directed arc relation between two `GLONode` elements within a `GraphLevelOrder`, checking that both nodes belong to the graph nodes array and that `v`'s coordinates appear in `u`'s out-neighbors list.",
     "dependencies": ["GraphLevelOrder", "GLONode"]
   },
   {
     "name": "GraphLevelOrder.IsAntisymmetric",
     "type": "definition",
-    "explanation": "Property stating that directed arcs are antisymmetric (no 2-cycles between nodes).",
+    "explanation": "Defines antisymmetry for a `GraphLevelOrder`, enforcing that if node `u` has a directed arc to `v`, then `v` cannot have a directed arc back to `u` (ruling out 2-cycles).",
     "dependencies": ["GraphLevelOrder.Adj"]
   },
   {
     "name": "GraphLevelOrder.IsOriented",
     "type": "definition",
-    "explanation": "Combined property that the level-ordered graph is both irreflexive and antisymmetric.",
+    "explanation": "Combined property stating that a `GraphLevelOrder` graph satisfies both `IsIrreflexive` and `IsAntisymmetric`.",
     "dependencies": ["GraphLevelOrder.IsIrreflexive", "GraphLevelOrder.IsAntisymmetric"]
   },
   {
     "name": "GraphLevelOrder.CoordUnique",
     "type": "definition",
-    "explanation": "Property ensuring that node coordinates (dist and lexId) uniquely identify each node in the graph.",
+    "explanation": "An invariant property stating that a node's distance and lexical ID uniquely identify the node across the graph's node array (no two distinct nodes share the same coordinates).",
     "dependencies": ["GraphLevelOrder", "GLONode"]
   },
   {
     "name": "GraphLevelOrder.getN1Finset_eq",
     "type": "theorem",
-    "explanation": "Proves that looking up N1 for a node's coordinates matches its out-neighbors finset under coordinate uniqueness.",
+    "explanation": "Proves that under coordinate uniqueness, looking up $N_1$ via a node's coordinates (`getN1Finset`) yields the exact same finset as its stored `out_neighbors` list converted to a finset.",
     "dependencies": ["GraphLevelOrder.CoordUnique", "GraphLevelOrder.getN1Finset", "GraphLevelOrder.getNode?"]
   },
   {
     "name": "GraphLevelOrder.cardN1_eq",
     "type": "theorem",
-    "explanation": "Relates the level-order cardN1 function to the cardinality of the node's out-neighbors finset.",
+    "explanation": "Relates the level-order `cardN1` function to the cardinality of the node's out-neighbors finset, utilizing coordinate uniqueness to simplify calculations.",
     "dependencies": ["GraphLevelOrder.cardN1", "GraphLevelOrder.getN1Finset_eq"]
   },
   {
     "name": "GraphLevelOrder.cardN1_eq_length",
     "type": "theorem",
-    "explanation": "Proves cardN1 equals the list length of out-neighbors when list entries have no duplicates.",
+    "explanation": "Proves that `cardN1` equals the raw list length of `out_neighbors` provided that the node's out-neighbor list contains no duplicate entries (`Nodup`).",
     "dependencies": ["GraphLevelOrder.cardN1_eq"]
   },
   {
     "name": "interiorNeighbors",
     "type": "definition",
-    "explanation": "Computes interior neighbors shared between adjacent nodes u and v residing on consecutive layers.",
+    "explanation": "Computes the set of interior neighbors shared between an adjacent parent node `u` and child node `v` residing on consecutive layers (`v.dist = u.dist + 1`), defined as the intersection of their out-neighbor finsets.",
     "dependencies": ["GraphLevelOrder", "GLONode", "Coord"]
   },
   {
     "name": "exteriorNeighbors",
     "type": "definition",
-    "explanation": "Computes exterior neighbors for a forward pair u and v, lying in N2(u) intersected with v's out-neighbors.",
+    "explanation": "Computes exterior neighbors for a forward pair `(u, v)`, defined as the intersection of parent `u`'s second-stage neighborhood $N_2(u)$ and child `v`'s out-neighbors.",
+    "dependencies": ["GraphLevelOrder", "GLONode", "GraphLevelOrder.getN2Finset"]
+  },
+  {
+    "name": "backNeighbors",
+    "type": "definition",
+    "explanation": "Computes back-neighbors for a forward pair `(u, v)`, filtering child `v`'s out-neighbors to retain only those nodes whose distance layer is strictly less than `v.dist` (pointing backwards to earlier layers).",
+    "dependencies": ["GraphLevelOrder", "GLONode"]
+  },
+  {
+    "name": "interior_neighbors_implies_first_neighbors",
+    "type": "theorem",
+    "explanation": "Proves that any coordinate belonging to the interior neighbors of a forward pair `(u, v)` must be a valid out-neighbor of both parent `u` and child `v`.",
+    "dependencies": ["interiorNeighbors"]
+  },
+  {
+    "name": "exterior_neighbor_implies_second_neighbor",
+    "type": "theorem",
+    "explanation": "Proves that any exterior neighbor of a forward pair `(u, v)` is guaranteed to be a member of the parent's second-stage neighborhood $N_2(u).$",
+    "dependencies": ["exteriorNeighbors", "GraphLevelOrder.getN2Finset"]
+  },
+  {
+    "name": "distOf",
+    "type": "definition",
+    "explanation": "Helper definition that retrieves the distance layer of a node matching a given lexical ID by searching the graph node array.",
+    "dependencies": ["GraphLevelOrder"]
+  },
+  {
+    "name": "fwdArc",
+    "type": "definition",
+    "explanation": "A boolean predicate verifying whether two nodes `u` and `v` form a valid forward arc in the level order (both exist in nodes, `v`'s coordinates are in `u`'s out-neighbors, and `v.dist = u.dist + 1`).",
+    "dependencies": ["GraphLevelOrder", "GLONode"]
+  },
+  {
+    "name": "IsCounterexample",
+    "type": "definition",
+    "explanation": "Defines the property of being a counterexample graph to Seymour's conjecture: it requires coordinate uniqueness, orientation, a non-empty node set, and that every single node in the graph violates Seymour's condition (`isNonSeymour = true`).",
+    "dependencies": ["GraphLevelOrder", "GraphLevelOrder.CoordUnique", "GraphLevelOrder.IsOriented", "GraphLevelOrder.isNonSeymour"]
+  },
+  {
+    "name": "layerInteriorArcCount",
+    "type": "definition",
+    "explanation": "Calculates the total count of interior arcs present across all nodes located at a specific distance layer `k` by iterating over node pairs and summing interior neighbor sizes for valid forward arcs.",
+    "dependencies": ["GraphLevelOrder", "fwdArc", "interiorNeighbors"]
+  },
+  {
+    "name": "getLayerAtDistance",
+    "type": "definition",
+    "explanation": "Extracts the finset of all `GLONode` instances belonging to a specific distance layer `k` by filtering the graph's node list.",
+    "dependencies": ["GraphLevelOrder", "GLONode"]
+  },
+  {
+    "name": "neighborhood_density",
+    "type": "definition",
+    "explanation": "Calculates the neighborhood density at layer `k` as a rational number representing the ratio of interior arc count to total layer size.",
+    "dependencies": ["getLayerAtDistance", "layerInteriorArcCount"]
+  },
+  {
+    "name": "interiorArcs",
+    "type": "definition",
+    "explanation": "Constructs a finset of directed interior arc coordinate pairs connecting parent `u` and child `v` to each of their shared interior neighbor nodes.",
+    "dependencies": ["GraphLevelOrder", "interiorNeighbors"]
+  },
+  {
+    "name": "allInteriorArcs",
+    "type": "definition",
+    "explanation": "Collects all interior arcs across every valid forward pair throughout the entire graph into a single comprehensive finset.",
+    "dependencies": ["GraphLevelOrder", "interiorArcs"]
+  },
+  {
+    "name": "interiorOutDegree",
+    "type": "definition",
+    "explanation": "Calculates the interior out-degree of a coordinate node by filtering all interior arcs originating from that coordinate.",
+    "dependencies": ["allInteriorArcs", "Coord"]
+  },
+  {
+    "name": "interiorInDegree",
+    "type": "definition",
+    "explanation": "Calculates the interior in-degree of a coordinate node by filtering all interior arcs terminating at that coordinate.",
+    "dependencies": ["allInteriorArcs", "Coord"]
+  },
+  {
+    "name": "totalInteriorDegree",
+    "type": "definition",
+    "explanation": "Computes the total interior degree for a coordinate node by summing its interior in-degree and interior out-degree.",
+    "dependencies": ["interiorInDegree", "interiorOutDegree"]
+  },
+  {
+    "name": "maxTotalInteriorDegree",
+    "type": "definition",
+    "explanation": "Finds the maximum total interior degree across all nodes in the graph using a supremum (`sup`) fold over node coordinates.",
+    "dependencies": ["GraphLevelOrder", "totalInteriorDegree"]
+  },
+  {
+    "name": "interiorArcCount",
+    "type": "definition",
+    "explanation": "Computes the total number of interior arcs in the graph by taking the cardinality of the `allInteriorArcs` finset.",
+    "dependencies": ["allInteriorArcs"]
+  },
+  {
+    "name": "mceMetric",
+    "type": "definition",
+    "explanation": "Defines the lexicographical minimization metric `Lex (Nat × Nat)` composed of `(interiorArcCount, maxTotalInteriorDegree)` used to establish a well-founded minimization ordering among counterexample graphs.",
+    "dependencies": ["interiorArcCount", "maxTotalInteriorDegree"]
+  },
+  {
+    "name": "IsMinimumCounterexample",
+    "type": "definition",
+    "ntersected with v's out-neighbors.",
     "dependencies": ["GraphLevelOrder", "GLONode", "GraphLevelOrder.getN2Finset"]
   },
   {
