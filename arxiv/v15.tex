@@ -229,7 +229,7 @@ Prior SSNC efforts have largely followed two methodologies: One considers transi
 		
 	\section{No Back Neighbors}
 	
-	When an MCE contains no back arcs, the vertex out-degree is strictly partitioned between forward/interior and exterior directions.
+	When an MCE contains no back arcs, the vertex out-degree is strictly partitioned between interior and exterior directions.
 	
 	\begin{lemma}[Degree Partition]\label{nodepartition}
 		Let $u_i \in R_i$ and let $v_{i+1} \in R_{i+1}$ be vertices of an MCE, with $u_i \to v_{i+1} \in G$. Then the out-neighborhood of $v_{i+1}$ admits the disjoint partition
@@ -296,58 +296,52 @@ The neighborhood size requires a number of nodes in each layer. These layers dec
 
 Another consequence of the rooted neighborhood size formula is that it sets the worse possible rate of decrease. The lower bound for interior neighbors is also an upper bound for exterior neighbors (because there are no back neighbors). 
 		
-	\begin{lemma}[Extra Forward Arc Produces Seymour Vertex]
-		Let $G$ be an MCE without back arcs with unique node coordinates. Let $u, v \in V(G)$ be nodes such that $v$ is in the adjacent forward layer ($\text{dist}(v) = \text{dist}(u) + 1$), and let $(u, v)$ be a forward arc in $G$. 
+	\begin{lemma}[Extra Exterior Arc Produces Seymour Vertex]
+		Let $G$ be an MCE without back arcs with unique node coordinates. Let $u_k, v_{k+1} \in G$ be nodes such that $u_k \to v_{k+1} \in G$. 
 		
-		If the number of exterior neighbors associated with $(u, v)$ bounds $u$'s out-degree from below, i.e.,
-		$$|N^+(u)| \le |\text{ext}(u, v)|$$
-		then $u$ satisfies the Seymour second neighborhood condition:
+		If the number of exterior neighbors associated with $(u_k, v_{k+1})$ bounds $u_k$'s out-degree from below, i.e.,
+		$$|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})|$$
+		then $u_k$ will be a Seymour vertex: 
 		
-		$$|N^+(u)| \le |N^{++}(u)|$$
-		
+		$$|N^+(u_k)| \le |N^{++}(u_k)|$$
 	\end{lemma}
 	
 	\begin{proof}
-		Let $c \in \text{ext}(u, v)$ be an arbitrary exterior neighbor of $u$ relative to $v$. 
-		By definition of exterior neighbors in $G$, $c$ is reachable from $u$ via a directed path of length 2 passing through $v$. Thus, every exterior neighbor $c$ belongs to the second neighborhood $N^{++}(u)$, giving the set inclusion:
+		Let $w_{k+2} \in \text{ext}(u_k, v_{k+1})$ be an exterior neighbor of $u_k$ relative to $v_{k+1}$. 
+		By definition of exterior neighbors in $G$, $w_{k+2}$ is reachable from $u_k$ via a path of length 2 passing through $v_{k+1}$. 
+		Thus, every exterior neighbor $w_{k+2}$ belongs to the second neighborhood $N^{++}(u)$. 
+		This gives the set inclusion:
 		$$
-		\text{ext}(u, v) \subseteq N^{++}(u)
+		\text{ext}(u_k, v_{k+1}) \subseteq N^{++}(u_k)
 		$$
 		
-		Taking the cardinalities of both finite sets, set inclusion implies:
-		\begin{equation}
-			|\text{ext}(u, v)| \le |N^{++}(u)|
-		\end{equation}
+		This implies that 
+		$$	|\text{ext}(u_k, v_{k+1})| \le |N^{++}(u_k)|$$
+		By assumption, the first neighborhood of $u_k$ is bounded by the exterior neighbors:
+		$$	|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})|$$
+		Combining these inequalities gives:
 		
-		By hypothesis, we are given that the first neighborhood of $u$ is bounded by the exterior neighbors:
-		\begin{equation}
-			|N^+(u)| \le |\text{ext}(u, v)|
-		\end{equation}
+		$$|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})| \le |N^{++}(u_k)| \implies |N^+(u_k)| \le |N^{++}(u_k)|$$
 		
-		Combining inequalities (2) and (1) by the transitivity of inequality on $\mathbb{N}$:
-		
-		$$|N^+(u)| \le |\text{ext}(u, v)| \le |N^{++}(u)| \implies |N^+(u)| \le |N^{++}(u)|$$
-		
-		This proves that $u$ is a Seymour vertex.
+		This proves that $u_k$ is a Seymour vertex.
 	\end{proof}
 	
 		\begin{lemma}[MCE Interior Degree]\label{intdeg}
 		Let $G \in mathcal{O}$ be a counterexample. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child pair. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
 			
-			$$\text{int}(u, v) = k$$
+			$$\text{int}(u_k, v_{k+1}) = k+1$$
 	\end{lemma}
 	\begin{proof}
 		Suppose for the sake of contradiction that the interior degree strictly exceeded the layer distance:
 		
-		$$int(u, v)>k$$
-By MCE and non-Seymour constraints, an interior degree greater than $k$ is over-connected. 
+		$$int(u_k, v_{k+1})>k+1$$
+By MCE and non-Seymour constraints, an interior degree greater than $k+1$ is over-connected. 
 This violates the MCE and is thus not minimal. 
 		
-Because assuming $\text{int}(u, v) > k$ leads to a violation of the MCE hypothesis, this case is impossible.
+Because assuming $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, this graph is not an MCE. Thus an interior arc can be removed, forming a smaller counterexample. 
 
-Therefore, by elimination of the upper violation, the interior degree is bounded by $k$:
-		$$\text{int}(u, v) = k$$
-		
+Therefore, the interior degree is bounded by $k+1$:
+		$$\text{int}(u_k, v_{k+1}) = k+1$$
 	\end{proof}
 	
 	\section{Disconnected Back Neighbors}
