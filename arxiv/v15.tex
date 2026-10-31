@@ -310,9 +310,9 @@ Another consequence of the rooted neighborhood size formula is that it sets the 
 	\begin{proof}
 		Let $c \in \text{ext}(u, v)$ be an arbitrary exterior neighbor of $u$ relative to $v$. 
 		By definition of exterior neighbors in $G$, $c$ is reachable from $u$ via a directed path of length 2 passing through $v$. Thus, every exterior neighbor $c$ belongs to the second neighborhood $N^{++}(u)$, giving the set inclusion:
-		\[
+		$$
 		\text{ext}(u, v) \subseteq N^{++}(u)
-		\]
+		$$
 		
 		Taking the cardinalities of both finite sets, set inclusion implies:
 		\begin{equation}
@@ -352,11 +352,16 @@ Therefore, by elimination of the upper violation, the interior degree is bounded
 	
 	\section{Disconnected Back Neighbors}
 	
-	To prevent parents from becoming Seymour vertices, neighborhood sizes must contract strictly as distance increases. This imposes strict constraints on interior and exterior arc allocation:
+To prevent parents from becoming Seymour vertices, neighborhood sizes must decrease as distance increases.
 	
-	If a node possesses an excess forward arc bypassing the immediate next neighborhood layer, it prematurely populates the second out-neighborhood, forcing $\vert{}N^{++}(u)\vert{} \ge \vert{}N^{+}(u)\vert{}$ and immediately creating a Seymour vertex.
-	If a node takes on too many interior arcs, it exceeds the local density threshold of the subgraph $R_i$, violating the minimum counterexample's density minimization condition.
-	If interior arc counts drop below the required threshold, the vertex fails to constrain its second neighborhood through local cycle packing, forcing extra forward arcs that trigger the Seymour condition.
+If a child node $v$ possesses an excess exterior arc, it is a second out-neighborhood of the parent $u$, 
+forcing $|N^{++}(u)| \ge |N^{+}(u)|$. This immediately makes $u$ Seymour vertex.
+	
+	If a node takes on too many interior arcs, it exceeds the local density threshold of the subgraph $R_i$. This violates the minimum counterexample's local density minimization condition.
+
+Thos implies that prior to the first disconnected back neighbor, the nodes are $\delta$-regular. Next. we analyze the first back neighbor in this environment. There are two cases: when the children overlap and then they do not. 
+
+The case when the children do not overlap implies that the first disconnected back neighbor will be similar to the situation of an extra forward neighbor. A back arc is $u_k \to v_{k+1} \to w_j$ where $j \le k-1$. The nodes $u_k$ and $v_{k+1}$ will be $\delta$-regular because there are no back arcs before 
 		
 	\begin{lemma}[Seymour Property under Disjoint Back Arcs]
 		Let $G$ be a graph represented by an MCE, and let $a, b \in V(G)$ such that $b \in N^+(a)$. If the out-neighbors are completely disjoint ($N^+(b) \cap N^+(a) = \emptyset$), $b$'s out-neighborhood contains no duplicates, and the degree bounds satisfy $|N^+(a)| \le \delta \le |N^+(b)|$, then $a$ satisfies Seymour's condition:*
