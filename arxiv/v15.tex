@@ -358,57 +358,55 @@ Thos implies that prior to the first disconnected back neighbor, the nodes are $
 The case when the children do not overlap implies that the first disconnected back neighbor will be similar to the situation of an extra forward neighbor. A back arc is $u_k \to v_{k+1} \to w_j$ where $j \le k-1$. The nodes $u_k$ and $v_{k+1}$ will be $\delta$-regular because there are no back arcs before 
 		
 	\begin{lemma}[Seymour Property under Disjoint Back Arcs]
-		Let $G$ be a graph represented by an MCE, and let $a, b \in V(G)$ such that $b \in N^+(a)$. If the out-neighbors are completely disjoint ($N^+(b) \cap N^+(a) = \emptyset$), $b$'s out-neighborhood contains no duplicates, and the degree bounds satisfy $|N^+(a)| \le \delta \le |N^+(b)|$, then $a$ satisfies Seymour's condition:*
+		Let $G$ be a graph represented by an MCE, and let $u_k, v_{k+1} \in V(G)$ such that $v_{k+1} \in N^+(u_k)$. If the out-neighbors are completely disjoint ($N^+(v_{k+1}) \cap N^+(u_k) = \emptyset$), the degree bounds satisfy $|N^+(u_k)| \le \delta \le |N^+(v_{k+1})|$, then $u_k$ is a  Seymour vertex:
 		
-		$$|N^1(a)| \le |N^2(a)|$$
+		$$|N^+(u_k)| \le |N^{++}(u_k)|$$
 	\end{lemma}\label{no_disj}
 	\begin{proof}
-		By definition, the first neighborhood $N^1(a)$ is a subset of $a$'s out-neighbor list:
+		By definition, the first neighborhood $N^+(u_k)$ is a subset of $u_k$'s out-neighbor list:
 		
-		$$|N^1(a)| \le |N^+(a)|$$
+		$$|N^+(u_k)| \le |N^+(u_k)|$$
 		
-		We claim that every vertex $z \in N^+(b)$ belongs to the second neighborhood $N^2(a)$. To verify this, let $z \in N^+(b)$. By definition:
+		We claim that every back neighbor $z_j \in N^+(v_{k+1})$ belongs to the second neighborhood $N^{++}(u_k)$. 
+		To verify this, let $z_j \in N^+(v_{k+1})$. 
+		By definition:
 		\begin{itemize}
-			\item $z$ is reachable from $a$ in two steps via the path $a \to b \to z$ (since $b \in N^+(a)$ and $z \in N^+(b)$).
-			\item $z \neq a$, because $a \notin N^+(b)$ (anti-symmetry constraint).
-			\item $z \notin N^+(a)$, because $N^+(b) \cap N^+(a) = \emptyset$.
+			\item $z_j$ is reachable from $u_j$ in two steps via the path $u_k \to v_{k+1} \to z_j$).
+			\item $z_j \neq u_k$, because $u_k \notin N^+(v_{k+1})$  by the anti-symmetry constraint.
+			\item $z_j \notin N^+(u_k)$, because $N^+(v_{k+1}) \cap N^+(u_k) = \emptyset$.
 		\end{itemize}
 		
-		Since $b$'s out-neighborhood contains no duplicates, its size as a set matches its list length:
+		Because $N^+(v_{k+1}) \subseteq N^{++}(u_k)$, it follows directly that:
 		
-		$$|N^+(b)| = |^+(b)|_{\text{set}}$$
+		$$|N^+(v_{k+1})| \le |N^{++}(u_k)|$$
 		
-		Because $N^+(b) \subseteq N^2(a)$, it follows directly that:
+		Combining our bounds with the minimality and regularity conditions ($|N^+(u_k)| \le \delta \le |N^+(v_{k+1})|$). We now chain the inequalities:
 		
-		$$|N^+(b)| \le |N^2(a)|$$
+		$$|N^+(u_k)| \le |N^+(u_k)| \le \delta \le |N^+(v_{k+1})| \le |N^{++}(u_k)|$$
 		
-		Combining our bounds with the minimality and regularity conditions ($|N^+(a)| \le \delta \le |N^+(b)|$), we chain the inequalities:
-		
-		$$|N^1(a)| \le |N^+(a)| \le \delta \le |N^+(b)| \le |N^2(a)|$$
-		
-		Therefore, $|N^1(a)| \le |N^2(a)|$, completing the proof. 
+		Therefore, $|N^+(u_k)| \le |N^{++}(u_k)|$, completing the proof. 
 	\end{proof}		
 				
 	\begin{lemma}[Termination of Disconnected Chains]
 		Let $\alpha$ be a type, let $\mu: \alpha \to \mathbb{N}$ be a measure function, and let $P$ and $\text{Closes}$ be predicates on $\alpha$. 
-		If $P$ holds for at least one element, and for every element $a$ satisfying $P(a)$, either $\text{Closes}(a)$ holds or there exists a successor $b$ such that $P(b)$ holds and $\mu(b) < \mu(a)$, then there exists an element satisfying both $P$ and $\text{Closes}$.
+		If $P$ holds for at least one element, and for every element $a$ satisfying $P(u_k)$, either $\text{Closes}(u_k)$ holds or there exists a successor $b$ such that $P(v_{k+1})$ holds and $\mu(v_{k+1}) < \mu(u_k)$, then there exists an element satisfying both $P$ and $\text{Closes}$.
 		
-		$$\left(\exists a, P(a)\right) \land \left(\forall a, P(a) \implies \text{Closes}(a) \lor \exists b, P(b) \land \mu(b) < \mu(a)\right) \implies \exists a, P(a) \land \text{Closes}(a)$$
+		$$\left(\exists a, P(u_k)\right) \land \left(\forall a, P(u_k) \implies \text{Closes}(u_k) \lor \exists b, P(v_{k+1}) \land \mu(v_{k+1}) < \mu(u_k)\right) \implies \exists a, P(u_k) \land \text{Closes}(u_k)$$
 	\end{lemma}\label{no_cbain}
 	\begin{proof}
 		By the well-foundedness of the natural numbers under strict inequality ($\langle \mathbb{N}, < \rangle$ is well-founded), any non-empty subset of $\alpha$ mapped by $\mu$ has a minimum element. 
-		Given that $P$ is non-empty ($\exists a, P(a)$), we consider the subset $\{x \in \alpha \mid P(x)\}$ and select a minimal element $a$ with respect to the measure $\mu$.
+		Given that $P$ is non-empty ($\exists a, P(u_k)$), we consider the subset $\{x \in \alpha \mid P(x)\}$ and select a minimal element $a$ with respect to the measure $\mu$.
 		
 		For this minimal element $a$, the hypothesis guarantees one of two outcomes:
 		\begin{itemize}
-			\item Case 1: $\text{Closes}(a)$ holds. Then $a$ is our desired witness, satisfying both $P(a)$ and $\text{Closes}(a)$.
-			\item Case 2: There exists $b$ such that $P(b)$ holds and $\mu(b) < \mu(a)$. 
+			\item Case 1: $\text{Closes}(u_k)$ holds. Then $a$ is our desired witness, satisfying both $P(u_k)$ and $\text{Closes}(u_k)$.
+			\item Case 2: There exists $b$ such that $P(v_{k+1})$ holds and $\mu(v_{k+1}) < \mu(u_k)$. 
 		\end{itemize}
 			This case implies the existence of a valid predecessor/successor $b$ in the chain with a strictly smaller measure.
 			
-			Case 2 directly contradicts the minimality of $a$ in the set $\{x \mid P(x)\}$, because $\mu(b) < \mu(a)$ and $P(b)$ is true. Thus, Case 2 is impossible.
+			Case 2 directly contradicts the minimality of $a$ in the set $\{x \mid P(x)\}$, because $\mu(v_{k+1}) < \mu(u_k)$ and $P(v_{k+1})$ is true. Thus, Case 2 is impossible.
 			
-			Therefore, $\text{Closes}(a)$ must hold, completing the proof that the chain terminates at a valid closing state. $\qed$
+			Therefore, $\text{Closes}(u_k)$ must hold, completing the proof that the chain terminates at a valid closing state. $\qed$
 		\end{proof}
 	
 \section{Connected Back Neighbors}
