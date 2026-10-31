@@ -62,15 +62,15 @@
 	\keywords{oriented graphs, minimum counterexample, breadth-first search, minimum out-degree node, set theory}
 	\maketitle
 	
-	\abstract{We provide a constructive proof of the Seymour Second Neighborhood Conjecture (SSNC) by reframing the problem as a set-packing optimization problem. The family of oriented graphs $\mathcal{O}$ is classified by their minimum out-degree $\delta$. This shifts the objective to maximizing the number of non-Seymour vertices.
-		
-		A minimum counterexample (MCE) is a packing of vertices into a minimum neighborhood density environment that fails the SSNC. To prove such a packing is unsustainable, we introduce the Graph Level Order. This BFS and lexicographic based coordinate system forms a well ordering. 	
-		
-		This well-ordering, along with the MCE, packs edges into the first neighborhood of every parent. These cause neighborhoods to become quadratically dense as they both decrease in size and need more arcs.
-		
-		Awareness of parent through set theory resolves the double-counting that has plagued Seymour diamonds. This coordinate system also categorizes transitive triangles into eight distinct types and proves that seven are inconsistent in an MCE environment.
-		
-		The proof concludes with a supply-demand collision. Arc capacity is consumed when $i > \frac{\delta}{3}$. This makes the packing of non-Seymour vertices unsustainable, forcing the appearance of a Seymour vertex in every graph of $\mathcal{O}$. The algorithm to identify these vertices is $O(|V|+|E|)$. This confirms that it can operate on large oriented networks that are dense, achieving detectability in polynomial time.
+	\abstract{We provide a constructive proof of the **maximal set version** of the Seymour Second Neighborhood Conjecture (SSNC) by reframing the problem as a set-packing optimization problem. The universal family of oriented graphs $\mathcal{O}$ is classified by their minimum out-degree $\delta$. This shifts the objective to maximizing the number of non-Seymour vertices.
+
+A counterexample is a packing of vertices that fail the SSNC. To prove such a packing is unsustainable, we introduce the Graph Level Order (GLOVER). This BFS-based coordinate system partitions $\mathcal{O}$ into rooted neighborhoods $R_i$ from a minimum out-degree node.
+
+Set-theoretic multiple parents resolve the double-counting that has plagued Seymour diamonds. This coordinate system also categorizes transitive triangles into eight distinct types and proves that seven are inconsistent in an MCE environment.
+
+Distinguishing it from standard BFS, the dual MCE metric first minimizes the number of interior neighbors, then maximizes total interior degree. This environment forces cycles in the first neighborhood of every parent, causing neighborhoods to become quadratically dense as they both decrease in size and demand more arcs.
+
+The proof concludes with a supply-demand collision. Arc capacity is consumed when $i > \frac{\delta}{3}$, making the packing of non-Seymour vertices unsustainable. Consequently, the appearance of a Seymour set of vertices is forced in every MCE. The algorithm to identify these vertices runs in $O(\vert{}V\vert{}+\vert{}E\vert{})$ time, confirming its capability to operate on large, dense oriented networks in polynomial time.
 	}
 	
 	
@@ -112,7 +112,7 @@
 	
 	Transitive triangles complicate the conjecture because first neighbors seem to steal counts from second neighbors. Here, degree and distance conflict: one arc increases the degree of a vertex, while one path defines distance. Resolving the conjecture requires mastering this interaction between degree and distance, particularly within these triangular structures.
 	
-	Another approach uses subset-level expansion bounds to restrict the behavior of potential counterexamples. Seacrest \cite{Scrt} used neighborhood ratios across subsets rather than individual nodes This showed that a hypothetical minimum counterexample could be bounded in size to at most $\binom{\delta +1}{2}$ vertices, where $\delta$ is the minimum out-degree. The problem with this approach is that oit proves facts about average neighborhood expansion. However, the SSNC seeks a single vertex whose degree doubles, and bridging the gap between average subset behavior and the existence of a single vertex remains a major challenge.
+	Another approach uses subset-level expansion bounds to restrict the behavior of potential counterexamples. Seacrest \cite{Scrt} used neighborhood ratios across subsets rather than individual nodes. This showed that a hypothetical minimum counterexample could be bounded in size to at most $\binom{\delta +1}{2}$ vertices, where $\delta$ is the minimum out-degree. The problem with this approach is that out proves facts about average neighborhood expansion. However, the SSNC seeks a single vertex whose degree doubles. Bridging the gap between average subset behavior and the existence of a single vertex remains a major challenge.
 	
 	In a 2021 poster, Illia Nalyvaiko \cite{NALYVAIKO2021poster} explored the conjecture's contrapositive. He introduced a penalty function to evaluate potential counterexamples. His intuition differs from non-Seymour vertices. Both approaches shift the focus from verifying the conjecture to testing its bounds. Nalyvaiko's method offered a novel perspective that aligns with our motivations.
 	
@@ -212,8 +212,8 @@
 			\item Ancestry-Awareness: For each parent-child pair $u_i \to v_{i+1}$ with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$, the out-neighbors of $v_{i+1}$ are classified into the three disjoint sets according to Lemma \ref{nodepartition}: $\text{back}(u_i, v_{i+1})$, $\text{int}(u_i,v_{i+1})$, and $\text{ext}(u_i,v_{i+1})$.
 		\end{enumerate}
 	\end{definition}
-		
-	while the other think they should be ignored across a class of problems \cite{Da, HKPS, BBKS}. Our BFS layering approach moves beyond this binary of requiring or forbidding transitivity. By partitioning the graph, we isolate the influence of these triangles based on their inter-layer distribution. Forward-facing transitive triangles serve as a type that can enforce a non-decreasing neighborhood condition.
+
+Prior SSNC efforts have largely followed two methodologies: One considers transitive triangles as building blocks to be leveraged \cite{FidlerYuster, MninyGhazal, Ghazal_2011, daamouch2024secondneighborhoodconjecturetournaments}, while the other think they should be ignored across a class of problems \cite{Da, HKPS, BBKS}. Our BFS layering approach moves beyond this binary of requiring or forbidding transitivity. By partitioning the graph, we isolate the influence of these triangles based on their inter-layer distribution. Forward-facing transitive triangles serve as a type that can enforce a non-decreasing neighborhood condition.
 		
 	This MCE will be constructed under the BFS-lex well-ordering on $V(G)$. This will be modeled through an iterative packing process. At any step $k$, the vertex set $V(G)$ is partitioned into a vector of three distinct, mutually exclusive zones:
 	
@@ -232,7 +232,7 @@
 	When an MCE contains no back arcs, the vertex out-degree is strictly partitioned between forward/interior and exterior directions.
 	
 	\begin{lemma}[Degree Partition]\label{nodepartition}
-		Let $u_i \in R_i$ and let $v_{i+1} \in R_{i+1}$ be vertices of an MCE, with $u_i \to v_{i+1}$. Then the out-neighborhood of $ v_{i+1}$ admits the disjoint partition
+		Let $u_i \in R_i$ and let $v_{i+1} \in R_{i+1}$ be vertices of an MCE, with $u_i \to v_{i+1} \in G$. Then the out-neighborhood of $v_{i+1}$ admits the disjoint partition
 		
 		$$N^+(v_{i+1}) = \text{int}( u_i, v_{i+1}) \;\dot{\cup}\; \text{ext}( u_i, v_{i+1}).$$ \end{lemma}
 	\begin{proof}
@@ -245,6 +245,8 @@
 		\end{description}
 		These sets are disjoint because distance is disjoint and cover all of $N^+( v_{i+1})$.
 	\end{proof}
+
+The assumption of no back neighbors simplifies our analysis. As we will see, the BFS traversal reveals many types of transitive triangles. The exclusion of back neighbors from this case means that the only remaining ones are the forward facing transitive triangles and same layer transitive triangles. These forward facing transitive triangles are what were defined as interior neighbors and help to keep a parent node non-Seymour. 
 	
 	\begin{theorem} (Neighborhood Size). Let $G \in \mathcal{O}$ be be an MCE with MDN $v_0$, with rooted neighborhoods $R_0$, $R_1$, $\ldots$, $R_k$ constructed by the BFS. Suppose all nodes are non-Seymour. Then for all $i \geq 0$, $R_k| = \delta - k + 1$. 
 	\end{theorem} \label{layer_size}
@@ -280,27 +282,29 @@
 	\end{tikzpicture}
 	\caption{\textit{\textbf{Iterated decrease in second neighborhood}. In a rooted environment, this means that there is a maximum value that every decrease comes from: $|R_k| = \delta - (k-1)$}}
 	\end{figure}
+
+The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
 	
 	\begin{theorem}
-	Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_k$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $\text{int}(u, v) \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
+	Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $\text{int}(u, v) \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
 	\end{theorem}
 	\begin{proof}
 	Let $v_{k+1} \in R_{k+1}$ be a child of $u_k \in R_k$. 
 	By Theorem \ref{layer_size} we know that at least $\delta - (k+1) + 1$ nodes are necessary in $R_{k+1}$ to keep $u_k$ from being Seymour. 
 	By the pigeonhole principle, to keep $u_k$ non-Seymour, the node $v_{k+1}$ must have no more than $delta - (k+2) + 1$ exterior arcs. 
 	\end{proof}
+
+Another consequence of the rooted neighborhood size formula is that it sets the worse possible rate of decrease. The lower bound for interior neighbors is also an upper bound for exterior neighbors (because there are no back neighbors). 
 		
 	\begin{lemma}[Extra Forward Arc Produces Seymour Vertex]
 		Let $G$ be an MCE without back arcs with unique node coordinates. Let $u, v \in V(G)$ be nodes such that $v$ is in the adjacent forward layer ($\text{dist}(v) = \text{dist}(u) + 1$), and let $(u, v)$ be a forward arc in $G$. 
 		
 		If the number of exterior neighbors associated with $(u, v)$ bounds $u$'s out-degree from below, i.e.,
-		\[
-		|N^+(u)| \le |\text{ext}(u, v)|
-		\]
+		$$|N^+(u)| \le |\text{ext}(u, v)|$$
 		then $u$ satisfies the Seymour second neighborhood condition:
-		\[
-		|N^+(u)| \le |N^{++}(u)|
-		\]
+		
+		$$|N^+(u)| \le |N^{++}(u)|$$
+		
 	\end{lemma}
 	
 	\begin{proof}
@@ -321,32 +325,28 @@
 		\end{equation}
 		
 		Combining inequalities (2) and (1) by the transitivity of inequality on $\mathbb{N}$:
-		\[
-		|N^+(u)| \le |\text{ext}(u, v)| \le |N^{++}(u)| \implies |N^+(u)| \le |N^{++}(u)|
-		\]
+		
+		$$|N^+(u)| \le |\text{ext}(u, v)| \le |N^{++}(u)| \implies |N^+(u)| \le |N^{++}(u)|$$
 		
 		This proves that $u$ is a Seymour vertex.
 	\end{proof}
-		
-	\begin{lemma}[Interior Degree Lower Bound via Exterior Spillover]
-		Let $G$ be a level-ordered graph representing a Minimum Counterexample (MCE). Let $u \in V(G)$ be a patent node at distance $\text{dist}(u) = k$. Let v be a child node at distance $\text{dist}(v) = k+1$ such that $u \to v \in G$. If $|int(u, v)| < k$), then $v$ will be forced to have an exterior neighbor such that $|N^1(u)| \le |\text{ext}(u, v)|$, leading to a contradiction.
-	\end{lemma}
 	
 		\begin{lemma}[MCE Interior Degree]\label{intdeg}
-		Let $G$ be a graph level order, let $u$ be a node in $G$ at distance $\text{dist}(u) = k$ for some integer $k \ge 0$, and let $\text{int\_deg}(u)$ represent its interior degree. If $G$ satisfies the Minimum Counterexample (MCE) property (imposing non-Seymour structural bounds that prohibit excessive interior connections), then:
-		\begin{enumerate}
+		Let $G \in mathcal{O}$ be a counterexample. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child pair. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
 			
-			\item $$\text{int\_deg}(u) \le k$$
-		\end{enumerate}
+			$$\text{int}(u, v) = k$$
 	\end{lemma}
 	\begin{proof}
 		Suppose for the sake of contradiction that the interior degree strictly exceeded the layer distance:
 		
-		$int_deg(u)>k$
-		Under the framework of our Minimum Counterexample (MCE) and non-Seymour constraints, an interior degree greater than 
-		k represents an over-connected structure that violates the minimal counterexample conditions (or forces a contradiction in the graph's layer-order invariants).
+		$$int(u, v)>k$$
+By MCE and non-Seymour constraints, an interior degree greater than $k$ is over-connected. 
+This violates the MCE and is thus not minimal. 
 		
-		Because assuming $\text{int\_deg}(u) > k$ leads to a violation of the MCE hypothesis, this case is impossible.Therefore, by elimination of the upper violation, the interior degree is bounded by $k$:$$\text{int\_deg}(u) \le k$$
+Because assuming $\text{int}(u, v) > k$ leads to a violation of the MCE hypothesis, this case is impossible.
+
+Therefore, by elimination of the upper violation, the interior degree is bounded by $k$:
+		$$\text{int}(u, v) = k$$
 		
 	\end{proof}
 	
