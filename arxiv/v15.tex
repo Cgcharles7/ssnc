@@ -386,9 +386,11 @@ The case when the children do not overlap implies that the first disconnected ba
 		
 		Therefore, $|N^+(u_k)| \le |N^{++}(u_k)|$, making $u_k$ a Seymour vertex. 
 	\end{proof}		
+
+Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such a case, there is the possibility of an infinite descending chain. However, this MCE is based on a BFS-Lex tracersal, which gives a well founded set. This guarantees that any recursive decent must terminate. Thus, every terminal node in that chain must become a Seymour vertex. This implies that disconnected back arcs cannot exist in either case of an MCE. 
 				
 	\begin{lemma}[Termination of Disconnected Chains]
-		Let $\alpha$ be a type, let $\mu: \alpha \to \mathbb{N}$ be a measure function, and let $P$ and $\text{Closes}$ be predicates on $\alpha$. 
+		Let $\alpha$ be a type, and let $\mu: \alpha \to \mathbb{N}$ be a measure function. Finally let $P$ and $\text{Closes}$ be predicates on $\alpha$. 
 		If $P$ holds for at least one element, and for every element $a$ satisfying $P(u_k)$, either $\text{Closes}(u_k)$ holds or there exists a successor $b$ such that $P(v_{k+1})$ holds and $\mu(v_{k+1}) < \mu(u_k)$, then there exists an element satisfying both $P$ and $\text{Closes}$.
 		
 		$$\left(\exists a, P(u_k)\right) \land \left(\forall a, P(u_k) \implies \text{Closes}(u_k) \lor \exists b, P(v_{k+1}) \land \mu(v_{k+1}) < \mu(u_k)\right) \implies \exists a, P(u_k) \land \text{Closes}(u_k)$$
