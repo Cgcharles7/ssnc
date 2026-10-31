@@ -282,7 +282,7 @@ theorem interior_neighbors_implies_first_neighbors
     c ∈ interiorNeighbors G u v →
     c ∈ u.out_neighbors ∧ c ∈ v.out_neighbors := by
   unfold interiorNeighbors
-  rw [if_pos h_cond]
+  rw [h_cond]
   intro h
   simpa [Finset.mem_inter, List.mem_toFinset] using h
 
@@ -294,7 +294,7 @@ theorem exterior_neighbor_implies_second_neighbor
     (hc : c ∈ exteriorNeighbors G u v) :
     c ∈ getN2Finset G u.toCoords := by
   unfold exteriorNeighbors at hc
-  rw [if_pos h_cond] at hc
+  rw [h_cond] at hc
   exact (Finset.mem_inter.mp hc).1
 
 /-
@@ -401,7 +401,6 @@ lemma node_out_degree_ge_delta
   exact h_min u hu_in
 
 theorem internal_degree_lower_bound
-  {n : Nat}
   (g : GraphLevelOrder)
   (ui : GLONode)
   (i : Nat)
@@ -420,11 +419,7 @@ theorem internal_degree_lower_bound
   exact h_bound
 
 theorem interior_degree_rigidity
-  (g : GraphLevelOrder)
-  (u : GLONode)
   (k : Nat)
-  (h_layer : u.dist = k)
-  (h_u_in : u ∈ g.nodes.toList)
   -- Suppose we have a quantity representing the interior neighbor count / degree of u
   -- (e.g., sum of sizes of interiorNeighbors with forward children)
   (int_count : Nat)
@@ -444,12 +439,7 @@ theorem interior_degree_rigidity
     exact h_not_too_high h_gt
 
 theorem node_interior_degree_eq_k
-  (g : GraphLevelOrder)
-  (u : GLONode)
   (k : Nat)
-  (h_layer : u.dist = k)
-  (h_u_in : u ∈ g.nodes.toList)
-  (mce : IsMinimumCounterexample g)
   -- Let's say int_deg is the total interior neighbors in layer k+1
   (int_deg : Nat)
   (h_lower_bound : k ≤ int_deg) -- Derived from min-degree / no-back-arcs
@@ -507,12 +497,8 @@ theorem layer_bound_of_step (s : Nat → Nat) (δ : Nat)
     show s (m + 3) ≤ δ - (m + 1 + 1)
     omega
 
-theorem degree_formula_under_no_back_arcs
+theorem layer_size_formula
     (g : GraphLevelOrder) (delta : Nat)
-    (h_all_non_seymour : ∀ u ∈ g.nodes.toList, g.isNonSeymour (u.dist, u.lexId) = true)
-    (k : Nat)
-    (h_no_back_upto : ∀ x ∈ g.nodes, x.dist ≤ k → ∀ y ∈ g.nodes, y.dist = k + 1 → g.backNeighbors x y = ∅)
-    (h0 : Fintype.card (getLayerAtDistance g 0) = 1)
     (h1 : Fintype.card (getLayerAtDistance g 1) = delta)
     (h_step : ∀ j, 1 ≤ j →
       Fintype.card (getLayerAtDistance g (j + 1))
@@ -530,7 +516,6 @@ theorem degree_formula_under_no_back_arcs
     have h_next : Fintype.card (getLayerAtDistance g (m + 3)) = Fintype.card (getLayerAtDistance g (m + 2)) - 1 := h_step (m + 2) (by omega)
     rw [h_next]
     omega
-
 
 def layerIds (G : GraphLevelOrder) (j : Nat) : Finset Nat :=
   ((G.nodes.filter (·.dist == j)).toList.map (·.lexId)).toFinset
@@ -570,7 +555,7 @@ theorem exteriorNeighbors_subset_layer
     exact ⟨⟨Array.contains_eq_true_of_mem hu_mem,
             Array.contains_eq_true_of_mem hv_mem⟩, hd⟩
   unfold exteriorNeighbors at hx
-  rw [if_pos hguard] at hx
+  rw [hguard] at hx
   obtain ⟨hN2, hxv⟩ := Finset.mem_inter.mp hx
   have hxv' : x ∈ v.out_neighbors := List.mem_toFinset.mp hxv
   -- x ∉ N1(u) = out(u)
@@ -583,7 +568,7 @@ theorem exteriorNeighbors_subset_layer
   have hge : v.dist ≤ x.1 := by
     by_contra hlt
     have : x ∈ G.backNeighbors u v := by
-      unfold backNeighbors; rw [if_pos hguard]
+      unfold backNeighbors; rw [hguard]
       simp [hxv', Nat.lt_of_not_le hlt]
     rw [hnb] at this; simp at this
   have hlay : x.1 = v.dist + 1 := by
@@ -647,6 +632,22 @@ def PartitionWF (n : GLONode) : Prop :=
   n.out_neighbors.length =
     n.back_neighbors.length + n.interior_neighbors.length + n.exterior_neighbors.length
 
+theorem interior_ge_of_layers
+    (out A B : Finset Coord) (delta k : Nat)
+    (hdeg : delta ≤ out.card)
+    (hsub : out ⊆ A ∪ B)            -- BFS + no back arcs: A = R_k, B = R_{k+1}
+    (hB : B.card ≤ delta - k)       -- from the layer formula
+    (hk : k ≤ delta) :
+    k ≤ (out ∩ A).card := by
+  have h1 : out ⊆ (out ∩ A) ∪ B := by
+    intro x hx
+    rcases Finset.mem_union.mp (hsub hx) with h | h
+    · exact Finset.mem_union_left _ (Finset.mem_inter.mpr ⟨hx, h⟩)
+    · exact Finset.mem_union_right _ h
+  have h2 := (Finset.card_le_card h1).trans (Finset.card_union_le _ _)
+  omega
+
+
 lemma child_interior_deficit
     (child : GLONode) (k : Nat)
     (h_part : PartitionWF child)
@@ -687,19 +688,19 @@ theorem out_eq_int_union_ext
       by_contra hlt
       have : x ∈ G.backNeighbors u v := by
         unfold GraphLevelOrder.backNeighbors
-        rw [if_pos hcond]
+        rw [hcond]
         simp [hxv]; omega
       rw [hnb] at this; simp at this
     by_cases heq : x.1 = v.dist
     · -- same layer as v: interior
       apply Finset.mem_union_left
       unfold GraphLevelOrder.interiorNeighbors
-      rw [if_pos hcond]
+      rw [hcond]
       simp [hxv, hno_same x hxv heq]
     · -- layer v.dist + 1: exterior
       apply Finset.mem_union_right
       unfold GraphLevelOrder.exteriorNeighbors
-      rw [if_pos hcond]
+      rw [hcond]
       refine Finset.mem_inter.mpr ⟨?_, by simpa using hxv⟩
       have hx2 : x.1 = u.dist + 2 := by omega
       unfold GraphLevelOrder.getN2Finset
@@ -715,10 +716,10 @@ theorem out_eq_int_union_ext
   · intro hx
     rcases Finset.mem_union.mp hx with h | h
     · unfold GraphLevelOrder.interiorNeighbors at h
-      rw [if_pos hcond] at h
+      rw [hcond] at h
       exact (Finset.mem_inter.mp h).2
     · unfold GraphLevelOrder.exteriorNeighbors at h
-      rw [if_pos hcond] at h
+      rw [hcond] at h
       exact (Finset.mem_inter.mp h).2
 
 
@@ -729,8 +730,8 @@ theorem int_ext_disjoint (G : GraphLevelOrder) (hu : G.CoordUnique)
   intro x hxi hxe
   by_cases hc : (G.nodes.contains u && G.nodes.contains v
                   && v.dist == u.dist + 1) = true
-  · rw [interiorNeighbors, if_pos hc] at hxi
-    rw [exteriorNeighbors, if_pos hc] at hxe
+  · rw [interiorNeighbors, hc] at hxi
+    rw [exteriorNeighbors, hc] at hxe
     have h1 : x ∈ u.out_neighbors.toFinset := (Finset.mem_inter.mp hxi).1
     have h2 := (Finset.mem_inter.mp hxe).1
     unfold getN2Finset at h2
@@ -743,8 +744,6 @@ theorem int_ext_disjoint (G : GraphLevelOrder) (hu : G.CoordUnique)
 theorem extra_forward_arc_produces_seymour_vertex
     (G : GraphLevelOrder) (hu : G.CoordUnique) (u v : GLONode)
     (h_cond : (G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1) = true)
-    (hfwd : fwdArc G u v = true)
-    (hu_deg : G.cardN1 u.toCoords = G.delta)
     (h_ext_bound : G.cardN1 u.toCoords ≤ (G.exteriorNeighbors u v).card) :
     G.cardN1 u.toCoords ≤ G.cardN2 u.toCoords := by
   -- 1. Show exteriorNeighbors G u v is a subset of getN2Finset G u.toCoords
@@ -791,11 +790,8 @@ lemma child_interior_deficit_no_back
   omega
 
 theorem fewer_interior_implies_extra_forward
-    (G : GraphLevelOrder) (hu : G.CoordUnique) (u v : GLONode)
-    (h_mce : IsMinimumCounterexample G)
+    (G : GraphLevelOrder) (u v : GLONode)
     (h_cond : (G.nodes.contains u && G.nodes.contains v && v.dist == u.dist + 1) = true)
-    (hfwd : fwdArc G u v = true)
-    (hu_deg : G.cardN1 u.toCoords = G.delta)
     (h_ext_bound : G.cardN1 u.toCoords ≤ (G.exteriorNeighbors u v).card) :
     G.cardN1 u.toCoords ≤ G.cardN2 u.toCoords := by
   -- 1. Show exteriorNeighbors G u v is a subset of getN2Finset G u.toCoords
@@ -834,7 +830,7 @@ theorem interior_degree_bounds
       intro c hc
       have hc' : c ∈ u.out_neighbors.toFinset ∩ v.out_neighbors.toFinset := by
         unfold interiorNeighbors at hc
-        rw [if_pos h_cond] at hc
+        rw [h_cond] at hc
         exact hc
       rw [Finset.mem_inter] at hc'
       rw [Finset.mem_erase]
@@ -867,10 +863,10 @@ theorem out_subset_int_union_ext_general
   have hxv : x ∈ v.out_neighbors := List.mem_toFinset.mp hx
   by_cases hxu : x ∈ u.out_neighbors
   · apply Finset.mem_union_left
-    rw [interiorNeighbors, if_pos hc]
+    rw [interiorNeighbors, hc]
     exact Finset.mem_inter.mpr ⟨List.mem_toFinset.mpr hxu, hx⟩
   · apply Finset.mem_union_right
-    rw [exteriorNeighbors, if_pos hc]
+    rw [exteriorNeighbors, hc]
     refine Finset.mem_inter.mpr ⟨?_, hx⟩
     rw [mem_getN2Finset_iff, getN1Finset_eq G hu u hu_node]
     refine ⟨⟨v.toCoords, List.mem_toFinset.mpr hadj, ?_⟩, ?_, ?_⟩
@@ -964,7 +960,7 @@ theorem layer_succ_subset_out
   unfold exteriorNeighbors at hc
   by_cases hcond : (G.nodes.contains u' && G.nodes.contains x
                       && x.dist == u'.dist + 1) = true
-  · rw [if_pos hcond] at hc
+  · rw [hcond] at hc
     exact (Finset.mem_inter.mp hc).2
   · rw [if_neg hcond] at hc
     simp at hc
@@ -996,14 +992,14 @@ theorem interior_subset_layer (G : GraphLevelOrder) (hw : G.BFSWF)
     G.interiorNeighbors u v ⊆ G.layerCoords v.dist := by
   have hc := cond_of_nodes hu_node hv_node hd
   intro x hx
-  rw [interiorNeighbors, if_pos hc] at hx
+  rw [interiorNeighbors, hc] at hx
   obtain ⟨hxu, hxv⟩ := Finset.mem_inter.mp hx
   have hle : x.1 ≤ u.dist + 1 := (hw u hu_node x (List.mem_toFinset.mp hxu)).2
   have hge : v.dist ≤ x.1 := by
     by_contra hlt
     push_neg at hlt
     have hb : x ∈ G.backNeighbors u v := by
-      rw [backNeighbors, if_pos hc]
+      rw [backNeighbors, hc]
       exact Finset.mem_filter.mpr ⟨hxv, hlt⟩
     rw [hnb] at hb
     simp at hb
@@ -1032,5 +1028,9 @@ theorem oriented_arcs_le {α : Type*} [DecidableEq α] (R : Finset α)
   rw [Finset.card_union_of_disjoint hdis, hcard, Finset.offDiag_card] at this
   omega
 
+theorem no_layer_past_third (δ : Nat) (hδ : 1 ≤ δ)
+    (hlayer : ∀ i, 1 ≤ i → i ≤ δ → 3 * i ≤ δ) : False := by
+  have := hlayer (δ / 3 + 1) (by omega) (by omega)
+  omega
 
 end GraphLevelOrder
