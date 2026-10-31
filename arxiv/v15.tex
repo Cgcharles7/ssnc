@@ -357,11 +357,11 @@ Thos implies that prior to the first disconnected back neighbor, the nodes are $
 
 The case when the children do not overlap implies that the first disconnected back neighbor will be similar to the situation of an extra forward neighbor. A back arc is $u_k \to v_{k+1} \to w_j$ where $j \le k-1$. The nodes $u_k$ and $v_{k+1}$ will be $\delta$-regular because there are no back arcs before 
 		
-	\begin{lemma}[Seymour Property under Disjoint Back Arcs]
+	\begin{theorem}[Seymour Property under Disjoint Back Arcs]
 		Let $G$ be a graph represented by an MCE, and let $u_k, v_{k+1} \in V(G)$ such that $v_{k+1} \in N^+(u_k)$. If the out-neighbors are completely disjoint ($N^+(v_{k+1}) \cap N^+(u_k) = \emptyset$), the degree bounds satisfy $|N^+(u_k)| \le \delta \le |N^+(v_{k+1})|$, then $u_k$ is a  Seymour vertex:
 		
 		$$|N^+(u_k)| \le |N^{++}(u_k)|$$
-	\end{lemma}\label{no_disj}
+	\end{theorem}\label{no_disj}
 	\begin{proof}
 		Every back neighbor $z_j \in N^+(v_{k+1})$ belongs to the second neighborhood $N^{++}(u_k)$. 
 		To verify this, let $z_j \in N^+(v_{k+1})$. 
@@ -389,27 +389,21 @@ The case when the children do not overlap implies that the first disconnected ba
 
 Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such a case, there is the possibility of an infinite descending chain. However, this MCE is based on a BFS-Lex tracersal, which gives a well founded set. This guarantees that any recursive decent must terminate. Thus, every terminal node in that chain must become a Seymour vertex. This implies that disconnected back arcs cannot exist in either case of an MCE. 
 				
-	\begin{lemma}[Termination of Disconnected Chains]
-		Let $\alpha$ be a type, and let $\mu: \alpha \to \mathbb{N}$ be a measure function. Finally let $P$ and $\text{Closes}$ be predicates on $\alpha$. 
-		If $P$ holds for at least one element, and for every element $a$ satisfying $P(u_k)$, either $\text{Closes}(u_k)$ holds or there exists a successor $b$ such that $P(v_{k+1})$ holds and $\mu(v_{k+1}) < \mu(u_k)$, then there exists an element satisfying both $P$ and $\text{Closes}$.
-		
-		$$\left(\exists a, P(u_k)\right) \land \left(\forall a, P(u_k) \implies \text{Closes}(u_k) \lor \exists b, P(v_{k+1}) \land \mu(v_{k+1}) < \mu(u_k)\right) \implies \exists a, P(u_k) \land \text{Closes}(u_k)$$
-	\end{lemma}\label{no_cbain}
-	\begin{proof}
-		By the well-foundedness of the natural numbers under strict inequality ($\langle \mathbb{N}, < \rangle$ is well-founded), any non-empty subset of $\alpha$ mapped by $\mu$ has a minimum element. 
-		Given that $P$ is non-empty ($\exists a, P(u_k)$), we consider the subset $\{x \in \alpha \mid P(x)\}$ and select a minimal element $a$ with respect to the measure $\mu$.
-		
-		For this minimal element $a$, the hypothesis guarantees one of two outcomes:
-		\begin{itemize}
-			\item Case 1: $\text{Closes}(u_k)$ holds. Then $a$ is our desired witness, satisfying both $P(u_k)$ and $\text{Closes}(u_k)$.
-			\item Case 2: There exists $b$ such that $P(v_{k+1})$ holds and $\mu(v_{k+1}) < \mu(u_k)$. 
-		\end{itemize}
-			This case implies the existence of a valid predecessor/successor $b$ in the chain with a strictly smaller measure.
-			
-			Case 2 directly contradicts the minimality of $a$ in the set $\{x \mid P(x)\}$, because $\mu(v_{k+1}) < \mu(u_k)$ and $P(v_{k+1})$ is true. Thus, Case 2 is impossible.
-			
-			Therefore, $\text{Closes}(u_k)$ must hold, completing the proof that the chain terminates at a valid closing state. $\qed$
-		\end{proof}
+\begin{theorem}[Termination and Loop Closure of Back-Arc Chains]
+    Let $G$ be an MCE under the BFS-Lex coordinate system. Any recursive propagation of back-arcs forms a well-founded sequence that must terminate by closing a loop, thereby forcing a Seymour vertex.
+\end{theorem}
+
+\begin{proof}
+    Suppose for a contradiction that a vertex $v_{k+1} \in R_{k+1}$ initiates a sequence of back-arcs $\langle c_0, c_1, c_2, \dots \rangle$ where each step satisfies $c_i \to c_{i+1}$ with a layer drop of at least 2 ($\text{dist}(c_{i+1}) + 2 \le \text{dist}(c_i)$). 
+    
+    The vertices of $G$ are well-ordered by the BFS-Lex coordinate system. Consequently, there exists an \emph{earliest} back-arc in this sequence, originating from a minimal node $c_m$.
+    
+    To continue the sequence, the chain must either locate an even earlier back-arc or close a loop with an existing neighborhood. The node $c_m$ has been defined as the earliest back-arc, so no earlier back-arc can exist. Therefore, the sequence is forced to close a loop.
+    
+    This closing arc connects the back-arc path directly into the neighborhood of the original parent $u_k$ (of node $v_{k+1}$). This introduces an extra path of length 2 without increasing the first out-neighborhood size. This forces the second out-neighborhood to satisfy $|N^{++}(u_k)| \ge |N^{+}(u_k)|$ and makes $u_k$ a Seymour vertex.
+    
+    Since a minimum counterexample cannot contain any Seymour vertices, this configuration is unsustainable, proving that no such infinite back-arc chain can exist.
+\end{proof}
 	
 \section{Connected Back Neighbors}
 	We have already covered both situations where there are no back neighbors and when there are disconnected back neighbors. In the first case we reached regularity in the MCE and in the second case we excluded disconnected back neighbors. 
