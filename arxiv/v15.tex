@@ -363,11 +363,7 @@ The case when the children do not overlap implies that the first disconnected ba
 		$$|N^+(u_k)| \le |N^{++}(u_k)|$$
 	\end{lemma}\label{no_disj}
 	\begin{proof}
-		By definition, the first neighborhood $N^+(u_k)$ is a subset of $u_k$'s out-neighbor list:
-		
-		$$|N^+(u_k)| \le |N^+(u_k)|$$
-		
-		We claim that every back neighbor $z_j \in N^+(v_{k+1})$ belongs to the second neighborhood $N^{++}(u_k)$. 
+		Every back neighbor $z_j \in N^+(v_{k+1})$ belongs to the second neighborhood $N^{++}(u_k)$. 
 		To verify this, let $z_j \in N^+(v_{k+1})$. 
 		By definition:
 		\begin{itemize}
@@ -379,12 +375,16 @@ The case when the children do not overlap implies that the first disconnected ba
 		Because $N^+(v_{k+1}) \subseteq N^{++}(u_k)$, it follows directly that:
 		
 		$$|N^+(v_{k+1})| \le |N^{++}(u_k)|$$
+
+		The regularity condition gives the following bounds on the size of $N^+(u_k)$ and $N^+(z_j)$ by their location prior to the first disconnected back neighbor. 
+
+		$$|N^+(u_k)| = |N^+(z_j)| = \delta $$
 		
-		Combining our bounds with the minimality and regularity conditions ($|N^+(u_k)| \le \delta \le |N^+(v_{k+1})|$). We now chain the inequalities:
+		We now chain the inequalities:
 		
-		$$|N^+(u_k)| \le |N^+(u_k)| \le \delta \le |N^+(v_{k+1})| \le |N^{++}(u_k)|$$
+		$$|N^+(u_k)| = \delta = |N^+(v_{k+1})| = \le |N^{++}(u_k)|$$
 		
-		Therefore, $|N^+(u_k)| \le |N^{++}(u_k)|$, completing the proof. 
+		Therefore, $|N^+(u_k)| \le |N^{++}(u_k)|$, making $u_k$ a Seymour vertex. 
 	\end{proof}		
 				
 	\begin{lemma}[Termination of Disconnected Chains]
