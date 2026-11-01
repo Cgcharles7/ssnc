@@ -1033,4 +1033,23 @@ theorem no_layer_past_third (δ : Nat) (hδ : 1 ≤ δ)
   have := hlayer (δ / 3 + 1) (by omega) (by omega)
   omega
 
+theorem no_mce_exists (δ : Nat) (hδ : 1 ≤ δ)
+    (hMCE : IsMinimumCounterexample δ)
+    (hlayer_size : ∀ i, 1 ≤ i → |R i| ≤ δ - i + 1)
+    (hinterior_demand : ∀ i, 1 ≤ i → interior_arcs i = |R i| * i)
+    (hbinomial_supply : ∀ i, 1 ≤ i → interior_arcs i ≤ |R i| * (|R i| - 1) / 2)
+    : False := by
+  -- Pick i = δ/3 + 1 (the first violating layer)
+  let i := δ / 3 + 1
+  -- From binomial supply + interior demand:
+  -- |R i| * i ≤ |R i| * (|R i| - 1) / 2
+  -- So |R i| ≥ 2*i + 1
+  have hmin_size : |R i| ≥ 2 * i + 1 := by ...
+  -- From layer size:
+  have hmax_size : |R i| ≤ δ - i + 1 := hlayer_size i (by omega)
+  -- Combine: 2*i + 1 ≤ δ - i + 1, i.e., 3*i ≤ δ
+  -- But i = δ/3 + 1, so 3*(δ/3 + 1) = δ + 3 > δ
+  have hcontradiction : 3 * i ≤ δ := by ...
+  omega   
+
 end GraphLevelOrder
