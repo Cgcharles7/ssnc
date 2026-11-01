@@ -408,14 +408,19 @@ Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such 
 \section{Connected Back Neighbors}
 	We have already covered both situations where there are no back neighbors and when there are disconnected back neighbors. In the first case we reached regularity in the MCE and in the second case we excluded disconnected back neighbors. 
 	
-	Thus when we arrive at the case of connected back neighbors what we arrive at is the case of the first connected back neighbor and the question of where can it happen in a well ordering. 
+	Thus, when we arrive at the case of connected back neighbors what we arrive at is the case of the first connected back neighbor and the question of where can it happen in a well ordering. 
+
+	Regularity prior to the first connected back neighbor implies that every child node in that layer will need to send all of its exterior neighbors to the next layer. what this means is that a connected back neighbor would violate the bi-directional property of oriented graph. 
 	
 	\begin{theorem}
 	Let $G\in\mathcal{O}$ be an MCE represented by the rooted neighbors $R_0, R_1, \ldots, R_k$. Then the first connected back neighbor in $G$ cannot exist. 
 	\end{theorem}
 	\begin{proof}
-	First let us understand the structure of our graph. 
-	By Theorems \ref {no_disj} and \ref{no_cbain} we know that disconnected back neighbors are not possible. Further, from theorem 
+	Theorems \ref {no_disj} and \ref{no_cbain} state that disconnected back neighbors are not possible. Further, from Theorem \ref{intbnd}, we have that $text{int}(u_k, v_{k+1}) = k+1$. The combination of the above two formulas yoelds that $text{ext}(u_k, v_{k+1}) = \delta - (k+1)$.
+
+This says that every $y_{k+1} \in R_{k+1}$ must be a parent to every node $z_{k+2} \in R_{k+2}$. 
+
+Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would create a bi-directional arc, violating the oriented graph property. Thus, connected back neighbors are not permitted 
 	\end{proof}
 					
 	\section{Graph Level Order} \label{glover}
