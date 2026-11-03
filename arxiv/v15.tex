@@ -63,14 +63,14 @@
 	\maketitle
 	
 	\abstract{We provide a constructive proof of the **maximal set version** of the Seymour Second Neighborhood Conjecture (SSNC) by reframing the problem as a set-packing optimization problem. The universal family of oriented graphs $\mathcal{O}$ is classified by their minimum out-degree $\delta$. This shifts the objective to maximizing the number of non-Seymour vertices.
-
-A counterexample is a packing of vertices that fail the SSNC. To prove such a packing is unsustainable, we introduce the Graph Level Order (GLOVER). This BFS-based coordinate system partitions $\mathcal{O}$ into rooted neighborhoods $R_i$ from a minimum out-degree node.
-
-Set-theoretic multiple parents resolve the double-counting that has plagued Seymour diamonds. This coordinate system also categorizes transitive triangles into eight distinct types and proves that seven are inconsistent in an MCE environment.
-
-Distinguishing it from standard BFS, the dual MCE metric first minimizes the number of interior neighbors, then maximizes total interior degree. This environment forces cycles in the first neighborhood of every parent, causing neighborhoods to become quadratically dense as they both decrease in size and demand more arcs.
-
-The proof concludes with a supply-demand collision. Arc capacity is consumed when $i > \frac{\delta}{3}$, making the packing of non-Seymour vertices unsustainable. Consequently, the appearance of a Seymour set of vertices is forced in every MCE. The algorithm to identify these vertices runs in $O(\vert{}V\vert{}+\vert{}E\vert{})$ time, confirming its capability to operate on large, dense oriented networks in polynomial time.
+		
+		A counterexample is a packing of vertices that fail the SSNC. To prove such a packing is unsustainable, we introduce the Graph Level Order (GLOVER). This BFS-based coordinate system partitions $\mathcal{O}$ into rooted neighborhoods $R_i$ from a minimum out-degree node.
+		
+		Set-theoretic multiple parents resolve the double-counting that has plagued Seymour diamonds. This coordinate system also categorizes transitive triangles into eight distinct types and proves that seven are inconsistent in an MCE environment.
+		
+		Distinguishing it from standard BFS, the dual MCE metric first minimizes the number of interior neighbors, then maximizes total interior degree. This environment forces cycles in the first neighborhood of every parent, causing neighborhoods to become quadratically dense as they both decrease in size and demand more arcs.
+		
+		The proof concludes with a supply-demand collision. Arc capacity is consumed when $i > \frac{\delta}{3}$, making the packing of non-Seymour vertices unsustainable. Consequently, the appearance of a Seymour set of vertices is forced in every MCE. The algorithm to identify these vertices runs in $O(\vert{}V\vert{}+\vert{}E\vert{})$ time, confirming its capability to operate on large, dense oriented networks in polynomial time.
 	}
 	
 	
@@ -191,7 +191,7 @@ The proof concludes with a supply-demand collision. Arc capacity is consumed whe
 	
 	Let $u_i \in R_i$ be a parent of $v_{i+1} \in R_{i+1}$. The \textbf{exterior neighbors} of $v_{i+1}$ with respect to $u_i$ are the vertices $$ \text{ext}(u_i,v_{i+1}) = N^{++}(u) \cap N^+(v_{i+1}). $$
 	The \textbf{exterior degree} of $v_{i+1}$ with respect to $u_i$ is $$ |\text{ext}(u_i, v_{i+1})|. $$\label{ext_nbr}
-		
+	
 	\begin{remark} For the MDN $v_0$, all its out-neighbors are exterior neighbors because $R_0 = \{v_0\}$ and there are no earlier neighborhoods $R_{-1}$. Thus, $$ \text{int}(v_0, v) = \emptyset \hspace{1cm} \forall v \in\space R_1 $$ \end{remark}
 	
 	Let $v_0$ be the MDN, and let $u_i \to v_{i+1} \in G$, with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$. The set of \textbf{back neighbors} from $v_i$ is $\text{back}(v_{j})$. The set of all back neighbors of $u_i$ is denoted $\bigcup_{j <= i} R_j \text{back}(u_i)$. \label{back_def} 
@@ -212,9 +212,9 @@ The proof concludes with a supply-demand collision. Arc capacity is consumed whe
 			\item Ancestry-Awareness: For each parent-child pair $u_i \to v_{i+1}$ with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$, the out-neighbors of $v_{i+1}$ are classified into the three disjoint sets according to Lemma \ref{nodepartition}: $\text{back}(u_i, v_{i+1})$, $\text{int}(u_i,v_{i+1})$, and $\text{ext}(u_i,v_{i+1})$.
 		\end{enumerate}
 	\end{definition}
-
-Prior SSNC efforts have largely followed two methodologies: One considers transitive triangles as building blocks to be leveraged \cite{FidlerYuster, MninyGhazal, Ghazal_2011, daamouch2024secondneighborhoodconjecturetournaments}, while the other think they should be ignored across a class of problems \cite{Da, HKPS, BBKS}. Our BFS layering approach moves beyond this binary of requiring or forbidding transitivity. By partitioning the graph, we isolate the influence of these triangles based on their inter-layer distribution. Forward-facing transitive triangles serve as a type that can enforce a non-decreasing neighborhood condition.
-		
+	
+	Prior SSNC efforts have largely followed two methodologies: One considers transitive triangles as building blocks to be leveraged \cite{FidlerYuster, MninyGhazal, Ghazal_2011, daamouch2024secondneighborhoodconjecturetournaments}, while the other think they should be ignored across a class of problems \cite{Da, HKPS, BBKS}. Our BFS layering approach moves beyond this binary of requiring or forbidding transitivity. By partitioning the graph, we isolate the influence of these triangles based on their inter-layer distribution. Forward-facing transitive triangles serve as a type that can enforce a non-decreasing neighborhood condition.
+	
 	This MCE will be constructed under the BFS-lex well-ordering on $V(G)$. This will be modeled through an iterative packing process. At any step $k$, the vertex set $V(G)$ is partitioned into a vector of three distinct, mutually exclusive zones:
 	
 	\begin{itemize}
@@ -226,7 +226,7 @@ Prior SSNC efforts have largely followed two methodologies: One considers transi
 	\end{itemize}
 	
 	Prior SSNC efforts have largely followed two methodologies: One considers transitive triangles as building blocks to be leveraged \cite{FidlerYuster, MninyGhazal, Ghazal_2011, daamouch2024secondneighborhoodconjecturetournaments}, 
-		
+	
 	\section{No Back Neighbors}
 	
 	When an MCE contains no back arcs, the vertex out-degree is strictly partitioned between interior and exterior directions.
@@ -245,8 +245,8 @@ Prior SSNC efforts have largely followed two methodologies: One considers transi
 		\end{description}
 		These sets are disjoint because distance is disjoint and cover all of $N^+( v_{i+1})$.
 	\end{proof}
-
-The assumption of no back neighbors simplifies our analysis. As we will see, the BFS traversal reveals many types of transitive triangles. The exclusion of back neighbors from this case means that the only remaining ones are the forward facing transitive triangles and same layer transitive triangles. These forward facing transitive triangles are what were defined as interior neighbors and help to keep a parent node non-Seymour. 
+	
+	The assumption of no back neighbors simplifies our analysis. As we will see, the BFS traversal reveals many types of transitive triangles. The exclusion of back neighbors from this case means that the only remaining ones are the forward facing transitive triangles and same layer transitive triangles. These forward facing transitive triangles are what were defined as interior neighbors and help to keep a parent node non-Seymour. 
 	
 	\begin{theorem} (Neighborhood Size). Let $G \in \mathcal{O}$ be be an MCE with MDN $v_0$, with rooted neighborhoods $R_0$, $R_1$, $\ldots$, $R_k$ constructed by the BFS. Suppose all nodes are non-Seymour. Then for all $i \geq 0$, $R_k| = \delta - k + 1$. 
 	\end{theorem} \label{layer_size}
@@ -267,39 +267,74 @@ The assumption of no back neighbors simplifies our analysis. As we will see, the
 	\end{proof}
 	
 	\begin{figure}
-	\centering
-	\begin{tikzpicture}[x=0.8cm, y=0.4cm, scale=0.8]
-		% Loop to draw 10 bars (shortened for clarity), decreasing in height
-		\foreach \h [count=\i] in {10, 9, 8, 7, 6, 5, 4, 3, 2, 1} {
-			% Draw vertical bar
-			\draw[fill=blue!15, draw=blue!50] (\i, 0) rectangle (\i+0.6, \h);
-			
-			% Label the levels
-			\ifnum\i=1 \node[below] at (\i+0.3, 0) {$R_1$}; \fi
-			\ifnum\i=4 \node[below] at (\i+0.3, 0) {$R_j$}; \fi
-			\ifnum\i=9 \node[below] at (\i+0.3, 0) {$u_i$}; \fi
-		}
-	\end{tikzpicture}
-	\caption{\textit{\textbf{Iterated decrease in second neighborhood}. In a rooted environment, this means that there is a maximum value that every decrease comes from: $|R_k| = \delta - (k-1)$}}
+		\centering
+		\begin{tikzpicture}[x=0.8cm, y=0.4cm, scale=0.8]
+			% Loop to draw 10 bars (shortened for clarity), decreasing in height
+			\foreach \h [count=\i] in {10, 9, 8, 7, 6, 5, 4, 3, 2, 1} {
+				% Draw vertical bar
+				\draw[fill=blue!15, draw=blue!50] (\i, 0) rectangle (\i+0.6, \h);
+				
+				% Label the levels
+				\ifnum\i=1 \node[below] at (\i+0.3, 0) {$R_1$}; \fi
+				\ifnum\i=4 \node[below] at (\i+0.3, 0) {$R_j$}; \fi
+				\ifnum\i=9 \node[below] at (\i+0.3, 0) {$u_i$}; \fi
+			}
+		\end{tikzpicture}
+		\caption{\textit{\textbf{Iterated decrease in second neighborhood}. In a rooted environment, this means that there is a maximum value that every decrease comes from: $|R_k| = \delta - (k-1)$}}
 	\end{figure}
+	
+	The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
+	
+	\begin{lemma}Let $G$ be an MCE minimizing interior arc weight. If an interior arc $e = (u, w)$ within layer $R_k$ can be removed such that no vertex in $R_{k-1}$ becomes a Seymour vertex and all preceding layer-size constraints remain satisfied, then $G$ cannot be a minimum counterexample.
+	\end{lemma}
+	\begin{proof}Assume such an arc exists. Removing $e$ strictly decreases the interior neighbor count (and/or max total interior degree) without violating the anti-Seymour property ($|N^{++}(v)| < |N^+(v)|$) for any vertex. This contradicts the minimality definition of $G$, proving that every interior arc in an MCE is structurally indispensable.\end{proof}
+	
+	\begin{lemma} (Interior Arc Redundancy and Parent Invariance).
+		Let $G$ be a Minimum Counterexample (MCE) under the metric minimizing interior neighbors and max total interior degree. Let $u_k \in R_k$ be a parent node with out-neighbors in $R_{k+1}$, including children $v_{k+1, 1}$ and $v_{k+1, 2}$. If an interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ is redundant—meaning its removal does not violate the minimum interior degree requirement for $v_{k+1, 1}$—then removing $e$ does not alter the first- or second-neighborhood sizes of $u_k$, and $u_k$ remains non-Seymour.
+	\end{lemma}\begin{proof}
+		Consider the interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$.  
+		We will show that this preserves the non-Seymour status of parent node $u_k \in R_k$. 
+		Let us the impact on $u_k$'s first and second neighborhoods,  $N^+(u_k)$ and $N^{++}(u_k)$:
 
-The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
-
-\begin{lemma}Let $G$ be an MCE minimizing interior arc weight. If an interior arc $e = (u, w)$ within layer $R_k$ can be removed such that no vertex in $R_{k-1}$ becomes a Seymour vertex and all preceding layer-size constraints remain satisfied, then $G$ cannot be a minimum counterexample.
-\end{lemma}
-\begin{proof}Assume such an arc exists. Removing $e$ strictly decreases the interior neighbor count (and/or max total interior degree) without violating the anti-Seymour property ($\vert{}N^{++}(v)\vert{} < \vert{}N^+(v)\vert{}$) for any vertex. This contradicts the minimality definition of $G$, proving that every interior arc in an MCE is structurally indispensable.\end{proof}
+		By definition, the first neighborhood of $u_k$ is the set of its direct out-neighbors:
+		$$N^+(u_k) = \{v \in V(G) \mid (u_k, v) \in E(G)\}$$
+		
+		The arc $e$ is an interior arc connecting two nodes ($v_{k+1, 1}$ and $v_{k+1, 2}$) within layer $R_{k+1}$. 
+		Removing $e$ deletes an edge between these children of $u_k$.
+		However, it does not delete any vertex from $R_{k+1}$. 
+		It also does not remove any outgoing edges from $u_k$ to its children. 
+		Thus, the set $N^+(u_k)$ and its cardinality $|N^+(u_k)|$ remain completely unchanged.
+		
+		The second neighborhood consists of vertices reachable from $u_k$ in exactly two steps, excluding $u_k$ and $N^+(u_k)$:
+		$$N^{++}(u_k) = N^+(N^+(u_k)) \setminus (N^+(u_k) \cup \{u_k\})$$
+		
+		Because $v_{k+1, 2} \in N^+(u_k)$, it belongs to the first neighborhood and cannot be an element of $N^{++}(u_k)$. An interior arc from $v_{k+1, 1}$ to $v_{k+1, 2}$ represents a transition within the first neighborhood ($N^+(u_k) \to N^+(u_k)$). 
+		This does not create paths to new vertices outside $N^+(u_k)$. Nor are any paths to $R_{k+2}$ dependent upon it. 
+		Every child node $v \in R_{k+1}$ is directly reached from $R_k$ via existing parent arcs. 
+		Therefore, the vertex reachability set defining $N^{++}(u_k)$ remains identical.
+		
+		Neither $|N^+(u_k)|$ nor $|N^{++}(u_k)|$ changes when the redundant interior arc $e$ is removed. 
+		This means that inequality defining the non-Seymour property:
+		
+		$$|N^{++}(u_k)| < |N^+(u_k)\vert{}$$
+		
+		continues to hold strictly for $u_k$.
+		Consequently, if an interior arc is in excess of what is required to keep the parent non-Seymour, it can be removed without introducing a Seymour vertex. 
+		This proving that an MCE must tightly bind every single interior arc to its exact minimum requirement.
+	\end{proof}
+	
 	
 	\begin{theorem}
-	Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $\text{int}(u, v) \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
+		Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $\text{int}(u, v) \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
 	\end{theorem}
 	\begin{proof}
-	Let $v_{k+1} \in R_{k+1}$ be a child of $u_k \in R_k$. 
-	By Theorem \ref{layer_size} we know that at least $\delta - (k+1) + 1$ nodes are necessary in $R_{k+1}$ to keep $u_k$ from being Seymour. 
-	By the pigeonhole principle, to keep $u_k$ non-Seymour, the node $v_{k+1}$ must have no more than $delta - (k+2) + 1$ exterior arcs. 
+		Let $v_{k+1} \in R_{k+1}$ be a child of $u_k \in R_k$. 
+		By Theorem \ref{layer_size} we know that at least $\delta - (k+1) + 1$ nodes are necessary in $R_{k+1}$ to keep $u_k$ from being Seymour. 
+		By the pigeonhole principle, to keep $u_k$ non-Seymour, the node $v_{k+1}$ must have no more than $delta - (k+2) + 1$ exterior arcs. 
 	\end{proof}
-
-Another consequence of the rooted neighborhood size formula is that it sets the worse possible rate of decrease. The lower bound for interior neighbors is also an upper bound for exterior neighbors (because there are no back neighbors). 
-		
+	
+	Another consequence of the rooted neighborhood size formula is that it sets the worse possible rate of decrease. The lower bound for interior neighbors is also an upper bound for exterior neighbors (because there are no back neighbors). 
+	
 	\begin{lemma}[Extra Exterior Arc Produces Seymour Vertex]
 		Let $G$ be an MCE without back arcs with unique node coordinates. Let $u_k, v_{k+1} \in G$ be nodes such that $u_k \to v_{k+1} \in G$. 
 		
@@ -330,37 +365,37 @@ Another consequence of the rooted neighborhood size formula is that it sets the 
 		This proves that $u_k$ is a Seymour vertex.
 	\end{proof}
 	
-		\begin{lemma}[MCE Interior Degree]\label{intdeg}
+	\begin{lemma}[MCE Interior Degree]\label{intdeg}
 		Let $G \in mathcal{O}$ be a counterexample. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child pair. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
-			
-			$$\text{int}(u_k, v_{k+1}) = k+1$$
+		
+		$$\text{int}(u_k, v_{k+1}) = k+1$$
 	\end{lemma}
 	\begin{proof}
 		Suppose for the sake of contradiction that the interior degree strictly exceeded the layer distance:
 		
 		$$int(u_k, v_{k+1})>k+1$$
-By MCE and non-Seymour constraints, an interior degree greater than $k+1$ is over-connected. 
-This violates the MCE and is thus not minimal. 
+		By MCE and non-Seymour constraints, an interior degree greater than $k+1$ is over-connected. 
+		This violates the MCE and is thus not minimal. 
 		
-Because assuming $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, this graph is not an MCE. Thus an interior arc can be removed, forming a smaller counterexample. 
-
-Therefore, the interior degree is bounded by $k+1$:
+		Because assuming $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, this graph is not an MCE. Thus an interior arc can be removed, forming a smaller counterexample. 
+		
+		Therefore, the interior degree is bounded by $k+1$:
 		$$\text{int}(u_k, v_{k+1}) = k+1$$
 	\end{proof}
 	
 	\section{Disconnected Back Neighbors}
 	
-To prevent parents from becoming Seymour vertices, neighborhood sizes must decrease as distance increases.
+	To prevent parents from becoming Seymour vertices, neighborhood sizes must decrease as distance increases.
 	
-If a child node $v$ possesses an excess exterior arc, it is a second out-neighborhood of the parent $u$, 
-forcing $|N^{++}(u)| \ge |N^{+}(u)|$. This immediately makes $u$ Seymour vertex.
+	If a child node $v$ possesses an excess exterior arc, it is a second out-neighborhood of the parent $u$, 
+	forcing $|N^{++}(u)| \ge |N^{+}(u)|$. This immediately makes $u$ Seymour vertex.
 	
 	If a node takes on too many interior arcs, it exceeds the local density threshold of the subgraph $R_i$. This violates the minimum counterexample's local density minimization condition.
-
-Thos implies that prior to the first disconnected back neighbor, the nodes are $\delta$-regular. Next. we analyze the first back neighbor in this environment. There are two cases: when the children overlap and then they do not. 
-
-The case when the children do not overlap implies that the first disconnected back neighbor will be similar to the situation of an extra forward neighbor. A back arc is $u_k \to v_{k+1} \to w_j$ where $j \le k-1$. The nodes $u_k$ and $v_{k+1}$ will be $\delta$-regular because there are no back arcs before 
-		
+	
+	Thos implies that prior to the first disconnected back neighbor, the nodes are $\delta$-regular. Next. we analyze the first back neighbor in this environment. There are two cases: when the children overlap and then they do not. 
+	
+	The case when the children do not overlap implies that the first disconnected back neighbor will be similar to the situation of an extra forward neighbor. A back arc is $u_k \to v_{k+1} \to w_j$ where $j \le k-1$. The nodes $u_k$ and $v_{k+1}$ will be $\delta$-regular because there are no back arcs before 
+	
 	\begin{theorem}[Seymour Property under Disjoint Back Arcs]
 		Let $G$ be a graph represented by an MCE, and let $u_k, v_{k+1} \in V(G)$ such that $v_{k+1} \in N^+(u_k)$. If the out-neighbors are completely disjoint ($N^+(v_{k+1}) \cap N^+(u_k) = \emptyset$), the degree bounds satisfy $|N^+(u_k)| \le \delta \le |N^+(v_{k+1})|$, then $u_k$ is a  Seymour vertex:
 		
@@ -379,9 +414,9 @@ The case when the children do not overlap implies that the first disconnected ba
 		Because $N^+(v_{k+1}) \subseteq N^{++}(u_k)$, it follows directly that:
 		
 		$$|N^+(v_{k+1})| \le |N^{++}(u_k)|$$
-
+		
 		The regularity condition gives the following bounds on the size of $N^+(u_k)$ and $N^+(z_j)$ by their location prior to the first disconnected back neighbor. 
-
+		
 		$$|N^+(u_k)| = |N^+(z_j)| = \delta $$
 		
 		We now chain the inequalities:
@@ -390,46 +425,46 @@ The case when the children do not overlap implies that the first disconnected ba
 		
 		Therefore, $|N^+(u_k)| \le |N^{++}(u_k)|$, making $u_k$ a Seymour vertex. 
 	\end{proof}		
-
-Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such a case, there is the possibility of an infinite descending chain. However, this MCE is based on a BFS-Lex tracersal, which gives a well founded set. This guarantees that any recursive decent must terminate. Thus, every terminal node in that chain must become a Seymour vertex. This implies that disconnected back arcs cannot exist in either case of an MCE. 
-				
-\begin{theorem}[Termination and Loop Closure of Back-Arc Chains]
-    Let $G$ be an MCE under the BFS-Lex coordinate system. Any recursive propagation of back-arcs forms a well-founded sequence that must terminate by closing a loop, thereby forcing a Seymour vertex.
-\end{theorem}
-
-\begin{proof}
-    Suppose for a contradiction that a vertex $v_{k+1} \in R_{k+1}$ initiates a sequence of back-arcs $\langle c_0, c_1, c_2, \dots \rangle$ where each step satisfies $c_i \to c_{i+1}$ with a layer drop of at least 2 ($\text{dist}(c_{i+1}) + 2 \le \text{dist}(c_i)$). 
-    
-    The vertices of $G$ are well-ordered by the BFS-Lex coordinate system. Consequently, there exists an \emph{earliest} back-arc in this sequence, originating from a minimal node $c_m$.
-    
-    To continue the sequence, the chain must either locate an even earlier back-arc or close a loop with an existing neighborhood. The node $c_m$ has been defined as the earliest back-arc, so no earlier back-arc can exist. Therefore, the sequence is forced to close a loop.
-    
-    This closing arc connects the back-arc path directly into the neighborhood of the original parent $u_k$ (of node $v_{k+1}$). This introduces an extra path of length 2 without increasing the first out-neighborhood size. This forces the second out-neighborhood to satisfy $|N^{++}(u_k)| \ge |N^{+}(u_k)|$ and makes $u_k$ a Seymour vertex.
-    
-    Since a minimum counterexample cannot contain any Seymour vertices, this configuration is unsustainable, proving that no such infinite back-arc chain can exist.
-\end{proof}
 	
-\section{Connected Back Neighbors}
+	Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such a case, there is the possibility of an infinite descending chain. However, this MCE is based on a BFS-Lex tracersal, which gives a well founded set. This guarantees that any recursive decent must terminate. Thus, every terminal node in that chain must become a Seymour vertex. This implies that disconnected back arcs cannot exist in either case of an MCE. 
+	
+	\begin{theorem}[Termination and Loop Closure of Back-Arc Chains]
+		Let $G$ be an MCE under the BFS-Lex coordinate system. Any recursive propagation of back-arcs forms a well-founded sequence that must terminate by closing a loop, thereby forcing a Seymour vertex.
+	\end{theorem}
+	
+	\begin{proof}
+		Suppose for a contradiction that a vertex $v_{k+1} \in R_{k+1}$ initiates a sequence of back-arcs $\langle c_0, c_1, c_2, \dots \rangle$ where each step satisfies $c_i \to c_{i+1}$ with a layer drop of at least 2 ($\text{dist}(c_{i+1}) + 2 \le \text{dist}(c_i)$). 
+		
+		The vertices of $G$ are well-ordered by the BFS-Lex coordinate system. Consequently, there exists an \emph{earliest} back-arc in this sequence, originating from a minimal node $c_m$.
+		
+		To continue the sequence, the chain must either locate an even earlier back-arc or close a loop with an existing neighborhood. The node $c_m$ has been defined as the earliest back-arc, so no earlier back-arc can exist. Therefore, the sequence is forced to close a loop.
+		
+		This closing arc connects the back-arc path directly into the neighborhood of the original parent $u_k$ (of node $v_{k+1}$). This introduces an extra path of length 2 without increasing the first out-neighborhood size. This forces the second out-neighborhood to satisfy $|N^{++}(u_k)| \ge |N^{+}(u_k)|$ and makes $u_k$ a Seymour vertex.
+		
+		Since a minimum counterexample cannot contain any Seymour vertices, this configuration is unsustainable, proving that no such infinite back-arc chain can exist.
+	\end{proof}
+	
+	\section{Connected Back Neighbors}
 	We have already covered both situations where there are no back neighbors and when there are disconnected back neighbors. In the first case we reached regularity in the MCE and in the second case we excluded disconnected back neighbors. 
 	
 	Thus, when we arrive at the case of connected back neighbors what we arrive at is the case of the first connected back neighbor and the question of where can it happen in a well ordering. 
-
+	
 	Regularity prior to the first connected back neighbor implies that every child node in that layer will need to send all of its exterior neighbors to the next layer. what this means is that a connected back neighbor would violate the bi-directional property of oriented graph. 
 	
 	\begin{theorem}
-	Let $G\in\mathcal{O}$ be an MCE represented by the rooted neighbors $R_0, R_1, \ldots, R_k$. Then the first connected back neighbor in $G$ cannot exist. 
+		Let $G\in\mathcal{O}$ be an MCE represented by the rooted neighbors $R_0, R_1, \ldots, R_k$. Then the first connected back neighbor in $G$ cannot exist. 
 	\end{theorem}
 	\begin{proof}
-	Theorems \ref {no_disj} and \ref{no_cbain} state that disconnected back neighbors are not possible. Further, from Theorem \ref{intbnd}, we have that $text{int}(u_k, v_{k+1}) = k+1$. The combination of the above two formulas yoelds that $text{ext}(u_k, v_{k+1}) = \delta - (k+1)$.
-
-This says that every $y_{k+1} \in R_{k+1}$ must be a parent to every node $z_{k+2} \in R_{k+2}$. 
-
-Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would create a bi-directional arc, violating the oriented graph property. Thus, connected back neighbors are not permitted 
+		Theorems \ref {no_disj} and \ref{no_cbain} state that disconnected back neighbors are not possible. Further, from Theorem \ref{intbnd}, we have that $text{int}(u_k, v_{k+1}) = k+1$. The combination of the above two formulas yoelds that $text{ext}(u_k, v_{k+1}) = \delta - (k+1)$.
+		
+		This says that every $y_{k+1} \in R_{k+1}$ must be a parent to every node $z_{k+2} \in R_{k+2}$. 
+		
+		Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would create a bi-directional arc, violating the oriented graph property. Thus, connected back neighbors are not permitted 
 	\end{proof}
-					
+	
 	\section{Graph Level Order} \label{glover}
 	
-		\begin{figure}
+	\begin{figure}
 		\centering
 		\begin{tikzpicture}[>=latex, line width=0.9pt]
 			
@@ -566,14 +601,14 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 	\end{proof}
 	
 	Because of this universal representation of graphs, when we speak of oriented graphs we are always talking of a Graph Level Order environment.
-						
+	
 	\subsection{Using Graph Level Order}
 	
 	With the Graph Level Order vocabulary established, these definitions now must connect to the mathematical foundation. Interior neighbors relate to the first neighbors of a parent. Exterior neighbors relate to the second neighbors. In an MCE environment, Theorem \ref{lbl} (Load Balance) shows the only purpose of these interior neighbors is to be forward-facing transitive triangles that reduce the parent’s second neighborhood.
-			
-			%	An edge $e$ is \textbf{unnecessary} to the MCE $G$ if replacing $e$ with an forward arc $e'$ in the MCE results in a graph that preserves the non-Seymour status of all vertices ($|N^{++}_{G'}(v)| < |N^{+}_{G'}(v)|$ for every $v \in V$).
-			
-				\begin{theorem}[Rooted Neighborhood Equivalence Relation]\label{nbhequiv}
+	
+	%	An edge $e$ is \textbf{unnecessary} to the MCE $G$ if replacing $e$ with an forward arc $e'$ in the MCE results in a graph that preserves the non-Seymour status of all vertices ($|N^{++}_{G'}(v)| < |N^{+}_{G'}(v)|$ for every $v \in V$).
+	
+	\begin{theorem}[Rooted Neighborhood Equivalence Relation]\label{nbhequiv}
 		Let $G$ be a Minimum Counterexample (MCE). Every vertex within a rooted neighborhood $R_k$ is indistinguishable under the rooted degree-preserving mapping $\sim$. The resulting quotient graph $G/\sim$ is a well-defined hyper-node graph that preserves the out-degree and non-Seymour status of $G$.
 	\end{theorem}
 	\begin{proof}
@@ -646,7 +681,7 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 		\end{tikzpicture}
 		\caption{ \textit { \textbf{Set cover implies a cycle}. Nodes have out-degree = 1 in $N^+(u)$. This implies the existence of at least one cycle in $N^+(u)$, allowing for a reduction in the size of $N^{++}(u)$.  }}
 	\end{figure}
-		
+	
 	\begin{figure}
 		\centering
 		\begin{tikzpicture}[
@@ -712,7 +747,7 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 		
 		The remaining triangles are the following: Case 1: $x \to y \to z \to x$, all in $R_i$, and the Load-Balancing Triangle (Case 7). A triangle from Case 1 is not a load-balancing triangle, so it contains an extra interior arc. By Theorem \ref{lbl} (Load Balance) $G$ cannot be an MCE.
 	\end{proof}
-			
+	
 	\begin{theorem}[Resolution of Seymour Diamonds]\label{smdiam}
 		Let $G \in \mathcal{O}$ be a Graph Level Order containing a Seymour diamond. Then the ambiguity is resolved via exterior neighbors. \end{theorem}
 	
@@ -724,484 +759,484 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 		The exterior neighbors are sets, so any node reached by multiple length-2 paths is counted only once in $N^{++}(u_i)$.
 		This eliminates double-counting for the node $u_i$.
 	\end{proof}
-			
-The two main hindrances of this conjecture have been shown that they are not roadblocks. The data structure used throughout this paper has been defined. This data structure provides an understanding of interior and exterior arcs, and guides the search for a counterexample. It also provides understanding of non-Seymour nodes and guides the nodes in this proof process.
-
-\section{Main Theorem} \label{main}
-
-\begin{example}
-	\begin{table}[h!]
+	
+	The two main hindrances of this conjecture have been shown that they are not roadblocks. The data structure used throughout this paper has been defined. This data structure provides an understanding of interior and exterior arcs, and guides the search for a counterexample. It also provides understanding of non-Seymour nodes and guides the nodes in this proof process.
+	
+	\section{Main Theorem} \label{main}
+	
+	\begin{example}
+		\begin{table}[h!]
+			\centering
+			\begin{tabular}{|c|c|c|}
+				\hline
+				\textbf{Rooted Neighborhood} & \textbf{Nodes} & \textbf{Size} \\
+				\hline
+				$R_0$ & 0 & 1 \\
+				$R_1$ & 1, 2, 3 & 3 \\
+				$R_2$ & 4, 5 & 2 \\
+				\hline
+			\end{tabular}
+			\caption{\textit{A look at Example minimum out-degree 3 example through the lens of rooted neighborhoods and their sizes}} \label{exdegdoub2}
+		\end{table}
+	\end{example}
+	
+	We begin this section by contrasting two examples. Tables \ref{exdegdoub2} and \ref{exdegdoub12} give two different reasons for the emergence of a Seymour vertex. In Table \ref{exdegdoub2}, the presence of an oriented graph of size two implies that both those nodes cannot have an out-degree of 1. That would violate the oriented graph property. Hence, a node in $R_2$ needs to send at least 3 nodes to $R_3$ forcing a node in $R_1$ to be a Seymour vertex.
+	
+	Conversely, Table \ref{exdegdoub12} because of the neighborhood density of $R_3$. There are 5 nodes in $R_3$ at distance 3 from the root. Theorem \ref{lbl} (Load Balance) requires each node in $R_3$ to have an interior degree of $3$. This requires 15 arcs. This is impossible, as a 5-node oriented graph can have only 10 arcs by the binomial theorem. This will force a Seymour vertex.
+	
+	\begin{example}
+		\begin{table}[h!]
+			\centering
+			\begin{tabular}{|c|c|c|}
+				\hline
+				\textbf{Rooted Neighborhood} & \textbf{Nodes} & \textbf{Size} \\
+				\hline
+				$R_0$ & 0 & 1 \\
+				$R_1$ & 1, 2, 3, 4, 5, 6, 7 & 7 \\
+				$R_2$ & 8, 9, 10, 11, 12, 13 & 6 \\
+				$R_3$ & 14, 15, 16, 17, 18 & 5 \\
+				\hline
+			\end{tabular}
+			\caption{\textit{Minimum out-degree 7 example through the lens of rooted neighborhoods}} \label{exdegdoub12}
+		\end{table}
+	\end{example}
+	
+	\pgfplotsset{compat=1.18}
+	\begin{figure}
 		\centering
-		\begin{tabular}{|c|c|c|}
-			\hline
-			\textbf{Rooted Neighborhood} & \textbf{Nodes} & \textbf{Size} \\
-			\hline
-			$R_0$ & 0 & 1 \\
-			$R_1$ & 1, 2, 3 & 3 \\
-			$R_2$ & 4, 5 & 2 \\
-			\hline
-		\end{tabular}
-		\caption{\textit{A look at Example minimum out-degree 3 example through the lens of rooted neighborhoods and their sizes}} \label{exdegdoub2}
-	\end{table}
-\end{example}
-
-We begin this section by contrasting two examples. Tables \ref{exdegdoub2} and \ref{exdegdoub12} give two different reasons for the emergence of a Seymour vertex. In Table \ref{exdegdoub2}, the presence of an oriented graph of size two implies that both those nodes cannot have an out-degree of 1. That would violate the oriented graph property. Hence, a node in $R_2$ needs to send at least 3 nodes to $R_3$ forcing a node in $R_1$ to be a Seymour vertex.
-
-Conversely, Table \ref{exdegdoub12} because of the neighborhood density of $R_3$. There are 5 nodes in $R_3$ at distance 3 from the root. Theorem \ref{lbl} (Load Balance) requires each node in $R_3$ to have an interior degree of $3$. This requires 15 arcs. This is impossible, as a 5-node oriented graph can have only 10 arcs by the binomial theorem. This will force a Seymour vertex.
-
-\begin{example}
-	\begin{table}[h!]
-		\centering
-		\begin{tabular}{|c|c|c|}
-			\hline
-			\textbf{Rooted Neighborhood} & \textbf{Nodes} & \textbf{Size} \\
-			\hline
-			$R_0$ & 0 & 1 \\
-			$R_1$ & 1, 2, 3, 4, 5, 6, 7 & 7 \\
-			$R_2$ & 8, 9, 10, 11, 12, 13 & 6 \\
-			$R_3$ & 14, 15, 16, 17, 18 & 5 \\
-			\hline
-		\end{tabular}
-		\caption{\textit{Minimum out-degree 7 example through the lens of rooted neighborhoods}} \label{exdegdoub12}
-	\end{table}
-\end{example}
-
-\pgfplotsset{compat=1.18}
-\begin{figure}
-	\centering
-	\begin{tikzpicture}[scale=0.7]
-		\begin{axis}[
-			width=11cm,
-			height=7cm,
-			xlabel={Minimum out-degree $\delta$},
-			ylabel={Termination depth},
-			xmin=2.5, xmax=14.5,
-			ymin=0.5, ymax=6,
-			xtick={3,4,5,6,7,8,9,10,11,12,13,14},
-			ytick={1,2,3,4,5},
-			grid=both,
-			grid style={dashed, gray!30},
-			legend style={at={(0.02,0.98)},anchor=north west}
-			]
-			
-			% Scatter points
-			
-			\addplot[
-			only marks,
-			mark=*,
-			mark size=2pt
-			] coordinates {
-				(3,2)
-				(4,2)
-				(5,2)
-				(6,3)
-				(7,3)
-				(8,3)
-				(9,4)
-				(10,4)
-				(11,4)
-				(12,5)
-				(13,5)
-				(14,5)
-			};
-			
-			\addlegendentry{Observed termination depth}
-			
-			% Linear interpolation
-			
-			\addplot[
-			thick,
-			blue,
-			domain=3:14
-			] {(x-1)/3 + 1};
-			
-			\addlegendentry{Linear trend $y = \delta/3 + 1$}\begin{tikzpicture}[
-				every node/.style={draw, rectangle, rounded corners, minimum height=7mm},
-				arrow/.style={->, thick}
+		\begin{tikzpicture}[scale=0.7]
+			\begin{axis}[
+				width=11cm,
+				height=7cm,
+				xlabel={Minimum out-degree $\delta$},
+				ylabel={Termination depth},
+				xmin=2.5, xmax=14.5,
+				ymin=0.5, ymax=6,
+				xtick={3,4,5,6,7,8,9,10,11,12,13,14},
+				ytick={1,2,3,4,5},
+				grid=both,
+				grid style={dashed, gray!30},
+				legend style={at={(0.02,0.98)},anchor=north west}
 				]
-			\end{tikzpicture}
-		\end{axis}
-	\end{tikzpicture}
-	\caption{\textit{The scatter points represent the last feasible rooted neighborhood before non-decreasing is forced. The linear trend illustrates the bound predicted by Corollary~\ref{smfmla}, showing termination at approximately $\lceil\delta/3\rceil$.}}
+				
+				% Scatter points
+				
+				\addplot[
+				only marks,
+				mark=*,
+				mark size=2pt
+				] coordinates {
+					(3,2)
+					(4,2)
+					(5,2)
+					(6,3)
+					(7,3)
+					(8,3)
+					(9,4)
+					(10,4)
+					(11,4)
+					(12,5)
+					(13,5)
+					(14,5)
+				};
+				
+				\addlegendentry{Observed termination depth}
+				
+				% Linear interpolation
+				
+				\addplot[
+				thick,
+				blue,
+				domain=3:14
+				] {(x-1)/3 + 1};
+				
+				\addlegendentry{Linear trend $y = \delta/3 + 1$}\begin{tikzpicture}[
+					every node/.style={draw, rectangle, rounded corners, minimum height=7mm},
+					arrow/.style={->, thick}
+					]
+				\end{tikzpicture}
+			\end{axis}
+		\end{tikzpicture}
+		\caption{\textit{The scatter points represent the last feasible rooted neighborhood before non-decreasing is forced. The linear trend illustrates the bound predicted by Corollary~\ref{smfmla}, showing termination at approximately $\lceil\delta/3\rceil$.}}
+		
+	\end{figure}\label{scattplt}
 	
-\end{figure}\label{scattplt}
-
-Example \ref{scattplt} shows the feasibility of rooted neighborhoods with minimum out-degree values $\delta$ ranging from 3 to 14. A clear pattern is evident, as shown by the trend line. Regardless of $\delta$, a Seymour vertex is always found at $\lfloor \frac{\delta}{3} \rfloor+1$. This is discussed further in Theorem \ref{smfmla} (Last Rooted Neighborhood).
-
-\begin{figure}
-	\centering
-	\begin{tikzpicture}[scale=0.7]
-		\begin{axis}[
-			width=12cm, height=9cm,
-			axis lines=left,
-			grid=both,
-			xmin=0, xmax=30,
-			ymin=0, ymax=200,
-			xlabel={Size of Rooted Neighborhoods},
-			ylabel={Number of Arcs},
-			title={Distance to Seymour Vertex ($d \in [2, 27]$)},
-			clip=false
-			]
+	Example \ref{scattplt} shows the feasibility of rooted neighborhoods with minimum out-degree values $\delta$ ranging from 3 to 14. A clear pattern is evident, as shown by the trend line. Regardless of $\delta$, a Seymour vertex is always found at $\lfloor \frac{\delta}{3} \rfloor+1$. This is discussed further in Theorem \ref{smfmla} (Last Rooted Neighborhood).
+	
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}[scale=0.7]
+			\begin{axis}[
+				width=12cm, height=9cm,
+				axis lines=left,
+				grid=both,
+				xmin=0, xmax=30,
+				ymin=0, ymax=200,
+				xlabel={Size of Rooted Neighborhoods},
+				ylabel={Number of Arcs},
+				title={Distance to Seymour Vertex ($d \in [2, 27]$)},
+				clip=false
+				]
+				
+				% 1. Boundary: y = x(x-1)/2
+				\addplot[thick, black, domain=1:21, samples=100] {x*(x-1)/2}
+				node[pos=0.9, right] {$y = \binom{x}{2}$};
+				
+				% 2. Automated Path Generator using \pgfplotsinvokeforeach
+				% Note: Use #1 instead of \d inside this command
+				\pgfplotsinvokeforeach{3,4,...,27}{
+					\addplot[blue, thick, opacity=0.6, domain=0:{floor(#1/3)}, samples=9]
+					({ #1 - x }, { (#1 - x) * (x + 1) });
+					% y = -x^2 + (d+1)x
+					% Draw the red dot at the Sink
+					\fill[red] (axis cs:{ #1 - floor(#1/3) }, { (#1 - floor(#1/3)) * (floor(#1/3) + 1) }) circle (1.5pt);
+				}
+				\node[blue, font=\small, rotate=-60] at (axis cs:24,120) {$y = -x^2 + (\delta+1)x$};
+			\end{axis}
+		\end{tikzpicture}
+		\caption{\textit{\textbf{Emergence of a maximally dense, rooted neighborhood}. Blue state-transition paths show the contraction of rooted neighborhood size (supply) and quadratic growth in interior arc requirements (demand). These are bounded above by $y=\binom{x}{2}$. Their intersection causes a terminal sink that corresponds to the last dense, rooted neighborhood with multiple Seymour vertices. Each of these blue lines is plotted along the quadratic arc of $y = -x^2 + (\delta+1) \cdot x$. }}
+		\label{lastneightbl}
+	\end{figure}
+	
+	Figure \ref{lastneightbl} illustrates the fundamental breakdown that occurs when the model's supply and demand requirements clash within these rooted neighborhoods. Vertex capacity decreases linearly. The interior arc requirements grow quadratically. This is modeled by the equation $y = -x^2 + (\delta + 1)\cdot x$.
+	
+	The concavity of these paths reflects the accelerating neighborhood density required to maintain a decreasing sequence of neighborhoods. The $(\delta+1) \cdot x$ term is the ideal arc count. It is the Load Balance Theorem \ref{lbl} showing the balance between interior and exterior neighbors. The $-x^2$ is the compression penalty issued by the non-Seymour nodes. The resulting equation $(\delta+1)x - x^2$ is the actual internal neighborhood density. The variable $x$ is a double metric, defining both the distance from the root and the number of arcs required per node at that distance.
+	
+	\begin{theorem}[Last Rooted Neighborhood] \label{smfmla}
+		Let $G$ be an oriented graph with minimum out-degree $\delta \ge 3$. Let $\mathcal{R} = \{R_0, R_1, \dots, R_k\}$ be the rooted neighborhoods of $V$ originating at a root $v_0$ of minimum out-degree.
+		
+		If every $u \in G$ is non-Seymour, then:
+		\begin{enumerate}
+			\item The maximum number of rooted neighborhoods is bounded by $k = \lceil \frac{\delta}{3} \rceil$.
+			\item The cardinality of the terminal level set is $|R_k| = \delta - k + 1$.
+			\item Every node in $R_{k-1}$ belongs to at least $k-1$ disjoint cycles.
+		\end{enumerate}
+	\end{theorem}
+	\begin{proof}
+		Fix $i \ge 1$ and consider the rooted neighborhood $R_i$. By the Load Balance Theorem \ref{lbl}, every node in $R_i$ must have an interior degree of exactly $i$. The Iterative Load-Balance Corollary \ref{ilb} converts each node's interior degrees into transitive triangles, yielding a required set of disjoint interior arcs of size:
+		\[ |R_i| \cdot i \tag{1} \]
+		
+		As an oriented graph, the number of interior arcs in $R_i$ is bounded above by the maximum number of oriented off-diagonal pairs among vertices in $R_i$:
+		\[ |E(R_i)| \le \binom{|R_i|}{2} = \frac{|R_i|(|R_i| - 1)}{2} \tag{2} \]
+		
+		Combining (1) and (2) gives the feasibility condition:
+		\[ |R_i| \cdot i \le \frac{|R_i|(|R_i| - 1)}{2} \quad \implies \quad 2i \le |R_i| - 1 \quad \implies \quad |R_i| \ge 2i + 1. \tag{3} \]
+		
+		Next, by Corollary \ref{nbhsizefmla} (Formula for Rooted Neighborhood Size), the assumption that all nodes are non-Seymour enforces a global contraction of neighborhoods across levels:
+		\[ |R_i| = \delta - (i - 1) = \delta - i + 1. \tag{4} \]
+		
+		Substituting (4) into the lower bound from (3):
+		\[ \delta - i + 1 \ge 2i + 1 \quad \implies \quad \delta \ge 3i \quad \implies \quad i \le \frac{\delta}{3}. \tag{5} \]
+		
+		Thus, for any rooted neighborhood $R_i$ to exist without forcing Seymour vertices, the depth index $i$ cannot exceed $\lceil \frac{\delta}{3} \rceil$. 
+		
+		When $i$ exceeds $\frac{\delta}{3}$, inequality (5) fails: the required number of interior arcs strictly exceeds the capacity that $R_i$ can support. This deficit forces additional exterior arcs to be redirected inward. By the Load Balance Theorem \ref{lbl}, this redirection produces supplementary transitive triangles, which guarantees the existence of a Seymour vertex. Therefore, the rooted neighborhoods cannot extend beyond $k = \lceil \frac{\delta}{3} \rceil$, establishing both the level bound and the terminal cardinality $|R_k| = \delta - k + 1$. Part (3) follows directly from the guaranteed accumulation of $k-1$ disjoint cycles required to sustain the interior degree constraint at depth $k-1$.
+	\end{proof}
+	
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}[>=latex, line width=0.9pt, scale=0.75]
+			% Variables
+			\def\deltaVal{9}
+			\def\intersectX{3} % Calculated: 2i+1 = 9-i+1 => 3i = 9 => i=3
+			\def\intersectY{7}
 			
-			% 1. Boundary: y = x(x-1)/2
-			\addplot[thick, black, domain=1:21, samples=100] {x*(x-1)/2}
-			node[pos=0.9, right] {$y = \binom{x}{2}$};
+			% Shaded feasible region with pattern
+			\fill[blue!10!black!20] (0.5,2) -- plot[domain=0.5:\intersectX] (\x, {2*\x + 1})
+			-- plot[domain=\intersectX:0.5] (\x, {\deltaVal - \x + 1}) -- cycle;
 			
-			% 2. Automated Path Generator using \pgfplotsinvokeforeach
-			% Note: Use #1 instead of \d inside this command
-			\pgfplotsinvokeforeach{3,4,...,27}{
-				\addplot[blue, thick, opacity=0.6, domain=0:{floor(#1/3)}, samples=9]
-				({ #1 - x }, { (#1 - x) * (x + 1) });
-				% y = -x^2 + (d+1)x
-				% Draw the red dot at the Sink
-				\fill[red] (axis cs:{ #1 - floor(#1/3) }, { (#1 - floor(#1/3)) * (floor(#1/3) + 1) }) circle (1.5pt);
+			% Axes
+			\draw[->, thick] (0.5,2) -- (0.5,10) node[above] {\small $|R_i|$ (Nodes)};
+			\draw[->, thick] (0.5,2) -- (8.0,2) node[right] {\small $i$ (Layer Distance)};
+			
+			% Constraint 1: Supply
+			\draw[blue, ultra thick, domain=0.5:4.2] plot (\x, {2*\x + 1})
+			node[right, xshift=2pt] {\footnotesize $|R_i| \ge 2i+1$};
+			
+			% Constraint 2: Demand
+			\draw[red, ultra thick, domain=0.5:7] plot (\x, {\deltaVal - \x + 1})
+			node[right] {\footnotesize $|R_i| = \delta-i+1$};
+			
+			% Intersection & Collapse marker
+			\draw[dashed, gray] (\intersectX, 2) -- (\intersectX, \intersectY);
+			\filldraw[black] (\intersectX, \intersectY) circle (2pt);
+			
+			% Labels
+			\node[below] at (\intersectX, 2) {$\frac{\delta}{3}$};
+			\node[fill=white, inner sep=2pt] at (1.5, 4.5) {\small \textbf{FEASIBLE}};
+			
+			% Annotation for the Collapse
+			\draw[<-, gray] (4.5, 6) -- (5.5, 7) node[above, text width=2cm, align=center]
+			{\scriptsize \color{red!70!black} \textbf{Collapse Zone} \\ No valid configurations};
+			
+		\end{tikzpicture}
+		\caption{\textit{\textbf{Intersection of Supply and Demand.} Supply is the number of nodes necessary for a MCE, bounded by the binomial theorem ($|R_i| \geq 2\cdot i + 1$). Demand is controlled by the decreasing size of the rooted neighborhoods. Beyond the threshold of $i = \delta/3$, there are no possibilities to support the interior cycles necessary, resulting in a collapse.
+		}}
+	\end{figure}
+	
+	Any directed graph $G \in \mathcal{O}$ in an MCE with more than three nodes will eventually have a last rooted neighborhood at distance $\lceil \delta / 3 \rceil$ by \ref{smfmla}. The size of this neighborhood will be $\lceil 2 \dot \delta / 3 \rceil$. This is an integer greater than 1 as long as $\delta > 1.5$, which must be true for there to be cycles to be present in $G$.
+	
+	\begin{corollary}[Multiple Seymour Vertices] \label{multiDDNodes}
+		Let $G \in \mathcal{O}$ be an oriented graph with minimum out-degree $\delta$, and let $R_i$ be the last, most dense rooted neighborhood. Then every node in $R_i$ is a Seymour vertex.
+	\end{corollary}
+	
+	\subsection{Algorithm \& Complexity Theory}
+	
+	\begin{theorem}[Algorithm Complexity] \label{complx}
+		Let $G$ be an oriented graph. The Graph Level Order algorithm runs in $$O(|V| + |E|),$$ where $|V|$ is the number of vertices and $|E|$ is the number of edges in $G$.
+	\end{theorem}
+	The proof follows the implementation of the BFS algorithm through the neighborhoods. Each node is visited only one time, giving it an $O(|V| + |E|)$ time.
+	
+	The algorithm can find a Seymour vertex in linear time. Moreover, it will work for any oriented graph. The analysis shows that it will not be a problem on larger graphs.
+	
+	\section{Conclusion}
+	
+	This work approached the SSNC through a minimum counterexample angle. Naturally, that led to layered embeddings of oriented graphs. By starting from a minimum out-degree node, the well ordering that was established gave the minimum counterexample its power.
+	
+	The key insight is that BFS is not simply a traversal algorithm. Along with lexicographic ordering, this algorithm can impose a well-ordering on a graph. By connecting the neighborhoods to BFS layers, the structure of Seymour vertices became dependent on cycle packing.
+	
+	This work also introduces techniques of partitioning and the dual metrics of degree and distance. These methods may apply beyond the SSNC, especially to problems in graph theory that invite constructive, algorithmic approaches rather than purely existential ones.
+	
+	Looking forward, this dual perspective invites further exploration of many still open problems. This suggests that other longstanding conjectures may also yield to methods that combine insights with algorithmic organization.
+	
+	\section{Extensions}\label{furthework}
+	\subsection{Alon-McDiarmid-Molloy}\label{further Work}
+	
+	The cycle packing nature of the Graph Level Order algorithm links the SSNC to two other well known conjectures, the Alon-McDiarmid-Molloy (AMM) Cycle Packing Conjecture, Caccetta-Häggkvist (CH).
+	
+	\begin{conjecture}[AMM]
+		If $G$ is a $k$-regular directed graph on $n$
+		vertices with no parallel edges, it contains a collection of at least $\frac{k+1}{2}$
+		edge-disjoint directed cycles.
+	\end{conjecture}
+	
+	%	If we strengthen the Load Balance Theorem to require that each node, not only has exactly $k$ interior neighbors but is also a member of exactly $k$ interior neighbors, then we can use Hierholzer's Algorithm to find $k$ disjoint cycles. 
+	
+	
+	\begin{corollary}[AMM via Cycle Packing]\label{ammthm}
+		Let $G$ be an MCE with minimum degree $\delta$. The Graph Level Order decomposition forces the existence of $T_{\delta/3}$ edge-disjoint cycles. This matches the AMM requirement for all $\delta \ge 3$.
+	\end{corollary}
+	\begin{corollary}
+		The Load-Balance and Reduction theorems establish that a minimum counterexample must be $\delta$-regular.
+		At distance $i$ from the root, the interior out-degree of every node is exactly $i$ (Theorem \ref{lbl}). As shown by the application of Hierholzer's algorithm \ref{ilb}, these Rooted Neighborhoods are a collection of disjoint cycles.
+		The total number of edge-disjoint cycles $C_{total}$ is the sum of the cycles at each level:
+		$$C_{total} = \sum_{i=1}^{\delta/3} i = \frac{(\delta/3)(\delta/3 + 1)}{2} = T_{\delta/3}$$
+		For $\delta=3$, $T_1 = 1 \ge \frac{3+1}{2} = 2$ (with the root-level cycle). For all $\delta > 3$, the triangular sum $T_{\delta/3}$ grows quadratically, whereas the AMM bound $\frac{\delta+1}{2}$ grows only linearly.
+	\end{corollary}
+	
+	Corollary \ref{ammthm} connects the SSNC directly to the AMM $k$-regular cycle packing conjecture. Remember that Corollary \ref{lbl} (Load Balance Theorem) declares that at each distance $k$, the nodes each have out-degree $k$.
+	
+	\subsection{Caccetta-Häggkvist}
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}[>=latex, line width=0.9pt]
+			% --- 2. Nodes (Main Layer) ---
+			% R0 Parent
+			\node[fill=green!70!black,draw, circle, inner sep=2pt] (v0) at (0, -0.5) {\(v_0\)};
+			% R1 Cycle Nodes
+			\def\n{9} \def\radius{1.5} \def\centerx{3.5}
+			\foreach \i in {1,...,\n} {
+				\node[fill=cyan, draw, circle, inner sep=1.2pt] (v1\i) at ({0.75*\centerx + \radius*cos(360/\n*(\i-1))}, {\radius*sin(360/\n*(\i-1))}) {\small \(v_{1,\i}\)};
 			}
-			\node[blue, font=\small, rotate=-60] at (axis cs:24,120) {$y = -x^2 + (\delta+1)x$};
-		\end{axis}
-	\end{tikzpicture}
-	\caption{\textit{\textbf{Emergence of a maximally dense, rooted neighborhood}. Blue state-transition paths show the contraction of rooted neighborhood size (supply) and quadratic growth in interior arc requirements (demand). These are bounded above by $y=\binom{x}{2}$. Their intersection causes a terminal sink that corresponds to the last dense, rooted neighborhood with multiple Seymour vertices. Each of these blue lines is plotted along the quadratic arc of $y = -x^2 + (\delta+1) \cdot x$. }}
-	\label{lastneightbl}
-\end{figure}
-
-Figure \ref{lastneightbl} illustrates the fundamental breakdown that occurs when the model's supply and demand requirements clash within these rooted neighborhoods. Vertex capacity decreases linearly. The interior arc requirements grow quadratically. This is modeled by the equation $y = -x^2 + (\delta + 1)\cdot x$.
-
-The concavity of these paths reflects the accelerating neighborhood density required to maintain a decreasing sequence of neighborhoods. The $(\delta+1) \cdot x$ term is the ideal arc count. It is the Load Balance Theorem \ref{lbl} showing the balance between interior and exterior neighbors. The $-x^2$ is the compression penalty issued by the non-Seymour nodes. The resulting equation $(\delta+1)x - x^2$ is the actual internal neighborhood density. The variable $x$ is a double metric, defining both the distance from the root and the number of arcs required per node at that distance.
-
-\begin{theorem}[Last Rooted Neighborhood] \label{smfmla}
-	Let $G$ be an oriented graph with minimum out-degree $\delta \ge 3$. Let $\mathcal{R} = \{R_0, R_1, \dots, R_k\}$ be the rooted neighborhoods of $V$ originating at a root $v_0$ of minimum out-degree.
-	
-	If every $u \in G$ is non-Seymour, then:
-	\begin{enumerate}
-		\item The maximum number of rooted neighborhoods is bounded by $k = \lceil \frac{\delta}{3} \rceil$.
-		\item The cardinality of the terminal level set is $|R_k| = \delta - k + 1$.
-		\item Every node in $R_{k-1}$ belongs to at least $k-1$ disjoint cycles.
-	\end{enumerate}
-\end{theorem}
-\begin{proof}
-	Fix $i \ge 1$ and consider the rooted neighborhood $R_i$. By the Load Balance Theorem \ref{lbl}, every node in $R_i$ must have an interior degree of exactly $i$. The Iterative Load-Balance Corollary \ref{ilb} converts each node's interior degrees into transitive triangles, yielding a required set of disjoint interior arcs of size:
-	\[ |R_i| \cdot i \tag{1} \]
-	
-	As an oriented graph, the number of interior arcs in $R_i$ is bounded above by the maximum number of oriented off-diagonal pairs among vertices in $R_i$:
-	\[ |E(R_i)| \le \binom{|R_i|}{2} = \frac{|R_i|(|R_i| - 1)}{2} \tag{2} \]
-	
-	Combining (1) and (2) gives the feasibility condition:
-	\[ |R_i| \cdot i \le \frac{|R_i|(|R_i| - 1)}{2} \quad \implies \quad 2i \le |R_i| - 1 \quad \implies \quad |R_i| \ge 2i + 1. \tag{3} \]
-	
-	Next, by Corollary \ref{nbhsizefmla} (Formula for Rooted Neighborhood Size), the assumption that all nodes are non-Seymour enforces a global contraction of neighborhoods across levels:
-	\[ |R_i| = \delta - (i - 1) = \delta - i + 1. \tag{4} \]
-	
-	Substituting (4) into the lower bound from (3):
-	\[ \delta - i + 1 \ge 2i + 1 \quad \implies \quad \delta \ge 3i \quad \implies \quad i \le \frac{\delta}{3}. \tag{5} \]
-	
-	Thus, for any rooted neighborhood $R_i$ to exist without forcing Seymour vertices, the depth index $i$ cannot exceed $\lceil \frac{\delta}{3} \rceil$. 
-	
-	When $i$ exceeds $\frac{\delta}{3}$, inequality (5) fails: the required number of interior arcs strictly exceeds the capacity that $R_i$ can support. This deficit forces additional exterior arcs to be redirected inward. By the Load Balance Theorem \ref{lbl}, this redirection produces supplementary transitive triangles, which guarantees the existence of a Seymour vertex. Therefore, the rooted neighborhoods cannot extend beyond $k = \lceil \frac{\delta}{3} \rceil$, establishing both the level bound and the terminal cardinality $|R_k| = \delta - k + 1$. Part (3) follows directly from the guaranteed accumulation of $k-1$ disjoint cycles required to sustain the interior degree constraint at depth $k-1$.
-\end{proof}
-
-\begin{figure}
-	\centering
-	\begin{tikzpicture}[>=latex, line width=0.9pt, scale=0.75]
-		% Variables
-		\def\deltaVal{9}
-		\def\intersectX{3} % Calculated: 2i+1 = 9-i+1 => 3i = 9 => i=3
-		\def\intersectY{7}
-		
-		% Shaded feasible region with pattern
-		\fill[blue!10!black!20] (0.5,2) -- plot[domain=0.5:\intersectX] (\x, {2*\x + 1})
-		-- plot[domain=\intersectX:0.5] (\x, {\deltaVal - \x + 1}) -- cycle;
-		
-		% Axes
-		\draw[->, thick] (0.5,2) -- (0.5,10) node[above] {\small $|R_i|$ (Nodes)};
-		\draw[->, thick] (0.5,2) -- (8.0,2) node[right] {\small $i$ (Layer Distance)};
-		
-		% Constraint 1: Supply
-		\draw[blue, ultra thick, domain=0.5:4.2] plot (\x, {2*\x + 1})
-		node[right, xshift=2pt] {\footnotesize $|R_i| \ge 2i+1$};
-		
-		% Constraint 2: Demand
-		\draw[red, ultra thick, domain=0.5:7] plot (\x, {\deltaVal - \x + 1})
-		node[right] {\footnotesize $|R_i| = \delta-i+1$};
-		
-		% Intersection & Collapse marker
-		\draw[dashed, gray] (\intersectX, 2) -- (\intersectX, \intersectY);
-		\filldraw[black] (\intersectX, \intersectY) circle (2pt);
-		
-		% Labels
-		\node[below] at (\intersectX, 2) {$\frac{\delta}{3}$};
-		\node[fill=white, inner sep=2pt] at (1.5, 4.5) {\small \textbf{FEASIBLE}};
-		
-		% Annotation for the Collapse
-		\draw[<-, gray] (4.5, 6) -- (5.5, 7) node[above, text width=2cm, align=center]
-		{\scriptsize \color{red!70!black} \textbf{Collapse Zone} \\ No valid configurations};
-		
-	\end{tikzpicture}
-	\caption{\textit{\textbf{Intersection of Supply and Demand.} Supply is the number of nodes necessary for a MCE, bounded by the binomial theorem ($|R_i| \geq 2\cdot i + 1$). Demand is controlled by the decreasing size of the rooted neighborhoods. Beyond the threshold of $i = \delta/3$, there are no possibilities to support the interior cycles necessary, resulting in a collapse.
-	}}
-\end{figure}
-
-Any directed graph $G \in \mathcal{O}$ in an MCE with more than three nodes will eventually have a last rooted neighborhood at distance $\lceil \delta / 3 \rceil$ by \ref{smfmla}. The size of this neighborhood will be $\lceil 2 \dot \delta / 3 \rceil$. This is an integer greater than 1 as long as $\delta > 1.5$, which must be true for there to be cycles to be present in $G$.
-
-\begin{corollary}[Multiple Seymour Vertices] \label{multiDDNodes}
-	Let $G \in \mathcal{O}$ be an oriented graph with minimum out-degree $\delta$, and let $R_i$ be the last, most dense rooted neighborhood. Then every node in $R_i$ is a Seymour vertex.
-\end{corollary}
-
-\subsection{Algorithm \& Complexity Theory}
-
-\begin{theorem}[Algorithm Complexity] \label{complx}
-	Let $G$ be an oriented graph. The Graph Level Order algorithm runs in $$O(|V| + |E|),$$ where $|V|$ is the number of vertices and $|E|$ is the number of edges in $G$.
-\end{theorem}
-The proof follows the implementation of the BFS algorithm through the neighborhoods. Each node is visited only one time, giving it an $O(|V| + |E|)$ time.
-
-The algorithm can find a Seymour vertex in linear time. Moreover, it will work for any oriented graph. The analysis shows that it will not be a problem on larger graphs.
-
-\section{Conclusion}
-
-This work approached the SSNC through a minimum counterexample angle. Naturally, that led to layered embeddings of oriented graphs. By starting from a minimum out-degree node, the well ordering that was established gave the minimum counterexample its power.
-
-The key insight is that BFS is not simply a traversal algorithm. Along with lexicographic ordering, this algorithm can impose a well-ordering on a graph. By connecting the neighborhoods to BFS layers, the structure of Seymour vertices became dependent on cycle packing.
-
-This work also introduces techniques of partitioning and the dual metrics of degree and distance. These methods may apply beyond the SSNC, especially to problems in graph theory that invite constructive, algorithmic approaches rather than purely existential ones.
-
-Looking forward, this dual perspective invites further exploration of many still open problems. This suggests that other longstanding conjectures may also yield to methods that combine insights with algorithmic organization.
-
-\section{Extensions}\label{furthework}
-\subsection{Alon-McDiarmid-Molloy}\label{further Work}
-
-The cycle packing nature of the Graph Level Order algorithm links the SSNC to two other well known conjectures, the Alon-McDiarmid-Molloy (AMM) Cycle Packing Conjecture, Caccetta-Häggkvist (CH).
-
-\begin{conjecture}[AMM]
-	If $G$ is a $k$-regular directed graph on $n$
-	vertices with no parallel edges, it contains a collection of at least $\frac{k+1}{2}$
-	edge-disjoint directed cycles.
-\end{conjecture}
-
-%	If we strengthen the Load Balance Theorem to require that each node, not only has exactly $k$ interior neighbors but is also a member of exactly $k$ interior neighbors, then we can use Hierholzer's Algorithm to find $k$ disjoint cycles. 
-
-
-\begin{corollary}[AMM via Cycle Packing]\label{ammthm}
-	Let $G$ be an MCE with minimum degree $\delta$. The Graph Level Order decomposition forces the existence of $T_{\delta/3}$ edge-disjoint cycles. This matches the AMM requirement for all $\delta \ge 3$.
-\end{corollary}
-\begin{corollary}
-	The Load-Balance and Reduction theorems establish that a minimum counterexample must be $\delta$-regular.
-	At distance $i$ from the root, the interior out-degree of every node is exactly $i$ (Theorem \ref{lbl}). As shown by the application of Hierholzer's algorithm \ref{ilb}, these Rooted Neighborhoods are a collection of disjoint cycles.
-	The total number of edge-disjoint cycles $C_{total}$ is the sum of the cycles at each level:
-	$$C_{total} = \sum_{i=1}^{\delta/3} i = \frac{(\delta/3)(\delta/3 + 1)}{2} = T_{\delta/3}$$
-	For $\delta=3$, $T_1 = 1 \ge \frac{3+1}{2} = 2$ (with the root-level cycle). For all $\delta > 3$, the triangular sum $T_{\delta/3}$ grows quadratically, whereas the AMM bound $\frac{\delta+1}{2}$ grows only linearly.
-\end{corollary}
-
-Corollary \ref{ammthm} connects the SSNC directly to the AMM $k$-regular cycle packing conjecture. Remember that Corollary \ref{lbl} (Load Balance Theorem) declares that at each distance $k$, the nodes each have out-degree $k$.
-
-\subsection{Caccetta-Häggkvist}
-\begin{figure}
-	\centering
-	\begin{tikzpicture}[>=latex, line width=0.9pt]
-		% --- 2. Nodes (Main Layer) ---
-		% R0 Parent
-		\node[fill=green!70!black,draw, circle, inner sep=2pt] (v0) at (0, -0.5) {\(v_0\)};
-		% R1 Cycle Nodes
-		\def\n{9} \def\radius{1.5} \def\centerx{3.5}
-		\foreach \i in {1,...,\n} {
-			\node[fill=cyan, draw, circle, inner sep=1.2pt] (v1\i) at ({0.75*\centerx + \radius*cos(360/\n*(\i-1))}, {\radius*sin(360/\n*(\i-1))}) {\small \(v_{1,\i}\)};
-		}
-		% R2 Cycle Nodes
-		\def\m{8} \def\rradius{1.2}
-		\foreach \i in {1,...,\m} {
-			\node[fill=magenta!40,draw, circle, inner sep=1.2pt] (v2\i) at ({1.75*\centerx + \rradius*cos(360/\m*(\i-1))}, {\rradius*sin(360/\m*(\i-1))}) {\(v_{2,\i}\)};
-		}
-		% R3 Cycle Nodes
-		\def\p{7} \def\rrradius{0.8}
-		\foreach \i in {1,...,\p} {
-			\node[fill=orange,draw, circle, inner sep=1.2pt] (v3\i) at ({2.6*\centerx + \rrradius*cos(360/\p*(\i-1))}, {\rrradius*sin(360/\p*(\i-1))}) {\(v_{3,\i}\)};
-		}
-		% R4 Cycle Nodes
-		\def\q{6} \def\rrradius{0.6}
-		\foreach \i in {1,...,\q} {
-			\node[fill=brown,draw, circle, inner sep=1.2pt] (v4\i) at ({3.3*\centerx + \rrradius*cos(360/\q*(\i-1))}, {\rrradius*sin(360/\q*(\i-1))}) {\(v_{4,\i}\)};
-		}
-		
-		% --- 3. Arcs (Background Layer) ---
-		% Arcs from R0 to R1
-		\foreach \i in {1,...,\n} {
-			\draw[lightgray,->] (v0) -- (v1\i);
-		}
-		
-		% Arcs from R1 to R2
-		\foreach \i in {1,...,\n}{
-			\foreach \j in {1,...,\m} {
-				\draw[lightgray,->] (v1\i) -- (v2\j);
+			% R2 Cycle Nodes
+			\def\m{8} \def\rradius{1.2}
+			\foreach \i in {1,...,\m} {
+				\node[fill=magenta!40,draw, circle, inner sep=1.2pt] (v2\i) at ({1.75*\centerx + \rradius*cos(360/\m*(\i-1))}, {\rradius*sin(360/\m*(\i-1))}) {\(v_{2,\i}\)};
 			}
-		}
-		
-		% Arcs from R2 to R3
-		\foreach \i in {1,...,\m}{
-			\foreach \j in {1,...,\p} {
-				\draw[lightgray,->] (v2\i) -- (v3\j);
+			% R3 Cycle Nodes
+			\def\p{7} \def\rrradius{0.8}
+			\foreach \i in {1,...,\p} {
+				\node[fill=orange,draw, circle, inner sep=1.2pt] (v3\i) at ({2.6*\centerx + \rrradius*cos(360/\p*(\i-1))}, {\rrradius*sin(360/\p*(\i-1))}) {\(v_{3,\i}\)};
 			}
-		}
-		
-		% Arcs from R3 to R4
-		
-		\foreach \i in {1,...,\p}{
-			\foreach \j in {1,...,\q} {
-				\draw[lightgray,->] (v3\i) -- (v4\j);
+			% R4 Cycle Nodes
+			\def\q{6} \def\rrradius{0.6}
+			\foreach \i in {1,...,\q} {
+				\node[fill=brown,draw, circle, inner sep=1.2pt] (v4\i) at ({3.3*\centerx + \rrradius*cos(360/\q*(\i-1))}, {\rrradius*sin(360/\q*(\i-1))}) {\(v_{4,\i}\)};
 			}
-		}
-		
-		% R1 Interior Arcs
-		\foreach \i [evaluate=\i as \next using {int(mod(\i,\n)+1)}] in {1,...,\n} {
-			\draw[->, bend right=15] (v1\i) to (v1\next);
-		}
-		
-		% R2 Interior Arcs
-		\foreach \i [
-		evaluate=\i as \next using {int(mod(\i,\m)+1)},
-		evaluate=\i as \anext using {int(mod(\i+1,\m)+1)}] in {1,...,\m} {
-			\draw[->] (v2\i) to (v2\next);
-			\draw[->] (v2\i) to (v2\anext);
-		}
-		
-		% R3 Interior Arcs
-		\foreach \i [
-		evaluate=\i as \next using {int(mod(\i,\p)+1)},
-		evaluate=\i as \anext using {int(mod(\i+1,\p)+1)},
-		evaluate=\i as \aanext using {int(mod(\i+2,\p)+1)}] in {1,...,\p} {
-			\draw[->] (v3\i) to (v3\next);
-			\draw[->] (v3\i) to (v3\anext);
-			\draw[->] (v3\i) to (v3\aanext);	
-		}
-		
-		% R4 Interior Arcs
-		\foreach \i [
-		evaluate=\i as \next using {int(mod(\i,\q)+1)},
-		evaluate=\i as \anext using {int(mod(\i+1,\q)+1)},
-		evaluate=\i as \aanext using {int(mod(\i+2,\q)+1)},
-		evaluate=\i as \aaanext using {int(mod(\i+3,\q)+1)}] in {1,...,\q} {
-			\draw[->] (v4\i) to (v4\next);
-			\draw[->] (v4\i) to (v4\anext);
-			\draw[->] (v4\i) to (v4\aanext);
-			\draw[->] (v4\i) to (v4\aaanext);	
-		}
-		
-		% R1 Cycle Nodes
-		\def\n{9} \def\radius{1.5} \def\centerx{3.5}
-		\foreach \i in {1,...,\n} {
-			\node[fill=cyan, draw, circle, inner sep=1.2pt] (v1\i) at ({0.75*\centerx + \radius*cos(360/\n*(\i-1))}, {\radius*sin(360/\n*(\i-1))}) {\small \(v_{1,\i}\)};				
-		}
-		
-		% R2 Cycle Nodes
-		\def\m{8} \def\rradius{1.2}
-		\foreach \i in {1,...,\m} {
-			\node[fill=magenta!40,draw, circle, inner sep=1.2pt] (v2\i) at ({1.75*\centerx + \rradius*cos(360/\m*(\i-1))}, {\rradius*sin(360/\m*(\i-1))}) {\(v_{2,\i}\)};	
-		}
-		% R3 Cycle Nodes
-		\def\p{7} \def\rrradius{0.8}
-		
-		\foreach \i in {1,...,\p} {
-			\node[fill=orange,draw, circle, inner sep=1.2pt] (v3\i) at ({2.6*\centerx + \rrradius*cos(360/\p*(\i-1))}, {\rrradius*sin(360/\p*(\i-1))}) {\(v_{3,\i}\)};	
-		}
-		
-		% R3 Cycle Nodes
-		\def\q{6} \def\rrradius{0.6}
-		\foreach \i in {1,...,\q} {
-			\node[fill=brown,draw, circle, inner sep=1.2pt] (v4\i) at ({3.3*\centerx + \rrradius*cos(360/\q*(\i-1))}, {\rrradius*sin(360/\q*(\i-1))}) {\(v_{4,\i}\)};
 			
+			% --- 3. Arcs (Background Layer) ---
+			% Arcs from R0 to R1
+			\foreach \i in {1,...,\n} {
+				\draw[lightgray,->] (v0) -- (v1\i);
+			}
 			
-			% \draw[thick, dotted, red] (v41) to [bend left](v0);
+			% Arcs from R1 to R2
+			\foreach \i in {1,...,\n}{
+				\foreach \j in {1,...,\m} {
+					\draw[lightgray,->] (v1\i) -- (v2\j);
+				}
+			}
 			
-			\draw[thick, dotted, red] (v41) to [bend right](v0);
-			\draw[thick, dotted, red] (v41) to [bend right](v11);
-			\draw[thick, dotted, red] (v41) to [bend left](v16);
-			\draw[thick, dotted, red] (v41) to [bend left](v18);
-			\draw[thick, dotted, red] (v41) to [bend right](v22);
-			\draw[thick, dotted, red] (v41) to [bend left](v28);
-			\draw[thick, solid, red] (v28) to [bend right](v36);
-			\draw[thick, solid, red] (v36) to [bend right](v41);
-		}
-	\end{tikzpicture}
-	\caption{\textit{\textbf{Visualization of Girth)}. Brooks's Equitable Coloring forces Seymour nodes to balance distribution of back arcs. These are spread across neighborhoods until they reach $k-2$ where a triangle is formed. For simplicity, dotted back back arcs only shown from $v_{4,1}$. Triangle is bold red $v_{4, 1} \to v_{2, 8} \to v_{3, 6} \to v_{4_1}$. } } \label{caccimage}
-\end{figure}
-
-
-\begin{conjecture}[CH]
-	Every simple directed graph with $n$
-	vertices and a minimum outdegree $\delta^+ \ge r$ contains a directed cycle of length at most $\lceil n/r \rceil$
-\end{conjecture}
-
-\begin{corollary}
-	An oriented graph with minimum outdegree $\delta$. $\lceil n/r \rceil$. In particular, the existence of a Seymour vertex implies the existence of a triangle.
-\end{corollary}
-\begin{proof}
-	The Reduction Theorem \ref{red} prevents back arcs before the Seymour vertices.
-	The binomial theorem does not allow these Seymour vertices to have all their arcs through standard neighborhood decreasing. Instead, back arcs must come into place to compensate.
-	%		To prevent earlier neighborhoods from having a Seymour vertex in an MCE,
-	To ensure that all Seymour vertices meet their degree requirements, Brooks's equitable coloring principle must be applied.
-	This says that no Seymour vertex can send back arcs to more than $|R_k| / 3$ nodes in the neighborhood $R_i$ for $R_1$ through $R_{k-2}$.
+			% Arcs from R2 to R3
+			\foreach \i in {1,...,\m}{
+				\foreach \j in {1,...,\p} {
+					\draw[lightgray,->] (v2\i) -- (v3\j);
+				}
+			}
+			
+			% Arcs from R3 to R4
+			
+			\foreach \i in {1,...,\p}{
+				\foreach \j in {1,...,\q} {
+					\draw[lightgray,->] (v3\i) -- (v4\j);
+				}
+			}
+			
+			% R1 Interior Arcs
+			\foreach \i [evaluate=\i as \next using {int(mod(\i,\n)+1)}] in {1,...,\n} {
+				\draw[->, bend right=15] (v1\i) to (v1\next);
+			}
+			
+			% R2 Interior Arcs
+			\foreach \i [
+			evaluate=\i as \next using {int(mod(\i,\m)+1)},
+			evaluate=\i as \anext using {int(mod(\i+1,\m)+1)}] in {1,...,\m} {
+				\draw[->] (v2\i) to (v2\next);
+				\draw[->] (v2\i) to (v2\anext);
+			}
+			
+			% R3 Interior Arcs
+			\foreach \i [
+			evaluate=\i as \next using {int(mod(\i,\p)+1)},
+			evaluate=\i as \anext using {int(mod(\i+1,\p)+1)},
+			evaluate=\i as \aanext using {int(mod(\i+2,\p)+1)}] in {1,...,\p} {
+				\draw[->] (v3\i) to (v3\next);
+				\draw[->] (v3\i) to (v3\anext);
+				\draw[->] (v3\i) to (v3\aanext);	
+			}
+			
+			% R4 Interior Arcs
+			\foreach \i [
+			evaluate=\i as \next using {int(mod(\i,\q)+1)},
+			evaluate=\i as \anext using {int(mod(\i+1,\q)+1)},
+			evaluate=\i as \aanext using {int(mod(\i+2,\q)+1)},
+			evaluate=\i as \aaanext using {int(mod(\i+3,\q)+1)}] in {1,...,\q} {
+				\draw[->] (v4\i) to (v4\next);
+				\draw[->] (v4\i) to (v4\anext);
+				\draw[->] (v4\i) to (v4\aanext);
+				\draw[->] (v4\i) to (v4\aaanext);	
+			}
+			
+			% R1 Cycle Nodes
+			\def\n{9} \def\radius{1.5} \def\centerx{3.5}
+			\foreach \i in {1,...,\n} {
+				\node[fill=cyan, draw, circle, inner sep=1.2pt] (v1\i) at ({0.75*\centerx + \radius*cos(360/\n*(\i-1))}, {\radius*sin(360/\n*(\i-1))}) {\small \(v_{1,\i}\)};				
+			}
+			
+			% R2 Cycle Nodes
+			\def\m{8} \def\rradius{1.2}
+			\foreach \i in {1,...,\m} {
+				\node[fill=magenta!40,draw, circle, inner sep=1.2pt] (v2\i) at ({1.75*\centerx + \rradius*cos(360/\m*(\i-1))}, {\rradius*sin(360/\m*(\i-1))}) {\(v_{2,\i}\)};	
+			}
+			% R3 Cycle Nodes
+			\def\p{7} \def\rrradius{0.8}
+			
+			\foreach \i in {1,...,\p} {
+				\node[fill=orange,draw, circle, inner sep=1.2pt] (v3\i) at ({2.6*\centerx + \rrradius*cos(360/\p*(\i-1))}, {\rrradius*sin(360/\p*(\i-1))}) {\(v_{3,\i}\)};	
+			}
+			
+			% R3 Cycle Nodes
+			\def\q{6} \def\rrradius{0.6}
+			\foreach \i in {1,...,\q} {
+				\node[fill=brown,draw, circle, inner sep=1.2pt] (v4\i) at ({3.3*\centerx + \rrradius*cos(360/\q*(\i-1))}, {\rrradius*sin(360/\q*(\i-1))}) {\(v_{4,\i}\)};
+				
+				
+				% \draw[thick, dotted, red] (v41) to [bend left](v0);
+				
+				\draw[thick, dotted, red] (v41) to [bend right](v0);
+				\draw[thick, dotted, red] (v41) to [bend right](v11);
+				\draw[thick, dotted, red] (v41) to [bend left](v16);
+				\draw[thick, dotted, red] (v41) to [bend left](v18);
+				\draw[thick, dotted, red] (v41) to [bend right](v22);
+				\draw[thick, dotted, red] (v41) to [bend left](v28);
+				\draw[thick, solid, red] (v28) to [bend right](v36);
+				\draw[thick, solid, red] (v36) to [bend right](v41);
+			}
+		\end{tikzpicture}
+		\caption{\textit{\textbf{Visualization of Girth)}. Brooks's Equitable Coloring forces Seymour nodes to balance distribution of back arcs. These are spread across neighborhoods until they reach $k-2$ where a triangle is formed. For simplicity, dotted back back arcs only shown from $v_{4,1}$. Triangle is bold red $v_{4, 1} \to v_{2, 8} \to v_{3, 6} \to v_{4_1}$. } } \label{caccimage}
+	\end{figure}
 	
-	This will exhaust the $\delta$ for every Seymour vertex. Once we reach the penultimate neighborhood of $R_{k-2}$, a triangle is reached. This proves that the girth of the graph cannot exceed 3. 	
-\end{proof}
-
-\section{Acknowledgments}
-I am deeply thankful to God for the inspiration and guidance that shaped this work, as Proverbs 3:5-6 has been a guiding light throughout this journey. I am profoundly grateful to my family—my wife and children, my mother, and father—for their unwavering support and encouragement.
-
-Special thanks to the late Dr. Nate Dean and Dr. Michael Ball for their contributions and support to this work. I want to sincerely thank everyone who has taken the time to pray for me, share encouraging words, and offer constructive feedback. Your support has meant so much to me, and I’m truly grateful for the kindness and thoughtfulness you’ve shown.
-
-I also appreciate the Department of Mathematics at Morehouse College for helpful discussions that were valuable during the research process. In particular, I thank Dr. Duane Cooper for asking the questions regarding understanding the conjecture, my approach and how cycles are important.
-
-Finally, I extend heartfelt gratitude to my family and friends for their patience and belief in me throughout this journey.
-
-%\end{desc}
-%% --------------------------------------------------------------------
-% Bibliography
-%% --------------------------------------------------------------------
-%		\bibliographystyle{acm}
-%\bibliography{references.bib}
-\begin{thebibliography}{99}
 	
-	\bibitem{AMMref} N. Alon, C. McDiarmid, and M. Molloy, Edge-disjoint cycles in regular directed graphs, \emph{J. Combin. Theory Ser. B} \textbf{66} (1996), 273--278.
+	\begin{conjecture}[CH]
+		Every simple directed graph with $n$
+		vertices and a minimum outdegree $\delta^+ \ge r$ contains a directed cycle of length at most $\lceil n/r \rceil$
+	\end{conjecture}
 	
-	\bibitem{BMN} Botler, F., Moura, P., and Naia, T. (2022). Seymour's Second Neighborhood Conjecture for orientations of (pseudo)random graphs. \textit{Discrete Mathematics}, 346.
+	\begin{corollary}
+		An oriented graph with minimum outdegree $\delta$. $\lceil n/r \rceil$. In particular, the existence of a Seymour vertex implies the existence of a triangle.
+	\end{corollary}
+	\begin{proof}
+		The Reduction Theorem \ref{red} prevents back arcs before the Seymour vertices.
+		The binomial theorem does not allow these Seymour vertices to have all their arcs through standard neighborhood decreasing. Instead, back arcs must come into place to compensate.
+		%		To prevent earlier neighborhoods from having a Seymour vertex in an MCE,
+		To ensure that all Seymour vertices meet their degree requirements, Brooks's equitable coloring principle must be applied.
+		This says that no Seymour vertex can send back arcs to more than $|R_k| / 3$ nodes in the neighborhood $R_i$ for $R_1$ through $R_{k-2}$.
+		
+		This will exhaust the $\delta$ for every Seymour vertex. Once we reach the penultimate neighborhood of $R_{k-2}$, a triangle is reached. This proves that the girth of the graph cannot exceed 3. 	
+	\end{proof}
 	
-	\bibitem{BBKS} Brantner, J., Brockman, G., Kay, B., and Snively, E. (2009). Contributions to Seymour's second neighborhood conjecture. \textit{Involve}, 2(4), 387--395.
+	\section{Acknowledgments}
+	I am deeply thankful to God for the inspiration and guidance that shaped this work, as Proverbs 3:5-6 has been a guiding light throughout this journey. I am profoundly grateful to my family—my wife and children, my mother, and father—for their unwavering support and encouragement.
 	
-	\bibitem{CHref} Caccetta, L; H\"{a}ggkvist, R. On minimal digraphs with given girth. Proceedings of the Ninth Southeastern Conference on Combinatorics, Graph Theory, and Computing (Florida Atlantic Univ., Boca Raton, Fla., 1978), pp. 181--187, Congress. Numer., XXI, Utilitas Math., Winnipeg, Man., 1978.
+	Special thanks to the late Dr. Nate Dean and Dr. Michael Ball for their contributions and support to this work. I want to sincerely thank everyone who has taken the time to pray for me, share encouraging words, and offer constructive feedback. Your support has meant so much to me, and I’m truly grateful for the kindness and thoughtfulness you’ve shown.
 	
-	\bibitem{CS} Chen, G., Shen, J., and Yuster, R. (2003). Second Neighborhood via First Neighborhood in Digraphs. \textit{Annals of Combinatorics}, 6, 15--20.
+	I also appreciate the Department of Mathematics at Morehouse College for helpful discussions that were valuable during the research process. In particular, I thank Dr. Duane Cooper for asking the questions regarding understanding the conjecture, my approach and how cycles are important.
 	
-	\bibitem{Da} Daamouch, M. (2021). Seymour's second neighborhood conjecture for m-free, k-transitive, k-anti-transitive digraphs and some approaches. \textit{Discrete Appl. Math.}, 304, 332--341.
+	Finally, I extend heartfelt gratitude to my family and friends for their patience and belief in me throughout this journey.
 	
-	\bibitem{daamouch2024secondneighborhoodconjecturetournaments} Daamouch, Moussa and Ghazal, Salman and Al-Mniny, Darine, About the second neighborhood conjecture for tournaments missing two stars or disjoint paths, arXiv:2406.03635, 2024.
+	%\end{desc}
+	%% --------------------------------------------------------------------
+	% Bibliography
+	%% --------------------------------------------------------------------
+	%		\bibliographystyle{acm}
+	%\bibliography{references.bib}
+	\begin{thebibliography}{99}
+		
+		\bibitem{AMMref} N. Alon, C. McDiarmid, and M. Molloy, Edge-disjoint cycles in regular directed graphs, \emph{J. Combin. Theory Ser. B} \textbf{66} (1996), 273--278.
+		
+		\bibitem{BMN} Botler, F., Moura, P., and Naia, T. (2022). Seymour's Second Neighborhood Conjecture for orientations of (pseudo)random graphs. \textit{Discrete Mathematics}, 346.
+		
+		\bibitem{BBKS} Brantner, J., Brockman, G., Kay, B., and Snively, E. (2009). Contributions to Seymour's second neighborhood conjecture. \textit{Involve}, 2(4), 387--395.
+		
+		\bibitem{CHref} Caccetta, L; H\"{a}ggkvist, R. On minimal digraphs with given girth. Proceedings of the Ninth Southeastern Conference on Combinatorics, Graph Theory, and Computing (Florida Atlantic Univ., Boca Raton, Fla., 1978), pp. 181--187, Congress. Numer., XXI, Utilitas Math., Winnipeg, Man., 1978.
+		
+		\bibitem{CS} Chen, G., Shen, J., and Yuster, R. (2003). Second Neighborhood via First Neighborhood in Digraphs. \textit{Annals of Combinatorics}, 6, 15--20.
+		
+		\bibitem{Da} Daamouch, M. (2021). Seymour's second neighborhood conjecture for m-free, k-transitive, k-anti-transitive digraphs and some approaches. \textit{Discrete Appl. Math.}, 304, 332--341.
+		
+		\bibitem{daamouch2024secondneighborhoodconjecturetournaments} Daamouch, Moussa and Ghazal, Salman and Al-Mniny, Darine, About the second neighborhood conjecture for tournaments missing two stars or disjoint paths, arXiv:2406.03635, 2024.
+		
+		\bibitem{DL} Dean, N., and Latka, B. (1995). Squaring the tournament-an open problem. \textit{Proceedings of the 26th Southeastern International Conference on Combinatorics}, 73--80.
+		
+		\bibitem{Di} Díaz, A. E., Girão, A., Granet, B., and Kronenberg, G. (2024). Seymour's second neighbourhood conjecture: random graphs and reductions. \textit{arXiv preprint arXiv:2403.02842}.
+		
+		\bibitem{D} Diestel, Reinhard, Graph Theory, Springer, 2005.
+		
+		\bibitem{FidlerYuster} Fidler, D., and Yuster, R. (2007). Remarks on the second neighborhood problem. \textit{J. Graph Theory}, 55(3), 208--220.
+		
+		\bibitem{F} Fisher, D. C. (1996). Squaring a tournament: A proof of Dean's conjecture. \textit{J. Graph Theory}, 23(1), 43--48.
+		
+		\bibitem{Ghazal_2011} Ghazal, S., Seymour's second neighborhood conjecture for tournaments missing a generalized star, J. Graph Theory, 71, 89--94, 2012.
+		
+		\bibitem{GodsilRoyle2001} Godsil, Chris D. and Royle, Gordon F., Algebraic Graph Theory, Springer, 2001
+		
+		\bibitem{HKPS} Hassan, Z.R., Khan, I.F., Poshni, M.I., and Shabbir, M., Seymour's second neighborhood conjecture for 6-antitransitive digraphs, Discrete Applied Mathematics, 292, 59--63, 2021.
+		
+		\bibitem{HT} Havet, F., and Thomassé, S. (2000). Median orders of tournaments: A tool for the second neighborhood problem and Sumner's conjecture. \textit{J. Graph Theory}, 35, 244--256.
+		
+		\bibitem{HP} Huang, H., and Peng, F. (2024). An improved bound on Seymour's second neighborhood conjecture. \textit{arXiv preprint arXiv:2412.20234}.
+		
+		\bibitem{J} Jungnickel, D, Graphs, networks and algorithms, Springer-Verlag, 2005
+		
+		\bibitem{KL} Kaneko, Y., and Locke, S. (2001). The minimum degree approach for Paul Seymour's distance 2 conjecture. \textit{Congressus Numerantium}, 148, 201--206.
+		
+		\bibitem{Llado2013} Lladó, A. (2013). On the second neighborhood conjecture of Seymour for regular digraphs with almost optimal connectivity. \textit{European Journal of Combinatorics}, 34(8), 1265--1271.
+		
+		\bibitem{MninyGhazal} Mniny, D. A., and Ghazal, S. (2020). The Second Neighborhood Conjecture for oriented graphs missing $\{C_{4}, \overline{C_{4}}, S_{3}, \text{chair and co-chair}\}$-free graph. \textit{arXiv:2010.10790}.
+		
+		\bibitem{NALYVAIKO2021poster} Nalyvaiko, I. (2021). Properties of possible counterexamples to the Seymour's Second Neighborhood Conjecture. \textit{Poster presented at the EUCYS 2020/2021 Contest}.
+		
+		\bibitem{Scrt} Seacrest, T. (2019). Seymour's Second Neighborhood Conjecture for Subsets of Vertices \textit{arXiv:1808.06293v3}
+	\end{thebibliography}
 	
-	\bibitem{DL} Dean, N., and Latka, B. (1995). Squaring the tournament-an open problem. \textit{Proceedings of the 26th Southeastern International Conference on Combinatorics}, 73--80.
-	
-	\bibitem{Di} Díaz, A. E., Girão, A., Granet, B., and Kronenberg, G. (2024). Seymour's second neighbourhood conjecture: random graphs and reductions. \textit{arXiv preprint arXiv:2403.02842}.
-	
-	\bibitem{D} Diestel, Reinhard, Graph Theory, Springer, 2005.
-	
-	\bibitem{FidlerYuster} Fidler, D., and Yuster, R. (2007). Remarks on the second neighborhood problem. \textit{J. Graph Theory}, 55(3), 208--220.
-	
-	\bibitem{F} Fisher, D. C. (1996). Squaring a tournament: A proof of Dean's conjecture. \textit{J. Graph Theory}, 23(1), 43--48.
-	
-	\bibitem{Ghazal_2011} Ghazal, S., Seymour's second neighborhood conjecture for tournaments missing a generalized star, J. Graph Theory, 71, 89--94, 2012.
-	
-	\bibitem{GodsilRoyle2001} Godsil, Chris D. and Royle, Gordon F., Algebraic Graph Theory, Springer, 2001
-	
-	\bibitem{HKPS} Hassan, Z.R., Khan, I.F., Poshni, M.I., and Shabbir, M., Seymour's second neighborhood conjecture for 6-antitransitive digraphs, Discrete Applied Mathematics, 292, 59--63, 2021.
-	
-	\bibitem{HT} Havet, F., and Thomassé, S. (2000). Median orders of tournaments: A tool for the second neighborhood problem and Sumner's conjecture. \textit{J. Graph Theory}, 35, 244--256.
-	
-	\bibitem{HP} Huang, H., and Peng, F. (2024). An improved bound on Seymour's second neighborhood conjecture. \textit{arXiv preprint arXiv:2412.20234}.
-	
-	\bibitem{J} Jungnickel, D, Graphs, networks and algorithms, Springer-Verlag, 2005
-	
-	\bibitem{KL} Kaneko, Y., and Locke, S. (2001). The minimum degree approach for Paul Seymour's distance 2 conjecture. \textit{Congressus Numerantium}, 148, 201--206.
-	
-	\bibitem{Llado2013} Lladó, A. (2013). On the second neighborhood conjecture of Seymour for regular digraphs with almost optimal connectivity. \textit{European Journal of Combinatorics}, 34(8), 1265--1271.
-	
-	\bibitem{MninyGhazal} Mniny, D. A., and Ghazal, S. (2020). The Second Neighborhood Conjecture for oriented graphs missing $\{C_{4}, \overline{C_{4}}, S_{3}, \text{chair and co-chair}\}$-free graph. \textit{arXiv:2010.10790}.
-	
-	\bibitem{NALYVAIKO2021poster} Nalyvaiko, I. (2021). Properties of possible counterexamples to the Seymour's Second Neighborhood Conjecture. \textit{Poster presented at the EUCYS 2020/2021 Contest}.
-	
-	\bibitem{Scrt} Seacrest, T. (2019). Seymour's Second Neighborhood Conjecture for Subsets of Vertices \textit{arXiv:1808.06293v3}
-\end{thebibliography}
-
 \end{document}
