@@ -284,6 +284,10 @@ The assumption of no back neighbors simplifies our analysis. As we will see, the
 	\end{figure}
 
 The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
+
+\begin{lemma}Let $G$ be an MCE minimizing interior arc weight. If an interior arc $e = (u, w)$ within layer $R_k$ can be removed such that no vertex in $R_{k-1}$ becomes a Seymour vertex and all preceding layer-size constraints remain satisfied, then $G$ cannot be a minimum counterexample.
+\end{lemma}
+\begin{proof}Assume such an arc exists. Removing $e$ strictly decreases the interior neighbor count (and/or max total interior degree) without violating the anti-Seymour property ($\vert{}N^{++}(v)\vert{} < \vert{}N^+(v)\vert{}$) for any vertex. This contradicts the minimality definition of $G$, proving that every interior arc in an MCE is structurally indispensable.\end{proof}
 	
 	\begin{theorem}
 	Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $\text{int}(u, v) \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
