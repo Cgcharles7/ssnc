@@ -1,8 +1,8 @@
 # Clarification on the Validity of the Seymour Second Neighborhood Lemma
 
-This document addresses the claims made in the [Evidence Press posting ("Seymour Second Neighborhood 2Delta3")](https://www.google.com/search?q=https://evidencepress.org/releases/seymour-second-neighborhood-2delta3/), which asserts that a lemma from my paper is false and presents a video counterexample.
+This document addresses the claims made in the [Evidence Press posting ("Seymour Second Neighborhood 2Delta3")](https://www.google.com/search?q=https://evidencepress.org/releases/seymour-second-neighborhood-2delta3/). The video asserts that a lemma from my paper is false and presents a counterexample.
 
-The critique misinterprets the foundational framework of the paper and relies on a graph that fails to meet the required structural conditions.
+The critique misinterprets the framework of the paper and relies on a graph that fails to meet the required structural conditions.
 
 ---
 
@@ -23,7 +23,18 @@ The video provided in the critique presents the following edge list as a counter
 
 This graph **immediately violates the MCE conditions** for the following reasons:
 
-* **Presence of Seymour Vertices:** Nodes **0 and 5** function as Seymour vertices within this specific graph structure.
+* **Presence of Seymour Vertices:**
+Here is the summary table in Markdown:
+
+| Node ($v$) | First Out-Neighbors $N^+(v)$ | Size | Second Out-Neighbors $N^{++}(v)$ | Size | Seymour Status ($\vert{}N^{++}\vert{} \ge \vert{}N^+\vert{}$) |
+| --- | --- | --- | --- | --- | --- |
+| **0** | $\{1\}$ | 1 | $\{2, 3\}$ | 2 | **True** (+1 margin) |
+| **1** | $\{2, 3\}$ | 2 | $\{4, 5\}$ | 2 | **True** (0 margin) |
+| **2** | $\{4, 5\}$ | 2 | $\{0, 3\}$ | 2 | **True** (0 margin) |
+| **3** | $\{2, 5\}$ | 2 | $\{0, 4\}$ | 2 | **True** (0 margin) |
+| **4** | $\{0, 3\}$ | 2 | $\{1, 2, 5\}$ | 3 | **True** (+1 margin) |
+| **5** | $\{0\}$ | 1 | $\{1\}$ | 1 | **True** (0 margin) |
+
 * **Environmental Incompatibility:** Without this MCE required to search for a Seymour vertex (and test the bounds of a contradiction), the lemma falls entirely outside the scope of its targeted environment.
  
 Therefore, the graph presented does not constitute a valid counterexample; it simply describes a graph that where Seymour vertices exist.
@@ -32,4 +43,4 @@ Therefore, the graph presented does not constitute a valid counterexample; it si
 
 ## 3. Conclusion
 
-While minor clarifications in wording could be made for broader readability, **the underlying lemma and its mathematical validity remain correct**. The critique's counterexample is rendered invalid because it tests a structure that contradicts the strict baseline assumptions of the MCE framework.
+Minor clarifications in wording could be made for broader readability to emphasize that the lemma itself holds for MCEs and not for all oriented graphs. However, **the underlying lemma and its mathematical validity remain correct**. The critique's counterexample is rendered invalid because it tests a structure that contradicts the strict baseline assumptions of the MCE framework.
