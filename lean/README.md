@@ -8,7 +8,7 @@ To keep things self-contained and avoid dependency version issues, the codebase 
 
 ## Overview & Architecture
 
-The core proof is organized into five sequential stages inside `Lean/5_full_prof.lean`:
+The core proof is organized into five sequential stages inside `lean/5_full_prof.lean`:
 
 * **Stage 1: Basic Graph Primitives**
 Defines an independent `FiniteGraph` type over a vertex set of type `Finset Nat`. It sets up neighborhood operations (`getN1Finset` and `getN2Finset`), computes cardinalities, and introduces the formal predicates for irreflexivity, antisymmetry, and oriented graphs (`IsOriented`).
