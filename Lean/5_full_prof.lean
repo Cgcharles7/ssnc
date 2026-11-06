@@ -1165,4 +1165,25 @@ theorem no_layer_past_third (δ : Nat) (hδ : 1 ≤ δ)
   have := hlayer (δ / 3 + 1) (by omega) (by omega)
   omega
 
+/-- Layers collapse at depth ⌊δ/3⌋: the size formula and the interior-arc
+    capacity bound cannot both hold at layer ⌊δ/3⌋ + 1. -/
+theorem layers_collapse (δ : Nat) (hδ : 1 ≤ δ) (s : Nat → Nat)
+    (hsize : ∀ i, 1 ≤ i → i ≤ δ → s i = δ - i + 1)
+    (hcap  : ∀ i, 1 ≤ i → i ≤ δ → 2 * (s i * i) ≤ s i * s i - s i) :
+    False := by
+  have hi1 : 1 ≤ δ / 3 + 1 := by omega
+  have hi2 : δ / 3 + 1 ≤ δ := by omega
+  have h3 := feasibility (s (δ / 3 + 1)) (δ / 3 + 1) δ
+    (hsize _ hi1 hi2) hi2 (hcap _ hi1 hi2)
+  omega
+
+theorem layers_collapse_G (G : GraphLevelOrder) (hδ : 1 ≤ G.delta)
+    (hsize : ∀ i, 1 ≤ i → i ≤ G.delta →
+      (G.layerCoords i).card = G.delta - i + 1)
+    (hcap : ∀ i, 1 ≤ i → i ≤ G.delta →
+      2 * ((G.layerCoords i).card * i)
+        ≤ (G.layerCoords i).card * (G.layerCoords i).card - (G.layerCoords i).card) :
+    False :=
+  layers_collapse G.delta hδ (fun i => (G.layerCoords i).card) hsize hcap
+
 end GraphLevelOrder
