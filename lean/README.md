@@ -1,6 +1,8 @@
 # Formalization of Seymour's Second Neighborhood Conjecture in Lean 4
 
-This repository contains a complete, machine-verified formalization of a strong, maximal-set variant of **Seymour's Second Neighborhood Conjecture (SSNC)**, written for the Lean 4 theorem prover.
+> **Status:** Active learning project / Work in Progress. Feedback and suggestions are warmly welcome!
+
+This repository contains a complete, machine-verified formalization of a strong, **Maximal-Set Version of Seymour's Second Neighborhood Conjecture (SSNC)**, written for the Lean 4 theorem prover. 
 
 To keep things self-contained and avoid dependency version issues, the codebase builds all graph-theoretic primitives, coordinate systems, and metrics entirely from first principles rather than relying on external graph libraries.
 
