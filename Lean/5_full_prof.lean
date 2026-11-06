@@ -1165,6 +1165,21 @@ theorem no_layer_past_third (δ : Nat) (hδ : 1 ≤ δ)
   have := hlayer (δ / 3 + 1) (by omega) (by omega)
   omega
 
+theorem last_layer_le (δ i : Nat) (h : 3 * i ≤ δ) : i ≤ δ / 3 := by omega
+
+theorem first_forbidden (δ : Nat) : ¬ (3 * (δ / 3 + 1) ≤ δ) := by omega
+
+theorem feasibility (n i δ : Nat) (hn : n = δ - i + 1) (hi : i ≤ δ)
+    (h : 2 * (n * i) ≤ n * n - n) : 3 * i ≤ δ := by
+  have hpos : 0 < n := by omega
+  have h2 : n * (2 * i) ≤ n * (n - 1) := by
+    have e1 : n * (2 * i) = 2 * (n * i) := Nat.mul_left_comm n 2 i
+    have e2 : n * (n - 1) = n * n - n := Nat.mul_sub_one n n
+    rw [e1, e2]
+    exact h
+  have h3 : 2 * i ≤ n - 1 := Nat.le_of_mul_le_mul_left h2 hpos
+  omega
+
 /-- Layers collapse at depth ⌊δ/3⌋: the size formula and the interior-arc
     capacity bound cannot both hold at layer ⌊δ/3⌋ + 1. -/
 theorem layers_collapse (δ : Nat) (hδ : 1 ≤ δ) (s : Nat → Nat)
