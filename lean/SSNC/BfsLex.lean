@@ -81,3 +81,4 @@ theorem gloNode_lt_wellFounded : WellFounded GLONode.Lt := by
       exact .right b.dist h_id  -- or simply: exact .right _ h_id
   · exact InvImage.wf f (WellFounded.prod_lex Nat.lt_wfRel.wf Nat.lt_wfRel.wf)
 
+end GLONode
