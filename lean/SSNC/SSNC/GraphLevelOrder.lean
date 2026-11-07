@@ -1,6 +1,46 @@
-import SSNC.Basic.FiniteGraph
+import SSNC.FiniteGraph
 import Mathlib.Data.List.Basic
-import Mathlib.Data.Prod.Lex
+import Mathlib.Order.Prod.Lex.Basic
+
+abbrev Coord := Nat × Nat   -- (dist, lexId)
+
+structure GLONode where
+  dist               : Nat
+  lexId              : Nat
+  out_neighbors      : List Coord
+  interior_neighbors : List Coord
+  exterior_neighbors : List Coord
+  back_neighbors     : List Coord
+  parent             : Option Coord
+  toNumber           : Nat
+  deriving Inhabited, Repr, Hashable, DecidableEq
+
+namespace GLONode
+
+def toProd (u : GLONode) : Nat × Nat :=
+  (u.dist, u.lexId)
+
+def toCoords (v : GLONode) : Coord :=
+  (v.dist, v.lexId)
+
+def Lt (a b : GLONode) : Prop :=
+  a.dist < b.dist ∨ (a.dist = b.dist ∧ a.lexId < b.lexId)
+
+def removeOut (n : GLONode) (c : Coord) : GLONode :=
+  { n with out_neighbors := n.out_neighbors.filter (· ≠ c) }
+
+end GLONode
+
+def defaultGLONode : GLONode := {
+  dist := 0,
+  lexId := 0,
+  out_neighbors := [],
+  interior_neighbors := [],
+  exterior_neighbors := [],
+  back_neighbors := [],
+  parent := (none),
+  toNumber := 0
+}
 
 /-- Graph structured as layers of GLONodes under BFS-Lex with adjacency matrix representation -/
 structure GraphLevelOrder where
