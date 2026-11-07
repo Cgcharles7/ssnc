@@ -252,16 +252,16 @@
 	\end{theorem} \label{layer_size}
 	
 	\begin{proof}
-	We proceed by induction on $i$. 
-	Base Case ($i = 0$): 
-	The root $R_0$ = $\{v_0\}$ has out-neighbors $R_1 = N^+(v_0)$. Consider $v_1 \in R_1$. If $v_1$ has more than $\delta$ exterior neighbors, then the node $v_0$ will be a Seymour node. The pigeonhole principle then forces $v_1$ to have at least one interior neighbor. If $v_1$ has more than one interior neighbor, then the subgraph $R_1$ violates the minimum neighborhood density metric, and thus $G$ would not be an MCE. This forces $v_1$ to have exactly 1 interior arc and $\delta - 1$ exterior arcs. 
+		We proceed by induction on $i$. 
+		Base Case ($i = 0$): 
+		The root $R_0$ = $\{v_0\}$ has out-neighbors $R_1 = N^+(v_0)$. Consider $v_1 \in R_1$. If $v_1$ has more than $\delta$ exterior neighbors, then the node $v_0$ will be a Seymour node. The pigeonhole principle then forces $v_1$ to have at least one interior neighbor. If $v_1$ has more than one interior neighbor, then the subgraph $R_1$ violates the minimum neighborhood density metric, and thus $G$ would not be an MCE. This forces $v_1$ to have exactly 1 interior arc and $\delta - 1$ exterior arcs. 
 		
-	Induction Hypothesis: Assume that for some $i \geq 0$, for $u_i \in R_i$, $|R_{i+1}| = \delta - (i+1) + 1$ and $|R_{i+2}| = \delts - (i+1).
+		Induction Hypothesis: Assume that for some $i \geq 0$, for $u_i \in R_i$, $|R_{i+1}| = \delta - (i+1) + 1$ and $|R_{i+2}| = \delta - (i+1)$.
 		
-	Inductive Step: Consider $u_{i+1} \in R_{i+1}$ and $v_{i+2} \in R_{i+2}$ with $u_{1+1} \to v_{i+2} \in G$. 
-	By the I.H., we know that $|R_{i+2}| = \delta - (i+1)$. These nodes in $R_{i+2}$ are all first neighbors of $u_{i+1}$. To ensure that $u_{i+1}$ is non-Seymour, every node $v_{i+2} \in R_{i+2}$ must send less than $\delta -(i+1)$ nodes to $R_{i+3}$. This implies that the pigeonhole principle applies where there are only $\delta - (i+1) -1$ for $\delta - (i+1)$ nodes. As a result, the nodes must overlap to meet their minimum out-degree requirements.
-	Finally, if any node $v_{i+2}$ were to send too few nodes to $R_{i+2}$, this would result in $v_{k+1}$ having more interior arcs than required. $G$ would this violate the minimum neighborhood density requirement for an MCE. 
-	Thus, the bound holds at level $i + 1$ and by induction, the statement is true for all $i \geq 0$.
+		Inductive Step: Consider $u_{i+1} \in R_{i+1}$ and $v_{i+2} \in R_{i+2}$ with $u_{1+1} \to v_{i+2} \in G$. 
+		By the I.H., we know that $|R_{i+2}| = \delta - (i+1)$. These nodes in $R_{i+2}$ are all first neighbors of $u_{i+1}$. To ensure that $u_{i+1}$ is non-Seymour, every node $v_{i+2} \in R_{i+2}$ must send less than $\delta -(i+1)$ nodes to $R_{i+3}$. This implies that the pigeonhole principle applies where there are only $\delta - (i+1) -1$ for $\delta - (i+1)$ nodes. As a result, the nodes must overlap to meet their minimum out-degree requirements.
+		Finally, if any node $v_{i+2}$ were to send too few nodes to $R_{i+2}$, this would result in $v_{k+1}$ having more interior arcs than required. $G$ would this violate the minimum neighborhood density requirement for an MCE. 
+		Thus, the bound holds at level $i + 1$ and by induction, the statement is true for all $i \geq 0$.
 	\end{proof}
 	
 	\begin{figure}
@@ -293,7 +293,7 @@
 		Consider the interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$.  
 		We will show that this preserves the non-Seymour status of parent node $u_k \in R_k$. 
 		Let us the impact on $u_k$'s first and second neighborhoods,  $N^+(u_k)$ and $N^{++}(u_k)$:
-
+		
 		By definition, the first neighborhood of $u_k$ is the set of its direct out-neighbors:
 		$$N^+(u_k) = \{v \in V(G) \mid (u_k, v) \in E(G)\}$$
 		
