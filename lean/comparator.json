@@ -1,7 +1,0 @@
-{
-  "challenge_module": "Challenge",
-  "solution_module": "Solution",
-  "theorem_names": ["no_minimum_layered_counterexample"],
-  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
-  "enable_nanoda": false
-}
