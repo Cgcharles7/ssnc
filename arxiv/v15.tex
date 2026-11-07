@@ -248,18 +248,19 @@
 	
 	The assumption of no back neighbors simplifies our analysis. As we will see, the BFS traversal reveals many types of transitive triangles. The exclusion of back neighbors from this case means that the only remaining ones are the forward facing transitive triangles and same layer transitive triangles. These forward facing transitive triangles are what were defined as interior neighbors and help to keep a parent node non-Seymour. 
 	
-	\begin{theorem} (Neighborhood Size). Let $G \in \mathcal{O}$ be be an MCE with MDN $v_0$, with rooted neighborhoods $R_0$, $R_1$, $\ldots$, $R_k$ constructed by the BFS. Suppose all nodes are non-Seymour. Then for all $i \geq 0$, $R_k| = \delta - k + 1$. 
+	\begin{theorem} (Neighborhood Size). Let $G \in \mathcal{O}$ be be an MCE with MDN $v_0$, with rooted neighborhoods $R_0$, $R_1$, $\ldots$, $R_k$ constructed by the BFS without back neighbors. Suppose all nodes are non-Seymour. Then for all $i \geq 0$, $R_k| = \delta - k + 1$. 
 	\end{theorem} \label{layer_size}
 	
 	\begin{proof}
-		We proceed by induction on $i$. 
-		Base Case ($i = 0$): 
-		The root $R_0$ = $\{v_0\}$ has out-neighbors $R_1 = N^+(v_0)$. Consider $v_1 \in R_1$. If $v_1$ has more than $\delta$ exterior neighbors, then the node $v_0$ will be a Seymour node. The pigeonhole principle then forces $v_1$ to have at least one interior neighbor. If $v_1$ has more than one interior neighbor, then the subgraph $R_1$ violates the minimum neighborhood density metric, and thus $G$ would not be an MCE. This forces $v_1$ to have exactly 1 interior arc and $\delta - 1$ exterior arcs. 
+	We proceed by induction on $i$. 
+	Base Case ($i = 0$): 
+	The root $R_0$ = $\{v_0\}$ has out-neighbors $R_1 = N^+(v_0)$. Consider $v_1 \in R_1$. If $v_1$ has more than $\delta$ exterior neighbors, then the node $v_0$ will be a Seymour node. The pigeonhole principle then forces $v_1$ to have at least one interior neighbor. If $v_1$ has more than one interior neighbor, then the subgraph $R_1$ violates the minimum neighborhood density metric, and thus $G$ would not be an MCE. This forces $v_1$ to have exactly 1 interior arc and $\delta - 1$ exterior arcs. 
 		
-		Induction Hypothesis: Assume that for some $i \geq 0$, $|R_k| = \delta - k + 1$.
+	Induction Hypothesis: Assume that for some $i \geq 0$, $|R_k| = \delta - i + 1$.
 		
-		Inductive Step: Consider $u_{k} \in R_{k}$ and $v_{i+1} \in R_{i+1}$ with $u_{i} \to v_{i} \in G$. 
-		By the I.H., we know that $|R_k| = \delta - k + 1$. If $v$ were to send more than $\delta - k + 1$ exterior neighbors to $R_{k+1}$, this would make $u_k$ Seymour. As a result, $v_{k+1}$ must have at least $k+1$ interior neighbors. Thus, by the partition lemma, this allows $v_{k+1}$ to only send $\delta - (k+1)$ nodes to $R_{k+2}$. 
+	Inductive Step: Consider $u_{k} \in R_{k}$ and $v_{i+1} \in R_{i+1}$ with $u_{i} \to v_{i} \in G$. 
+	By the I.H., we know that $|R_k| = \delta - k + 1$. Then by the Degree Partition, $u_k$ has $k$ interior neighbors and $\delta - k$ exterior neighbors.
+	If $v$ were to send more than $\delta - k + 1$ exterior neighbors to $R_{k+1}$, this would make $u_k$ Seymour. As a result, $v_{k+1}$ must have at least $k+1$ interior neighbors. Thus, by the partition lemma, this allows $v_{k+1}$ to only send $\delta - (k+1)$ nodes to $R_{k+2}$. 
 		
 		Similar to case 1, if $v_{k+1}$ sent too few nodes to $R_{k+2}$, this would result in $v_{k+1}$ having more interior arcs than required, and $G$ violating the minimum neighborhood density requirement for an MCE. 
 		
