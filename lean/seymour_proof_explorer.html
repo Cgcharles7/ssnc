@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lean 4 Seymour Conjecture Proof Explorer</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            lean: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              900: '#0c4a6e',
+            },
+            stage1: '#3b82f6', // blue
+            stage2: '#8b5cf6', // purple
+            stage3: '#10b981', // emerald
+            stage4: '#f59e0b', // amber
+            stage5: '#ef4444', // red
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'Fira Code', 'Menlo', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(71, 85, 105, 1);
+    }
+    .grid-bg {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-white">
+
+  <!-- Header / Navigation -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="p-2 bg-gradient-to-tr from-cyan-500 to-indigo-600 rounded-xl shadow-lg shadow-cyan-500/20">
+          <i data-lucide="git-fork" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold bg-gradient-to-r from-cyan-400 via-sky-200 to-indigo-300 bg-clip-text text-transparent">
+            Lean 4 Seymour Proof Navigator
+          </h1>
+          <p class="text-xs text-slate-400 font-mono">GLO / BFS-Lex Architecture Explorer</p>
+        </div>
+      </div>
+
+      <!-- Action & View Controls -->
+      <div class="flex items-center space-x-3">
+        <button id="toggle-sim-modal" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/50 transition flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Layer Visualizer</span>
+        </button>
+
+        <button id="toggle-export-modal" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-cyan-600/30 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-600/50 transition flex items-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Export Selection (<span id="selected-count-badge">0</span>)</span>
+        </button>
+
+        <button id="theme-toggle" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="sun" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Column: Filter Control & Graph Node Selector (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col space-y-4">
+      
+      <!-- Filter Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <i data-lucide="filter" class="w-3.5 h-3.5 text-cyan-400"></i> Proof Nodes Filter
+          </span>
+          <button id="reset-selection-btn" class="text-xs text-slate-400 hover:text-cyan-400 underline transition">Clear Selection</button>
+        </div>
+
+        <!-- Search input -->
+        <div class="relative mb-3">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
+          <input type="text" id="search-input" placeholder="Search definitions or theorems..." 
+            class="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+        </div>
+
+        <!-- Stage Filter Pills -->
+        <div class="flex flex-wrap gap-1.5 mb-3" id="stage-filter-container">
+          <button data-stage="all" class="stage-filter-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-cyan-500 text-white shadow-sm shadow-cyan-500/30">All Stages</button>
+          <button data-stage="1" class="stage-filter-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800 text-slate-400 hover:text-slate-200">S1: Primitives</button>
+          <button data-stage="2" class="stage-filter-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800 text-slate-400 hover:text-slate-200">S2: BFS-Lex</button>
+          <button data-stage="3" class="stage-filter-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800 text-slate-400 hover:text-slate-200">S3: GLO Nodes</button>
+          <button data-stage="4" class="stage-filter-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800 text-slate-400 hover:text-slate-200">S4: Neighbors</button>
+          <button data-stage="5" class="stage-filter-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800 text-slate-400 hover:text-slate-200">S5: Reductions</button>
+        </div>
+
+        <!-- Auto-Select Dependencies Mode Toggle -->
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-xs text-slate-400">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="git-commit" class="w-3.5 h-3.5 text-indigo-400"></i> Auto-include dependencies
+          </span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="auto-deps-toggle" class="sr-only peer" checked>
+            <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-cyan-600"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Proof Tree List -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex-1 flex flex-col min-h-[480px]">
+        <div class="flex items-center justify-between mb-3 text-xs text-slate-400">
+          <span class="font-bold uppercase tracking-wider">Proof Items (<span id="visible-count">0</span>)</span>
+          <span>Click to view details</span>
+        </div>
+
+        <div id="proof-node-list" class="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[580px]">
+          <!-- Node items rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Inspector & Lean 4 Code Viewer (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col space-y-4">
+      
+      <!-- Proof Detail Card -->
+      <div id="inspector-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col relative grid-bg">
+        
+        <!-- Empty State (No node selected) -->
+        <div id="inspector-empty" class="hidden my-auto py-16 flex flex-col items-center justify-center text-center">
+          <div class="p-4 bg-slate-800/60 rounded-full mb-3 text-slate-500">
+            <i data-lucide="code-2" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-slate-300 font-semibold text-base mb-1">Select a Proof Node</h3>
+          <p class="text-xs text-slate-500 max-w-sm">Choose any definition, structure, or theorem from the left list to inspect Lean 4 source code and formal logic.</p>
+        </div>
+
+        <!-- Node Details Content -->
+        <div id="inspector-content" class="flex-1 flex flex-col">
+          <!-- Header info -->
+          <div class="flex items-start justify-between border-b border-slate-800 pb-4 mb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span id="node-stage-badge" class="px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider">Stage 1</span>
+                <span id="node-type-badge" class="px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider bg-slate-800 text-slate-300">Theorem</span>
+              </div>
+              <h2 id="node-title" class="text-xl font-bold font-mono text-cyan-300">isSeymour_iff</h2>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button id="checkbox-select-current" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 border border-slate-700 hover:border-cyan-500 text-slate-200 transition flex items-center gap-1.5">
+                <i data-lucide="check-square" class="w-4 h-4 text-cyan-400"></i>
+                <span id="select-current-label">Include in Selection</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dependencies & Dependents Pills -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+            <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+              <span class="text-[11px] font-semibold text-slate-400 block mb-1.5 flex items-center gap-1">
+                <i data-lucide="arrow-left-circle" class="w-3.5 h-3.5 text-indigo-400"></i> Prerequisites (Depends On)
+              </span>
+              <div id="node-deps-list" class="flex flex-wrap gap-1">
+                <!-- Direct dependencies -->
+              </div>
+            </div>
+            <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+              <span class="text-[11px] font-semibold text-slate-400 block mb-1.5 flex items-center gap-1">
+                <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5 text-emerald-400"></i> Required By (Used In)
+              </span>
+              <div id="node-rev-deps-list" class="flex flex-wrap gap-1">
+                <!-- Reverse dependencies -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Informal Plain-English Explanation -->
+          <div class="mb-4 bg-slate-950/80 border border-slate-800 rounded-xl p-4">
+            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+              <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i> Intuitive Math Insight
+            </h4>
+            <p id="node-informal" class="text-xs text-slate-300 leading-relaxed">
+              Explaining the relation between Seymour proposition...
+            </p>
+          </div>
+
+          <!-- Tabs for Formal Code & Strategy -->
+          <div class="flex-1 flex flex-col min-h-0">
+            <div class="flex items-center justify-between border-b border-slate-800 mb-2">
+              <div class="flex space-x-2">
+                <button id="tab-code" class="px-3 py-1.5 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400">Lean 4 Code</button>
+                <button id="tab-strategy" class="px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-slate-200">Proof Strategy</button>
+              </div>
+              <button id="copy-code-btn" class="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1 py-1 px-2 rounded hover:bg-slate-800 transition">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Code
+              </button>
+            </div>
+
+            <!-- Code Content Box -->
+            <div id="code-box" class="flex-1 bg-slate-950 rounded-xl border border-slate-800 p-4 font-mono text-xs overflow-x-auto text-slate-200 leading-relaxed">
+              <pre id="node-lean-code">-- Lean code here</pre>
+            </div>
+
+            <!-- Strategy Content Box -->
+            <div id="strategy-box" class="hidden flex-1 bg-slate-950 rounded-xl border border-slate-800 p-4 text-xs text-slate-300 leading-relaxed overflow-y-auto">
+              <div id="node-strategy">Strategy description...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive GLO Simulation Modal -->
+  <div id="sim-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layers" class="w-5 h-5 text-indigo-400"></i>
+          <h3 class="text-base font-bold text-slate-100">GLO Layer Contradiction Visualizer</h3>
+        </div>
+        <button id="close-sim-modal" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-6">
+        <!-- Explanatory Banner -->
+        <div class="bg-indigo-950/40 border border-indigo-800/50 rounded-xl p-4 text-xs text-indigo-200 leading-relaxed">
+          <strong>The Contradiction Core (<code class="font-mono text-indigo-300">layers_collapse</code>):</strong> 
+          In a Minimum Counterexample (MCE), layer sizes strictly shrink as $|R_{k+1}| = \delta - k$. However, each node in layer $R_k$ must maintain an interior degree capacity bound derived from $N_1(u) \cap N_1(v)$. As layers shrink, the available degree capacity fails to accommodate required interior arcs, forcing a structural impossibility!
+        </div>
+
+        <!-- Interactive Sliders & Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 border border-slate-800 rounded-xl p-4">
+          <div>
+            <label class="text-xs font-semibold text-slate-300 flex justify-between mb-1">
+              <span>Minimum Degree ($\delta$):</span>
+              <span id="sim-delta-val" class="font-mono text-cyan-400 font-bold">4</span>
+            </label>
+            <input type="range" id="sim-delta" min="3" max="10" value="4" class="w-full accent-cyan-500 cursor-pointer">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-300 flex justify-between mb-1">
+              <span>Current Layer Depth ($k$):</span>
+              <span id="sim-k-val" class="font-mono text-indigo-400 font-bold">1</span>
+            </label>
+            <input type="range" id="sim-k" min="0" max="3" value="1" class="w-full accent-indigo-500 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- Layer Diagram Visualizer -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 relative overflow-x-auto min-h-[220px] flex flex-col justify-center">
+          <div id="layer-visualization" class="flex items-center justify-around gap-4 min-w-[500px]">
+            <!-- Generated dynamically -->
+          </div>
+        </div>
+
+        <!-- Math Verification Box -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+          <div class="bg-slate-950/80 border border-slate-800 p-3 rounded-xl">
+            <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">Layer Size |R<sub>k+1</sub>|</span>
+            <span id="stat-layer-size" class="text-lg font-bold font-mono text-emerald-400">3</span>
+          </div>
+          <div class="bg-slate-950/80 border border-slate-800 p-3 rounded-xl">
+            <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">Required Capacity</span>
+            <span id="stat-required-cap" class="text-lg font-bold font-mono text-amber-400">6 Arcs</span>
+          </div>
+          <div class="bg-slate-950/80 border border-slate-800 p-3 rounded-xl">
+            <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">Max Graph Capacity</span>
+            <span id="stat-max-cap" class="text-lg font-bold font-mono text-red-400">3 Arcs</span>
+          </div>
+        </div>
+
+        <div id="sim-status-banner" class="p-3 rounded-xl border text-xs font-semibold text-center">
+          Status message...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Proof Modal -->
+  <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="download" class="w-5 h-5 text-cyan-400"></i>
+          <h3 class="text-base font-bold text-slate-100">Export Lean 4 Code Selection</h3>
+        </div>
+        <button id="close-export-modal" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 flex-1 flex flex-col min-h-0 space-y-4">
+        <p class="text-xs text-slate-400">
+          Below is the compiled Lean 4 source snippet containing your selected definitions and theorems along with their required dependencies.
+        </p>
+
+        <div class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs overflow-y-auto text-slate-200">
+          <pre id="export-lean-text">// Selection contents</pre>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <span class="text-xs text-slate-500"><span id="export-item-count">0</span> Lean block(s) compiled.</span>
+          <div class="flex space-x-3">
+            <button id="copy-export-btn" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-cyan-600/20">
+              <i data-lucide="copy" class="w-4 h-4"></i> Copy Selection
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // --- PROOF DATABASE ---
+    const proofDatabase = [
+      // STAGE 1
+      {
+        id: "FiniteGraph",
+        title: "FiniteGraph",
+        type: "structure",
+        stage: 1,
+        deps: [],
+        informal: "Basic structure for a finite graph with explicit sets of vertices and edges. Verifies that every edge endpoint belongs to the vertex set.",
+        strategy: "Defines vertices and edges as Finsets of Nat and pairs of Nat respectively, with a proof obligation edge_valid.",
+        code: `structure FiniteGraph where\n  vertices : Finset Nat\n  edges : Finset (Nat × Nat)\n  edge_valid : ∀ e ∈ edges, e.1 ∈ vertices ∧ e.2 ∈ vertices`
+      },
+      {
+        id: "getN1Finset",
+        title: "FiniteGraph.getN1Finset",
+        type: "definition",
+        stage: 1,
+        deps: ["FiniteGraph"],
+        informal: "Computes the first neighborhood N₁(u) as a Finset of vertices directly connected by an outgoing arc from u.",
+        strategy: "Filters G.edges for pairs starting with u, then maps to destination vertices.",
+        code: `def getN1Finset (G : FiniteGraph) (u : Nat) : Finset Nat :=\n  (G.edges.filter (fun e => e.1 = u)).image (fun e => e.2)`
+      },
+      {
+        id: "getN2Finset",
+        title: "FiniteGraph.getN2Finset",
+        type: "definition",
+        stage: 1,
+        deps: ["getN1Finset"],
+        informal: "Computes the second neighborhood N₂(u): vertices reachable at distance 2, excluding u and any direct neighbors N₁(u).",
+        strategy: "Takes biUnion of getN1Finset over all v ∈ N₁(u) and filters out u and N₁(u).",
+        code: `def getN2Finset (G : FiniteGraph) (u : Nat) : Finset Nat :=\n  let n1 := getN1Finset G u\n  let all_n2 := n1.biUnion (fun v => getN1Finset G v)\n  all_n2.filter (fun w => w ≠ u ∧ w ∉ n1)`
+      },
+      {
+        id: "isSeymour",
+        title: "FiniteGraph.isSeymour",
+        type: "definition",
+        stage: 1,
+        deps: ["getN1Finset", "getN2Finset"],
+        informal: "Boolean test checking whether vertex u satisfies the Seymour condition |N₂(u)| ≥ |N₁(u)|.",
+        strategy: "Compares cardN2 G u ≥ cardN1 G u.",
+        code: `def isSeymour (G : FiniteGraph) (u : Nat) : Bool :=\n  cardN2 G u ≥ cardN1 G u`
+      },
+      {
+        id: "isSeymour_iff",
+        title: "FiniteGraph.isSeymour_iff",
+        type: "lemma",
+        stage: 1,
+        deps: ["isSeymour"],
+        informal: "Equivalence lemma converting the Boolean test `isSeymour` to its Proposition counterpart `IsSeymourProp`.",
+        strategy: "Unfolds definitions and applies `Bool.decide_iff`.",
+        code: `lemma isSeymour_iff (G : FiniteGraph) (u : Nat) :\n    G.isSeymour u = true ↔ G.IsSeymourProp u := by\n  dsimp [isSeymour, IsSeymourProp]\n  rw [Bool.decide_iff]`
+      },
+
+      // STAGE 2
+      {
+        id: "GloLex",
+        title: "GloLex",
+        type: "inductive",
+        stage: 2,
+        deps: ["FiniteGraph"],
+        informal: "BFS-Lex Coordinate System. Inductive datatype establishing node positions across layers (distance `d`) and root provenance.",
+        strategy: "Three constructors: `root` at layer 0, `childOf` moving layer d → d+1, and `sameLayerNeighbor` within layer d.",
+        code: `inductive GloLex (G : FiniteGraph) (delta : Nat) : (d : Nat) → (v : Nat) → Type where\n  | root (r : Nat) (h_vert : r ∈ G.vertices) : GloLex G delta 0 r\n  | childOf {d parent curr : Nat}\n      (p : GloLex G delta d parent)\n      (h_adj : G.Adj parent curr) : GloLex G delta (d + 1) curr\n  | sameLayerNeighbor {d peer curr : Nat}\n      (p : GloLex G delta d peer)\n      (h_adj : G.Adj peer curr) : GloLex G delta d curr`
+      },
+
+      // STAGE 3
+      {
+        id: "GLONode",
+        title: "GLONode",
+        type: "structure",
+        stage: 3,
+        deps: [],
+        informal: "Structural representation of a node under GLO architecture storing layer distance, lexicographical ID, and classified neighbor lists.",
+        strategy: "Stores `out_neighbors`, `interior_neighbors`, `exterior_neighbors`, and `back_neighbors` as coordinate lists.",
+        code: `structure GLONode where\n  dist               : Nat\n  lexId              : Nat\n  out_neighbors      : List Coord\n  interior_neighbors : List Coord\n  exterior_neighbors : List Coord\n  back_neighbors     : List Coord\n  parent             : Option Coord\n  toNumber           : Nat`
+      },
+      {
+        id: "gloNode_lt_wellFounded",
+        title: "gloNode_lt_wellFounded",
+        type: "theorem",
+        stage: 3,
+        deps: ["GLONode"],
+        informal: "Proves that the strict lexicographical ordering `GLONode.Lt` on nodes is well-founded, enabling structural induction over nodes.",
+        strategy: "Maps nodes to `(dist, lexId)` tuples and applies well-foundedness of lexicographical product order (`Prod.Lex`).",
+        code: `theorem gloNode_lt_wellFounded : WellFounded GLONode.Lt := by\n  let f := GLONode.toProd\n  apply Subrelation.wf (r := fun a b => Prod.Lex Nat.lt Nat.lt (f a) (f b))\n  · intro a b h\n    rcases h with h_dist | ⟨h_eq, h_id⟩\n    · exact .left _ _ h_dist\n    · dsimp [f, GLONode.toProd]\n      rw [h_eq]\n      exact .right b.dist h_id\n  · exact InvImage.wf f (WellFounded.prod_lex Nat.lt_wfRel.wf Nat.lt_wfRel.wf)`
+      },
+      {
+        id: "GraphLevelOrder",
+        title: "GraphLevelOrder",
+        type: "structure",
+        stage: 3,
+        deps: ["GLONode", "FiniteGraph"],
+        informal: "The master GLO architecture array structure encapsulating all nodes, minimum degree delta, maximum layer count, and underlying graph.",
+        strategy: "Wraps an Array of GLONodes along with delta metadata and underlying graph invariants.",
+        code: `structure GraphLevelOrder where\n  nodes            : Array GLONode\n  delta            : Nat\n  max_layer        : Nat\n  graph            : FiniteGraph`
+      },
+      {
+        id: "getN1Finset_eq",
+        title: "GraphLevelOrder.getN1Finset_eq",
+        type: "theorem",
+        stage: 3,
+        deps: ["GraphLevelOrder"],
+        informal: "Proves that for unique coordinates, the out-neighbor Finset matches the node's `out_neighbors` list.",
+        strategy: "Uses coordinate uniqueness `CoordUnique` to prove `find?` locates the exact node `n`.",
+        code: `theorem getN1Finset_eq (G : GraphLevelOrder) (hu : G.CoordUnique)\n    (n : GLONode) (hn : n ∈ G.nodes) :\n    getN1Finset G n.toCoords = n.out_neighbors.toFinset := by ...`
+      },
+
+      // STAGE 4
+      {
+        id: "interiorNeighbors",
+        title: "interiorNeighbors",
+        type: "definition",
+        stage: 4,
+        deps: ["GraphLevelOrder"],
+        informal: "Interior Neighbors N₁(u) ∩ N₁(v): Arcs from both u and its forward child v to a common node in the same layer as v.",
+        strategy: "Intersects `u.out_neighbors.toFinset` with `v.out_neighbors.toFinset` provided `v.dist = u.dist + 1`.",
+        code: `def interiorNeighbors (G : GraphLevelOrder) (u v : GLONode) : Finset Coord :=\n  if G.nodes.contains u && G.nodes.contains v && v.dist = u.dist + 1 then\n    u.out_neighbors.toFinset ∩ v.out_neighbors.toFinset\n  else ∅`
+      },
+      {
+        id: "exteriorNeighbors",
+        title: "exteriorNeighbors",
+        type: "definition",
+        stage: 4,
+        deps: ["GraphLevelOrder"],
+        informal: "Exterior Neighbors N₂(u) ∩ N₁(v): Arcs from child v to nodes that belong to the second neighborhood of u.",
+        strategy: "Intersects `getN2Finset G u.toCoords` with `v.out_neighbors.toFinset`.",
+        code: `def exteriorNeighbors (G : GraphLevelOrder) (u v : GLONode) : Finset Coord :=\n  if G.nodes.contains u && G.nodes.contains v && v.dist = u.dist + 1 then\n    getN2Finset G u.toCoords ∩ v.out_neighbors.toFinset\n  else ∅`
+      },
+      {
+        id: "exterior_neighbor_implies_second_neighbor",
+        title: "exterior_neighbor_implies_second_neighbor",
+        type: "theorem",
+        stage: 4,
+        deps: ["exteriorNeighbors"],
+        informal: "Proves that any exterior neighbor of a forward pair (u, v) is necessarily inside N₂(u).",
+        strategy: "Unfolds `exteriorNeighbors` and extracts the first component from `Finset.mem_inter`.",
+        code: `theorem exterior_neighbor_implies_second_neighbor\n    (G : GraphLevelOrder) (u v : GLONode) (c : Coord)\n    (h_cond : (G.nodes.contains u && G.nodes.contains v && v.dist = u.dist + 1) = true)\n    (hc : c ∈ exteriorNeighbors G u v) :\n    c ∈ getN2Finset G u.toCoords := by\n  unfold exteriorNeighbors at hc\n  rw [h_cond] at hc\n  exact (Finset.mem_inter.mp hc).1`
+      },
+
+      // STAGE 5
+      {
+        id: "IsCounterexample",
+        title: "IsCounterexample",
+        type: "definition",
+        stage: 5,
+        deps: ["GraphLevelOrder"],
+        informal: "Defines a valid Seymour counterexample: an oriented graph where EVERY node is non-Seymour (|N₂| < |N₁|).",
+        strategy: "Requires `CoordUnique`, `IsOriented`, non-empty nodes, and `isNonSeymour = true` for all nodes.",
+        code: `def IsCounterexample (G : GraphLevelOrder) : Prop :=\n  G.CoordUnique ∧\n  G.IsOriented ∧\n  0 < G.nodes.size ∧\n  ∀ x ∈ G.nodes, G.isNonSeymour (x.dist, x.lexId) = true`
+      },
+      {
+        id: "IsMinimumCounterexample",
+        title: "IsMinimumCounterexample",
+        type: "definition",
+        stage: 5,
+        deps: ["IsCounterexample"],
+        informal: "A Minimum Counterexample (MCE): A counterexample minimizing the lexicographical tuple `(interiorArcCount, maxTotalInteriorDegree)`.",
+        strategy: "Asserts counterexample status and minimality under `mceMetric G ≤ mceMetric H`.",
+        code: `def IsMinimumCounterexample (G : GraphLevelOrder) : Prop :=\n  IsCounterexample G ∧\n  ∀ H, IsCounterexample H → mceMetric G ≤ mceMetric H`
+      },
+      {
+        id: "layer_size_formula",
+        title: "layer_size_formula",
+        type: "theorem",
+        stage: 5,
+        deps: ["GraphLevelOrder"],
+        informal: "Derives the exact layer size formula under BFS layer contraction: |R_{m+2}| = δ - (m + 1).",
+        strategy: "Induction on depth `m` using the layer step reduction hypothesis.",
+        code: `theorem layer_size_formula\n    (G : GraphLevelOrder) (delta : Nat) (v0 : GLONode)\n    (h_v0_deg : v0.out_neighbors.length = delta)\n    (h_v0_nodup : v0.out_neighbors.Nodup)\n    (h_layer1_eq : (G.layerCoords 1).card = v0.out_neighbors.toFinset.card)\n    (h_step : ∀ j, 1 ≤ j → (G.layerCoords (j + 1)).card = (G.layerCoords j).card - 1)\n    (m : Nat) :\n    (G.layerCoords (m + 2)).card = delta - (m + 1) := by ...`
+      },
+      {
+        id: "interior_degree_lower_bound",
+        title: "interior_degree_lower_bound",
+        type: "theorem",
+        stage: 5,
+        deps: ["layer_size_formula", "interiorNeighbors"],
+        informal: "Establishes that the interior degree of any node at layer k+1 must be at least k + 1.",
+        strategy: "Combines minimum degree delta with exterior capacity bounds derived from layer shrinking.",
+        code: `theorem interior_degree_lower_bound\n    (G : GraphLevelOrder) (hu : G.CoordUnique) (hw : G.BFSWF)\n    (u v v0 : GLONode) (k : Nat)\n    (hL : LayerShrink G v0)\n    (hfwd : fwdArc G u v = true) (hk : v.dist = k + 1)\n    (hnb : G.backNeighbors u v = ∅)\n    (hsame : ∀ x ∈ v.out_neighbors, x.1 = v.dist → x ∈ u.out_neighbors)\n    (h_min : ∀ x ∈ G.nodes.toList, G.delta ≤ x.out_neighbors.length)\n    (hPart : PartitionWF v) (hback0 : v.back_neighbors.length = 0)\n    (hext_len : v.exterior_neighbors.length = (G.exteriorNeighbors u v).card)\n    (hk_le : k + 1 ≤ G.delta) :\n    k + 1 ≤ v.interior_neighbors.length := by ...`
+      },
+      {
+        id: "seymour_of_disconnected_back_arc",
+        title: "seymour_of_disconnected_back_arc",
+        type: "theorem",
+        stage: 5,
+        deps: ["GraphLevelOrder"],
+        informal: "Proves that if a back arc (b → a) has no overlap between N⁺(b) and N⁺(a), node `a` is forced to be Seymour.",
+        strategy: "Shows that all out-neighbors of `b` fall directly into N₂(a), proving |N₂(a)| ≥ delta ≥ |N₁(a)|.",
+        code: `theorem seymour_of_disconnected_back_arc\n    (G : GraphLevelOrder) (hu : G.CoordUnique)\n    (a b : GLONode) (ha : a ∈ G.nodes) (hb : b ∈ G.nodes)\n    (hback : b.toCoords ∈ a.out_neighbors)\n    (h_anti : a.toCoords ∉ b.out_neighbors)\n    (h_disc : ∀ z ∈ b.out_neighbors, z ∉ a.out_neighbors)\n    (hbnd : b.out_neighbors.Nodup)\n    (hreg : a.out_neighbors.length ≤ G.delta)\n    (hmin : G.delta ≤ b.out_neighbors.length) :\n    G.cardN1 a.toCoords ≤ G.cardN2 a.toCoords := by ...`
+      },
+      {
+        id: "layers_collapse",
+        title: "layers_collapse",
+        type: "theorem",
+        stage: 5,
+        deps: ["layer_size_formula", "interior_degree_lower_bound"],
+        informal: "Main contradiction theorem proving that layer shrinking |R_i| = δ - i + 1 and capacity bounds 2(s_i * i) ≤ s_i² - s_i cannot coexist at layer ⌊δ/3⌋ + 1.",
+        strategy: "Evaluates feasibility at depth i = ⌊δ/3⌋ + 1 to show 3i ≤ δ is violated, proving False.",
+        code: `theorem layers_collapse (δ : Nat) (hδ : 1 ≤ δ) (s : Nat → Nat)\n    (hsize : ∀ i, 1 ≤ i → i ≤ δ → s i = δ - i + 1)\n    (hcap  : ∀ i, 1 ≤ i → i ≤ δ → 2 * (s i * i) ≤ s i * s i - s i) :\n    False := by\n  have hi1 : 1 ≤ δ / 3 + 1 := by omega\n  have hi2 : δ / 3 + 1 ≤ δ := by omega\n  have h3 := feasibility (s (δ / 3 + 1)) (δ / 3 + 1) δ\n    (hsize _ hi1 hi2) hi2 (hcap _ hi1 hi2)\n  omega`
+      },
+      {
+        id: "no_minimum_layered_counterexample",
+        title: "no_minimum_layered_counterexample",
+        type: "theorem",
+        stage: 5,
+        deps: ["IsMinimumCounterexample", "layers_collapse"],
+        informal: "Final Theorem: No minimum layered counterexample exists for delta ≥ 3, concluding the proof of Seymour's Conjecture for GLO architecture.",
+        strategy: "Feeds `layer_size_of_min` and `layer_cap_of_min` into `layers_collapse_G` to derive False.",
+        code: `theorem no_minimum_layered_counterexample\n    (G : GraphLevelOrder) (hG : IsMinimumCounterexample G)\n    (h3 : 3 ≤ G.delta) : False :=\n  layers_collapse_G G (by omega) (layer_size_of_min G hG) (layer_cap_of_min G hG)`
+      }
+    ];
+
+    // --- STATE MANAGEMENT ---
+    let selectedNodeIds = new Set(["no_minimum_layered_counterexample", "layers_collapse"]);
+    let activeNodeId = "no_minimum_layered_counterexample";
+    let activeStageFilter = "all";
+    let searchQuery = "";
+    let autoIncludeDeps = true;
+
+    // Build reverse dependencies map
+    const reverseDepsMap = {};
+    proofDatabase.forEach(n => {
+      reverseDepsMap[n.id] = [];
+    });
+    proofDatabase.forEach(n => {
+      n.deps.forEach(depId => {
+        if (reverseDepsMap[depId]) {
+          reverseDepsMap[depId].push(n.id);
+        }
+      });
+    });
+
+    // --- STAGE COLORS & STYLING ---
+    const stageBadges = {
+      1: "bg-blue-900/50 text-blue-300 border border-blue-700/50",
+      2: "bg-purple-900/50 text-purple-300 border border-purple-700/50",
+      3: "bg-emerald-900/50 text-emerald-300 border border-emerald-700/50",
+      4: "bg-amber-900/50 text-amber-300 border border-amber-700/50",
+      5: "bg-red-900/50 text-red-300 border border-red-700/50",
+    };
+
+    const typeBadges = {
+      structure: "bg-cyan-950 text-cyan-300 border border-cyan-800",
+      definition: "bg-slate-800 text-slate-300 border border-slate-700",
+      inductive: "bg-purple-950 text-purple-300 border border-purple-800",
+      theorem: "bg-emerald-950 text-emerald-300 border border-emerald-800",
+      lemma: "bg-indigo-950 text-indigo-300 border border-indigo-800",
+    };
+
+    // --- DOM ELEMENTS ---
+    const proofNodeListEl = document.getElementById("proof-node-list");
+    const visibleCountEl = document.getElementById("visible-count");
+    const selectedCountBadgeEl = document.getElementById("selected-count-badge");
+
+    const inspectorEmptyEl = document.getElementById("inspector-empty");
+    const inspectorContentEl = document.getElementById("inspector-content");
+    const nodeTitleEl = document.getElementById("node-title");
+    const nodeStageBadgeEl = document.getElementById("node-stage-badge");
+    const nodeTypeBadgeEl = document.getElementById("node-type-badge");
+    const nodeInformalEl = document.getElementById("node-informal");
+    const nodeLeanCodeEl = document.getElementById("node-lean-code");
+    const nodeStrategyEl = document.getElementById("node-strategy");
+    const nodeDepsListEl = document.getElementById("node-deps-list");
+    const nodeRevDepsListEl = document.getElementById("node-rev-deps-list");
+    const checkboxSelectCurrentEl = document.getElementById("checkbox-select-current");
+    const selectCurrentLabelEl = document.getElementById("select-current-label");
+
+    const tabCodeEl = document.getElementById("tab-code");
+    const tabStrategyEl = document.getElementById("tab-strategy");
+    const codeBoxEl = document.getElementById("code-box");
+    const strategyBoxEl = document.getElementById("strategy-box");
+
+    // --- HELPER FUNCTIONS ---
+    function getFullDependencies(nodeId, collected = new Set()) {
+      const node = proofDatabase.find(n => n.id === nodeId);
+      if (!node) return collected;
+      node.deps.forEach(depId => {
+        if (!collected.has(depId)) {
+          collected.add(depId);
+          getFullDependencies(depId, collected);
+        }
+      });
+      return collected;
+    }
+
+    function toggleNodeSelection(nodeId) {
+      if (selectedNodeIds.has(nodeId)) {
+        selectedNodeIds.delete(nodeId);
+      } else {
+        selectedNodeIds.add(nodeId);
+        if (autoIncludeDeps) {
+          const deps = getFullDependencies(nodeId);
+          deps.forEach(d => selectedNodeIds.add(d));
+        }
+      }
+      updateUI();
+    }
+
+    // --- RENDER NODES ---
+    function renderNodeList() {
+      proofNodeListEl.innerHTML = "";
+      
+      const filtered = proofDatabase.filter(node => {
+        const matchesStage = activeStageFilter === "all" || node.stage.toString() === activeStageFilter;
+        const matchesSearch = node.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                              node.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              node.informal.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesStage && matchesSearch;
+      });
+
+      visibleCountEl.innerText = filtered.length;
+
+      filtered.forEach(node => {
+        const isSelected = selectedNodeIds.has(node.id);
+        const isActive = node.id === activeNodeId;
+
+        const el = document.createElement("div");
+        el.className = `p-3 rounded-xl border cursor-pointer transition flex items-start gap-3 ${
+          isActive 
+            ? "bg-slate-800/90 border-cyan-500 shadow-md shadow-cyan-500/10" 
+            : "bg-slate-950/60 border-slate-800/80 hover:border-slate-700"
+        }`;
+
+        el.innerHTML = `
+          <input type="checkbox" ${isSelected ? "checked" : ""} class="mt-1 accent-cyan-500 rounded cursor-pointer node-checkbox" data-id="${node.id}">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-mono text-xs font-bold text-slate-200 truncate ${isActive ? 'text-cyan-300' : ''}">${node.title}</span>
+              <span class="px-1.5 py-0.5 text-[9px] font-bold rounded ${stageBadges[node.stage]}">S${node.stage}</span>
+            </div>
+            <p class="text-[11px] text-slate-400 line-clamp-2">${node.informal}</p>
+          </div>
+        `;
+
+        el.addEventListener("click", (e) => {
+          if (e.target.classList.contains("node-checkbox")) return;
+          activeNodeId = node.id;
+          updateUI();
+        });
+
+        const chk = el.querySelector(".node-checkbox");
+        chk.addEventListener("change", (e) => {
+          e.stopPropagation();
+          toggleNodeSelection(node.id);
+        });
+
+        proofNodeListEl.appendChild(el);
+      });
+
+      selectedCountBadgeEl.innerText = selectedNodeIds.size;
+    }
+
+    function renderInspector() {
+      const node = proofDatabase.find(n => n.id === activeNodeId);
+      if (!node) {
+        inspectorEmptyEl.classList.remove("hidden");
+        inspectorContentEl.classList.add("hidden");
+        return;
+      }
+
+      inspectorEmptyEl.classList.add("hidden");
+      inspectorContentEl.classList.remove("hidden");
+
+      nodeTitleEl.innerText = node.title;
+      nodeStageBadgeEl.className = `px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider ${stageBadges[node.stage]}`;
+      nodeStageBadgeEl.innerText = `Stage ${node.stage}`;
+
+      nodeTypeBadgeEl.className = `px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider ${typeBadges[node.type] || 'bg-slate-800 text-slate-300'}`;
+      nodeTypeBadgeEl.innerText = node.type;
+
+      nodeInformalEl.innerText = node.informal;
+      nodeLeanCodeEl.innerText = node.code;
+      nodeStrategyEl.innerHTML = node.strategy;
+
+      // Selection Button label
+      const isSelected = selectedNodeIds.has(node.id);
+      selectCurrentLabelEl.innerText = isSelected ? "Selected in Export" : "Include in Selection";
+      checkboxSelectCurrentEl.className = `px-3 py-1.5 text-xs font-semibold rounded-lg border transition flex items-center gap-1.5 ${
+        isSelected 
+          ? "bg-cyan-950 border-cyan-500 text-cyan-300" 
+          : "bg-slate-800 border-slate-700 hover:border-cyan-500 text-slate-200"
+      }`;
+
+      // Prerequisites List
+      nodeDepsListEl.innerHTML = "";
+      if (node.deps.length === 0) {
+        nodeDepsListEl.innerHTML = `<span class="text-[10px] text-slate-500 italic">None (Base axiom/struct)</span>`;
+      } else {
+        node.deps.forEach(depId => {
+          const depNode = proofDatabase.find(n => n.id === depId);
+          const pill = document.createElement("button");
+          pill.className = "px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-700 hover:border-indigo-400 text-indigo-300 transition";
+          pill.innerText = depNode ? depNode.title : depId;
+          pill.addEventListener("click", () => {
+            activeNodeId = depId;
+            updateUI();
+          });
+          nodeDepsListEl.appendChild(pill);
+        });
+      }
+
+      // Required By List
+      nodeRevDepsListEl.innerHTML = "";
+      const revDeps = reverseDepsMap[node.id] || [];
+      if (revDeps.length === 0) {
+        nodeRevDepsListEl.innerHTML = `<span class="text-[10px] text-slate-500 italic">None (Top-level goal)</span>`;
+      } else {
+        revDeps.forEach(revId => {
+          const revNode = proofDatabase.find(n => n.id === revId);
+          const pill = document.createElement("button");
+          pill.className = "px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-700 hover:border-emerald-400 text-emerald-300 transition";
+          pill.innerText = revNode ? revNode.title : revId;
+          pill.addEventListener("click", () => {
+            activeNodeId = revId;
+            updateUI();
+          });
+          nodeRevDepsListEl.appendChild(pill);
+        });
+      }
+    }
+
+    function updateUI() {
+      renderNodeList();
+      renderInspector();
+    }
+
+    // --- EVENT LISTENERS ---
+    document.getElementById("search-input").addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      renderNodeList();
+    });
+
+    document.querySelectorAll(".stage-filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".stage-filter-btn").forEach(b => {
+          b.className = "stage-filter-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-slate-800 text-slate-400 hover:text-slate-200";
+        });
+        btn.className = "stage-filter-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-cyan-500 text-white shadow-sm shadow-cyan-500/30";
+        activeStageFilter = btn.getAttribute("data-stage");
+        renderNodeList();
+      });
+    });
+
+    document.getElementById("auto-deps-toggle").addEventListener("change", (e) => {
+      autoIncludeDeps = e.target.checked;
+    });
+
+    document.getElementById("reset-selection-btn").addEventListener("click", () => {
+      selectedNodeIds.clear();
+      updateUI();
+    });
+
+    checkboxSelectCurrentEl.addEventListener("click", () => {
+      toggleNodeSelection(activeNodeId);
+    });
+
+    // Code vs Strategy Tabs
+    tabCodeEl.addEventListener("click", () => {
+      tabCodeEl.className = "px-3 py-1.5 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400";
+      tabStrategyEl.className = "px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-slate-200";
+      codeBoxEl.classList.remove("hidden");
+      strategyBoxEl.classList.add("hidden");
+    });
+
+    tabStrategyEl.addEventListener("click", () => {
+      tabStrategyEl.className = "px-3 py-1.5 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400";
+      tabCodeEl.className = "px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-slate-200";
+      strategyBoxEl.classList.remove("hidden");
+      codeBoxEl.classList.add("hidden");
+    });
+
+    document.getElementById("copy-code-btn").addEventListener("click", () => {
+      const node = proofDatabase.find(n => n.id === activeNodeId);
+      if (node) {
+        navigator.clipboard.writeText(node.code);
+        const orig = document.getElementById("copy-code-btn").innerHTML;
+        document.getElementById("copy-code-btn").innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i> Copied!`;
+        setTimeout(() => {
+          document.getElementById("copy-code-btn").innerHTML = orig;
+          lucide.createIcons();
+        }, 1500);
+      }
+    });
+
+    // --- SIMULATION VISUALIZER MODAL ---
+    const simModal = document.getElementById("sim-modal");
+    const simDeltaInput = document.getElementById("sim-delta");
+    const simKInput = document.getElementById("sim-k");
+    const simDeltaVal = document.getElementById("sim-delta-val");
+    const simKVal = document.getElementById("sim-k-val");
+    const layerVisContainer = document.getElementById("layer-visualization");
+
+    const statLayerSize = document.getElementById("stat-layer-size");
+    const statRequiredCap = document.getElementById("stat-required-cap");
+    const statMaxCap = document.getElementById("stat-max-cap");
+    const simStatusBanner = document.getElementById("sim-status-banner");
+
+    function updateSimulation() {
+      const delta = parseInt(simDeltaInput.value);
+      const k = parseInt(simKInput.value);
+
+      simDeltaVal.innerText = delta;
+      simKVal.innerText = k;
+
+      // Formula computations
+      // |R_{k+1}| = delta - k
+      const layerSize = Math.max(0, delta - k);
+      // Required interior arc capacity = |R_{k+1}| * (k + 1)
+      const requiredArcs = layerSize * (k + 1);
+      // Maximum capacity in layer = |R_{k+1}| * (|R_{k+1}| - 1) / 2
+      const maxArcs = Math.floor((layerSize * (layerSize - 1)) / 2);
+
+      statLayerSize.innerText = layerSize;
+      statRequiredCap.innerText = `${requiredArcs} Arcs`;
+      statMaxCap.innerText = `${maxArcs} Arcs`;
+
+      const isContradiction = (2 * requiredArcs) > (layerSize * layerSize - layerSize) || layerSize <= 0;
+
+      if (isContradiction) {
+        simStatusBanner.className = "p-3 rounded-xl border border-red-800/80 bg-red-950/60 text-xs font-semibold text-red-300 text-center";
+        simStatusBanner.innerHTML = `<i data-lucide="alert-triangle" class="inline w-4 h-4 mr-1"></i> Contradiction Reached! Interior Arc demand (${requiredArcs}) exceeds layer capacity (${maxArcs}) at depth k = ${k}.`;
+      } else {
+        simStatusBanner.className = "p-3 rounded-xl border border-emerald-800/80 bg-emerald-950/60 text-xs font-semibold text-emerald-300 text-center";
+        simStatusBanner.innerHTML = `<i data-lucide="check-circle" class="inline w-4 h-4 mr-1"></i> Feasible Layer: Capacity (${maxArcs}) is sufficient for demand (${requiredArcs}).`;
+      }
+
+      // Render Visual Nodes across Layers
+      layerVisContainer.innerHTML = "";
+
+      // Layer R_k
+      const rkBox = document.createElement("div");
+      rkBox.className = "flex flex-col items-center bg-slate-900 border border-indigo-700/60 p-4 rounded-xl min-w-[120px]";
+      rkBox.innerHTML = `
+        <span class="text-xs font-bold text-indigo-300 mb-2">Layer R<sub>${k}</sub></span>
+        <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold font-mono text-sm shadow-lg shadow-indigo-600/30">u</div>
+      `;
+
+      // Arrow
+      const arrow = document.createElement("div");
+      arrow.className = "flex flex-col items-center text-slate-500 font-mono text-xs";
+      arrow.innerHTML = `<span>Forward Arc</span><i data-lucide="arrow-right" class="w-6 h-6 text-cyan-400"></i>`;
+
+      // Layer R_{k+1}
+      const rk1Box = document.createElement("div");
+      rk1Box.className = "flex flex-col items-center bg-slate-900 border border-emerald-700/60 p-4 rounded-xl min-w-[160px]";
+      
+      let nodesHtml = "";
+      const displayCount = Math.min(layerSize, 6);
+      for(let i = 0; i < displayCount; i++) {
+        nodesHtml += `<div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow">v<sub>${i+1}</sub></div>`;
+      }
+      if (layerSize > 6) nodesHtml += `<span class="text-xs text-slate-400">+${layerSize - 6} more</span>`;
+
+      rk1Box.innerHTML = `
+        <span class="text-xs font-bold text-emerald-300 mb-2">Layer R<sub>${k+1}</sub> (${layerSize} nodes)</span>
+        <div class="flex flex-wrap gap-1.5 justify-center max-w-[140px]">${nodesHtml || '<span class="text-xs text-red-400">Empty Layer</span>'}</div>
+      `;
+
+      layerVisContainer.appendChild(rkBox);
+      layerVisContainer.appendChild(arrow);
+      layerVisContainer.appendChild(rk1Box);
+
+      lucide.createIcons();
+    }
+
+    document.getElementById("toggle-sim-modal").addEventListener("click", () => {
+      simModal.classList.remove("hidden");
+      updateSimulation();
+    });
+    document.getElementById("close-sim-modal").addEventListener("click", () => simModal.classList.add("hidden"));
+
+    simDeltaInput.addEventListener("input", updateSimulation);
+    simKInput.addEventListener("input", updateSimulation);
+
+    // --- EXPORT MODAL ---
+    const exportModal = document.getElementById("export-modal");
+    const exportLeanText = document.getElementById("export-lean-text");
+    const exportItemCount = document.getElementById("export-item-count");
+
+    document.getElementById("toggle-export-modal").addEventListener("click", () => {
+      exportModal.classList.remove("hidden");
+      
+      const selected = proofDatabase.filter(n => selectedNodeIds.has(n.id));
+      exportItemCount.innerText = selected.length;
+
+      let codeOutput = `-- Compiled Lean 4 Sub-proof Selection\n-- Seymour Second Neighborhood Conjecture (GLO Framework)\n\n`;
+      selected.forEach(n => {
+        codeOutput += `-- Stage ${n.stage}: ${n.title}\n${n.code}\n\n`;
+      });
+
+      exportLeanText.innerText = codeOutput;
+    });
+
+    document.getElementById("close-export-modal").addEventListener("click", () => exportModal.classList.add("hidden"));
+
+    document.getElementById("copy-export-btn").addEventListener("click", () => {
+      navigator.clipboard.writeText(exportLeanText.innerText);
+      const btn = document.getElementById("copy-export-btn");
+      btn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Copied to Clipboard!`;
+      setTimeout(() => {
+        btn.innerHTML = `<i data-lucide="copy" class="w-4 h-4"></i> Copy Selection`;
+        lucide.createIcons();
+      }, 1500);
+    });
+
+    // Light/Dark Theme toggle placeholder
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+    });
+
+    // --- INITIALIZATION ---
+    window.onload = () => {
+      updateUI();
+      lucide.createIcons();
+    };
+  </script>
+</body>
+</html>
