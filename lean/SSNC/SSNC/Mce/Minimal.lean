@@ -829,49 +829,4 @@ theorem layers_collapse_G (G : GraphLevelOrder) (hδ : 1 ≤ G.delta)
     False :=
   layers_collapse G.delta hδ (fun i => (G.layerCoords i).card) hsize hcap
 
-theorem layer_size_all
-    (G : GraphLevelOrder) (delta : Nat) (v0 : GLONode)
-    (h_v0_deg : v0.out_neighbors.length = delta)
-    (h_v0_nodup : v0.out_neighbors.Nodup)
-    (h_layer1_eq : (G.layerCoords 1).card = v0.out_neighbors.toFinset.card)
-    (h_step : ∀ j, 1 ≤ j →
-      (G.layerCoords (j + 1)).card = (G.layerCoords j).card - 1) :
-    ∀ i, 1 ≤ i → i ≤ delta → (G.layerCoords i).card = delta - i + 1 := by
-  intro i hi hid
-  have h1 : (G.layerCoords 1).card = delta := by
-    rw [h_layer1_eq, List.toFinset_card_of_nodup h_v0_nodup]
-    exact h_v0_deg
-  rcases Nat.lt_or_ge i 2 with h | h
-  · obtain rfl : i = 1 := by omega
-    rw [h1]; omega
-  · obtain ⟨m, rfl⟩ : ∃ m, i = m + 2 := ⟨i - 2, by omega⟩
-    rw [layer_size_formula G delta v0 h_v0_deg h_v0_nodup h_layer1_eq h_step m]
-    omega
-
-/-- hsize: from `layer_size_all`, with `h_step` from the no-back-arc invariant. -/
-theorem layer_size_of_min (G : GraphLevelOrder)
-    (hG : IsMinimumCounterexample G) :
-    ∀ i, 1 ≤ i → i ≤ G.delta →
-      (G.layerCoords i).card = G.delta - i + 1 := by
-  have hstep := layer_step G hG
-  obtain ⟨hL, hce, _⟩ := hG
-  obtain ⟨hbfs, hnodup, _hmin, ⟨r, hr, hr0, hrdeg, huniq⟩, hparents⟩ := hL
-  obtain ⟨_hcu, ⟨hirr, _hanti⟩, _hne, _hall⟩ := hce
-  exact layer_size_all G G.delta r hrdeg (hnodup r hr)
-    (by rw [layerCoords_one_eq G hbfs hparents hirr r hr hr0 huniq]) hstep
-
-/-- hcap: from `layer_arc_count`, using interior degree i in every node of R_i. -/
-theorem layer_cap_of_min (G : GraphLevelOrder)
-    (hG : IsMinimumCounterexample G) :
-    ∀ i, 1 ≤ i → i ≤ G.delta →
-      2 * ((G.layerCoords i).card * i)
-        ≤ (G.layerCoords i).card * (G.layerCoords i).card - (G.layerCoords i).card := by
-  sorry  -- layer_arc_count
-
-theorem no_minimum_layered_counterexample
-    (G : GraphLevelOrder) (hG : IsMinimumCounterexample G)
-    (h3 : 3 ≤ G.delta) : False :=
-  layers_collapse_G G (by omega) (layer_size_of_min G hG) (layer_cap_of_min G hG)
-
-
 end GraphLevelOrder
