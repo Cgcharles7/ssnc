@@ -13,6 +13,15 @@ inductive PathLen (G : FiniteGraph) : Nat → Nat → Nat → Prop
 def ShortestPathLen (G : FiniteGraph) (u v n : Nat) : Prop :=
   PathLen G u v n ∧ ∀ m, PathLen G u v m → n ≤ m
 
+noncomputable def getMinOutDegNode (G : FiniteGraph) : Nat :=
+  match G.vertices.toList with
+  | [] => 0
+  | u :: us =>
+    us.foldl (fun best u' =>
+      if cardN1 G u' < cardN1 G best then u' else best
+    ) u
+
+
 lemma ShortestPathLen.unique (G : FiniteGraph) (u v n m : Nat)
     (h₁ : G.ShortestPathLen u v n) (h₂ : G.ShortestPathLen u v m) : n = m :=
   le_antisymm (h₁.2 m h₂.1) (h₂.2 n h₁.1)
