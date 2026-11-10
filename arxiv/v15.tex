@@ -284,9 +284,41 @@ $R_{i+2}$).
 	
 	The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
 	
-	\begin{lemma}Let $G$ be an MCE minimizing interior arc weight. If an interior arc $e = (u, w)$ within layer $R_k$ can be removed such that no vertex in $R_{k-1}$ becomes a Seymour vertex and all preceding layer-size constraints remain satisfied, then $G$ cannot be a minimum counterexample.
-	\end{lemma}
-	\begin{proof}Assume such an arc exists. Removing $e$ strictly decreases the interior neighbor count (and/or max total interior degree) without violating the anti-Seymour property ($|N^{++}(v)| < |N^+(v)|$) for any vertex. This contradicts the minimality definition of $G$, proving that every interior arc in an MCE is structurally indispensable.\end{proof}
+	\begin{lemma}
+Let $G$ be a Minimum Counterexample (MCE) that minimizes the total interior arc weight. 
+If an interior arc $e = (u, w)$ within layer $R_k$ can be removed such that:
+\begin{enumerate}
+    \item No vertex in $R_{k-1}$ (or subsequent layers) becomes a Seymour vertex, and
+    \item All preceding layer-size and degree constraints remain satisfied,
+\end{enumerate}
+then $G$ cannot be a minimum counterexample.
+\end{lemma}
+
+\begin{lemma} (Interior Arc Redundancy and Parent Invariance)
+Let $G$ be a Minimum Counterexample (MCE) under the metric minimizing interior neighbors and max total interior degree. 
+Let $u_k \in R_k$ be a parent node whose out-neighbors in $R_{k+1}$ include children $v_{k+1, 1}$ and $v_{k+1, 2}$. 
+If an interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ is redundant—meaning its removal respects the minimum interior degree requirement for $v_{k+1, 1}$—then removing $e$ leaves the first- and second-neighborhood sizes of $u_k$ completely unchanged, ensuring $u_k$ remains non-Seymour.
+\end{lemma}
+
+\begin{proof}
+Consider the interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ within layer $R_{k+1}$. We wish to show that removing $e$ preserves the non-Seymour status of parent node $u_k \in R_k$ by analyzing its neighborhoods:
+
+\begin{enumerate}
+    \item \textbf{First Neighborhood ($N^+(u_k)$):} 
+    By definition, $N^+(u_k) = \{v \in V(G) \mid (u_k, v) \in E(G)\}$. 
+    Because $e$ is an internal edge between two children of $u_k$ in $R_{k+1}$ rather than an outgoing edge from $u_k$ itself, its removal deletes no vertices and modifies no edges incident to $u_k$. Thus, both $N^+(u_k)$ and its cardinality $|N^+(u_k)|$ remain invariant.
+
+    \item \textbf{Second Neighborhood ($N^{++}(u_k)$):} 
+    The second neighborhood is defined as $N^{++}(u_k) = N^+(N^+(u_k)) \setminus (N^+(u_k) \cup \{u_k\})$. 
+    Since both endpoints of $e$ ($v_{k+1, 1}$ and $v_{k+1, 2}$) already belong to $N^+(u_k)$, the arc $e$ represents an internal transition entirely within the first neighborhood ($N^+(u_k) \to N^+(u_k)$). It creates no new paths to vertices outside $N^+(u_k)$ (such as $R_{k+2}$), meaning the underlying reachability set defining $N^{++}(u_k)$ is unaltered.
+\end{enumerate}
+
+Since neither $|N^+(u_k)|$ nor $|N^{++}(u_k)|$ changes when the redundant interior arc $e$ is removed, the strict anti-Seymour inequality for $u_k$:
+\[
+|N^{++}(u_k)| < |N^+(u_k)|
+\]
+continues to hold. Consequently, any interior arc in excess of a vertex's minimum structural requirement can be safely removed without generating a Seymour vertex, proving that an MCE must tightly bind every interior arc.
+\end{proof}
 	
 	\begin{lemma} (Interior Arc Redundancy and Parent Invariance).
 		Let $G$ be a Minimum Counterexample (MCE) under the metric minimizing interior neighbors and max total interior degree. Let $u_k \in R_k$ be a parent node with out-neighbors in $R_{k+1}$, including children $v_{k+1, 1}$ and $v_{k+1, 2}$. If an interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ is redundant—meaning its removal does not violate the minimum interior degree requirement for $v_{k+1, 1}$—then removing $e$ does not alter the first- or second-neighborhood sizes of $u_k$, and $u_k$ remains non-Seymour.
@@ -324,13 +356,14 @@ $R_{i+2}$).
 	
 	
 	\begin{theorem}
-		Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $\text{int}(u, v) \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
+		Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $\text{int}(u, v) \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
 	\end{theorem}
 	\begin{proof}
-		Let $v_{k+1} \in R_{k+1}$ be a child of $u_k \in R_k$. 
-		By Theorem \ref{layer_size} we know that at least $\delta - (k+1) + 1$ nodes are necessary in $R_{k+1}$ to keep $u_k$ from being Seymour. 
-		By the pigeonhole principle, to keep $u_k$ non-Seymour, the node $v_{k+1}$ must have no more than $delta - (k+2) + 1$ exterior arcs. 
+		Let $v_{k+1} \in R_{k+1}$ be a child of $u_k \in R_k$. 
+		By Theorem \ref{layer_size} we know that at least $\delta - (k+1) + 1$ nodes are necessary in $R_{k+1}$ to keep $u_k$ from being Seymour. 
+		If $v_{k+1} had more than $k+1$ neighbors in $R_{k+1}$ then each of these neighbors is an interior neighbor with parent neighbors $u_k$. By Lemma \ref{int_arc_rem} the sizes first and second neighborhoods of the parents do not change. Thus $u_k$ remains non-Seymour. Thus can form a smaller counterexample when these extra interior arcs are present. 
 	\end{proof}
+
 	
 	Another consequence of the rooted neighborhood size formula is that it sets the worse possible rate of decrease. The lower bound for interior neighbors is also an upper bound for exterior neighbors (because there are no back neighbors). 
 	
