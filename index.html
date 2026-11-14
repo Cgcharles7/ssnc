@@ -939,7 +939,7 @@ function generateBackArcs(clusters, delta) {
     const k = clusters.length - 1; // Index of the last neighborhood
     
     // We only process the last two neighborhoods: k (Outlet) and k-1 (Seymour)
-    const activeNeighborhoods = [k - 1, k];
+    const activeNeighborhoods = [k - 1];
     
     // Root vertex is explicitly the node in the first cluster (position 0)
     const rootVertex = clusters[0][0];
@@ -953,11 +953,11 @@ function generateBackArcs(clusters, delta) {
 
             // 2. Iterate through previous neighborhoods to distribute remaining back-arcs
             // Specifically targeting R_1, R_2, ... up to k-2
-            for (let targetIdx = 1; targetIdx <= k - 2; targetIdx++) {
+            for (let targetIdx = 1; targetIdx <= 1; targetIdx++) {
                 const targetCluster = clusters[targetIdx];
                 
                 // Constraint: Cannot send more than |A[target]| / 3
-                const maxArcsToThisCluster = Math.floor(targetCluster.length / 3);
+                const maxArcsToThisCluster = delta;
                 
                 // Special Constraint: Nodes in the 4th cluster (index 3) 
                 // cannot send links to the 3rd cluster (index 2).
