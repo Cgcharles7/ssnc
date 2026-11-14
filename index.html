@@ -695,7 +695,7 @@ Minimum Degree: <select id="minDeg" onchange="ansOvr = main(); ansOvr = dowork(a
 <div id="myDiv2"></div><br>
 <select id="backArcToggle" onchange="ansOvr = main(); ansOvr = dowork(ansOvr)">
     <option value="off">Forward Flow Only (Clean)</option>
-    <option value="on">Show Back Arcs (Detailed)</option>
+    <option value="on" selected>Show Back Arcs (Detailed)</option>
 </select><br>
 <button id="generateGraph" onclick="main()">Generate Graph</button><br>
 <button onclick="downloadImage()">Download as Image</button><br>
@@ -803,8 +803,8 @@ function main() {
             // Safe access to the previous select value
             if (i != numseq)
                 size = minDeg - i + 1;
-            else
-                size = minDeg - i + 2;
+//            else
+//                size = minDeg - i + 2;
         
         // Generate the subgraph using the new deterministic logic
         gphs.push(generateGph(size, i));
