@@ -141,17 +141,11 @@
 	
 	Graph theory is the study of relationships. The Graph Level Order introduces set-theoretic ancestry to those connections. After identifying the limitations of existing terminology, we formally define the Graph Level Order architecture. This includes new set-theoretic types of neighbors, partitions of those neighbors, and theorems mapping these terms to existing terminology. This systematic reorganization provides the clarity necessary to resolve the SSNC.
 	
-	A Seymour node is a node satisfying the conjecture. Consequently, a non-Seymour node is the node-level negation of the SSNC, requiring a strict inequality ($|N^{++}(u)| < |N^{+}(u)|$). The objective is to maximize the number of non-Seymour vertices inside a graph $G \in \mathcal{C}$ (the set of counterexamples).
+	Prior literature has largely divided the study of Seymour's Second Neighborhood Conjecture into two camps regarding transitive triangles: those who attempt to leverage them as building blocks and those who bypass them entirely across restricted graph classes. However, treating transitive triangles uniformly is a foundational stumbling block. Standard shortest-path definitions lack the structural resolution to distinguish how these triangles actually function, leading critics to view new neighborhood definitions as mere rebrandings of old components.
 	
-	If any node fails to be non-Seymour, it proves the conjecture. As a result, these non-Seymour nodes work in unison towards not allowing a Seymour vertex.
+	Our BFS layering approach moves beyond this binary. By organizing the graph into strict hierarchical levels, we can isolate and classify transitive triangles based on their inter-layer orientation. Specifically, forward-facing transitive triangles act as dynamic conduits—allowing parent nodes to propagate structural requirements down to their children. This systematic isolation of back arcs transforms what was once a methodological roadblock into a reliable engine for the Graph Level Order architecture.
 	
-	Most researchers who work on this problem use shortest paths to distinguish first neighbors from second. The Breadth-First Search (BFS) algorithm extends that concept to entire graphs. When a second metric of lexicographic ordering is added to distinguish nodes at the same distance, this becomes a well-ordering of vertices.
-	
-	\begin{theorem}[BFS-Lex Coordinate System]\label{bfslex}
-		For any finite, connected oriented graph $G \in \mathcal{O}$ and root vertex $v_0 \in V(G)$, there exists a unique Well-Ordering of V(G) induced by a breadth-first search (BFS) algorithm combined with a lexicographical tie-breaking rule.
-	\end{theorem}
-	
-	This well ordering can easily be seen by a mapping from the coordinate pair of a node's BFS distance and lexicographic ID to the natural numbers. 
+	A Seymour node is a vertex satisfying the conjecture, making a non-Seymour node the node-level negation of the SSNC ($|N^{++}(u)| < |N^{+}(u)|$). By definition, any minimum counterexample requires every node to be non-Seymour; the sudden absence of a non-Seymour node immediately proves the conjecture. Structurally, this creates a cooperative propagation dynamic between parent and child nodes across the BFS layers. Parent nodes effectively pass the burden of the neighborhood condition down the hierarchy, while children must satisfy it to prevent the local configuration from collapsing into a counterexample-ending Seymour vertex. This inter-layer dependency is structurally mediated by forward-facing transitive triangles—which we formally define as interior neighbors and utilize as the foundational engine of the Graph Level Order architecture.	
 	
 	Standard neighborhood definitions suffer from an accounting failure: they cannot be partitioned without destroying ancestral data. When a node's influence is sent to its first neighbors, the connection to its second neighbors is reduced to a simple count. This strips distance-two neighbors of any knowledge of their ancestry. This loss creates a disconnect and makes it impossible to track the precise distribution of out-degree influence.
 	
@@ -183,6 +177,12 @@
 		Standard neighborhoods $N^+(v)$ and $N^{++}(v)$ discard layer-ancestry information, causing the Seymour diamond double-counting problem. When two children of the same parent both point to the same grandchild, summing their out-degrees counts that grandchild twice. The canonical partition presents positional data and makes the double-counting resolvable. The second neighborhood is a union of forward neighbor sets, not a sum. 
 	\end{remark}
 	
+	\begin{theorem}[BFS-Lex Coordinate System]\label{bfslex}
+		For any finite, connected oriented graph $G \in \mathcal{O}$ and root vertex $v_0 \in V(G)$, there exists a unique Well-Ordering of V(G) induced by a breadth-first search (BFS) algorithm combined with a lexicographical tie-breaking rule.
+	\end{theorem}
+	
+	This well ordering can easily be seen by a mapping from the coordinate pair of a node's BFS distance and lexicographic ID to the natural numbers. 
+	
 	The \textbf{rooted neighborhood} at distance $i \ge 0$ from $v_0$ is the subgraph induced by the vertices at directed distance $i$ from $v_0$.
 	
 	A triple of vertices $x,y,u$ in an oriented graph $G$ forms a \textbf{transitive triangle} if $$ x \to y,\qquad x \to u,\qquad y \to u, $$ i.e., the three vertices induce an acyclic orientation of a 3-cycle.
@@ -193,7 +193,7 @@
 	The \textbf{exterior degree} of $v_{i+1}$ with respect to $u_i$ is $$ |\text{ext}(u_i, v_{i+1})|. $$\label{ext_nbr}
 	
 	\begin{remark} For the MDN $v_0$, all its out-neighbors are exterior neighbors because $R_0 = \{v_0\}$ and there are no earlier neighborhoods $R_{-1}$. Thus, $$ \text{int}(v_0, v) = \emptyset \hspace{1cm} \forall v \in\space R_1 $$ \end{remark}
-	
+		
 	Let $v_0$ be the MDN, and let $u_i \to v_{i+1} \in G$, with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$. The set of \textbf{back neighbors} from $v_i$ is $\text{back}(v_{j})$. The set of all back neighbors of $u_i$ is denoted $\bigcup_{j <= i} R_j \text{back}(u_i)$. \label{back_def} 
 	
 	Back neighbors are a well studied problem in graph theory and this definition is consistent with literature. To assist with solving the SSNC, we will partition the set of back neighbors further: connected and disconnected back neighbors. 
@@ -204,6 +204,32 @@
 	
 	This is a minimum counterexample approach to the SSNC. Let $G \in \mathcal{O}$ be an oriented graph. Let $\mathcal{C}$ be the (possibly empty) set of all counterexamples to SSNC. Let $G \in \mathcal{C}$ be a counterexample. Let $\omega$ be a BFS-Lex well-ordering $G$ rooted at its minimum out-degree node $v_0$. For a fixed integer $k$, let $G_k$ denote the induced subgraph consisting of the first $k$ vertices of $G$ under the ordering $\omega$. The graph $G \in \mathcal{C}$ is a \textbf{Minimum Counterexample (MCE)} if it is constructed using the BFS-Lex algorithm rooted at a minimum out-degree node $v_0$ and which also minimizes the interior neighbors and the maximum total interior degree in each layer. 	
 	
+	\begin{remark}
+	Let $G\in \mathcal{O}$ be an MCE. The interior neighbors of $v_{i+1}$ with respect to $u_i$ are the vertices $\text{int}(u_i, v_{i+1}) = N^+(u_i) \cap N^+(v_{i+1})$. By definition, $\text{int}(u_i, v_{i+1}) \subseteq N^+(u_i)$. 
+	\end{remark}
+	
+	\begin{remark}
+	Let $G\in \mathcal{O}$ be an MCE. The exterior neighbors of $v_{i+1}$ with respect to $u_i$ are given by $\text{ext}(u_i, v_{i+1}) = N^2(u_i) \cap N^+(v_{i+1})$. By definition, $\text{ext}(u_i, v_{i+1}) \subseteq N^2(u_i)$.
+	\end{remark}
+	
+	\begin{lemma}
+	Lemma (Layer $R_{k+1}$ Neighborhood Coverage)For any layer $k \ge 0$, the $(k+1)$-th layer is entirely contained within the union of the out-neighborhoods of vertices in $R_k$:$$R_{k+1} \subseteq \bigcup_{u_k \in R_k} N^+(u_k)$$
+	\end{lemma}
+	\begin{proof}
+	Let $x \in R_{k+1}$. By the definition of BFS layering, every vertex in layer $R_{k+1}$ is at directed distance $k+1$ from the root $v_0$. This implies that a shortest directed path from $v_0$ to $x$ must pass through a parent vertex $u_k \in R_k$. So there exists an arc $u_k \to x$. By definition of the out-neighborhood, $x \in N^+(u_k)$ for that specific parent $u_k$. Because $u_k$ is an element of $R_k$, $x$ is contained in the union of out-neighborhoods across all vertices in $R_k$. Therefore, $R_{k+1} \subseteq \bigcup_{u_k \in R_k} N^+(u_k)$. 
+	\end{proof}
+	
+	\begin{lemma}
+	Let $G \in mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ without back-neighbors. For any parent $u_k \in R_k$ and its child $v_{k+1} \in R_{k+1}$:$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
+	\end{lemma}
+	\begin{proof}
+	\begin{itemize}
+		\item Interior Neighbors: By definition, interior neighbors are nodes reached by both $u_k$ and $v_{k+1}$ ($N^+(u_k) \cap N^+(v_{k+1})$). In a BFS layering without back-neighbors, out-neighbors from layer $R_k$ only land in $R_k$ or $R_{k+1}$, while out-neighbors from layer $R_{k+1}$ land in $R_{k+1}$ or $R_{k+2}$. The intersection of those two sets, only leaves the  layer $R_{k+1}$. Therefore, all interior neighbors live right inside $R_{k+1}$.
+		
+		\item Exterior Neighbors: Exterior neighbors sit at the intersection of $u_k$'s second neighborhood and $v_{k+1}$'s first neighborhood ($N^2(u_k) \cap N^+(v_{k+1})$). Since second neighbors of $u_k$ can reach into $R_{k+1}$ or $R_{k+2}$, and out-neighbors of $v_{k+1}$ also land in $R_{k+1}$ or $R_{k+2}$, our initial candidate pool is $R_{k+1} \cup R_{k+2}$. However, everything in $R_{k+1}$ is already accounted for by direct first-layer steps from $R_k$ (and first/second neighborhoods are strictly disjoint). Stripping out $R_{k+1}$ leaves us with the strict containment $\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$.
+	\end{itemize}
+	\end{proof}
+	
 	\begin{definition}\label{glover1}
 		Let $G = (V,E)$ be an oriented graph represented by an MCE, and let $v_0 \in V$ be the vertex of minimum out-degree. A \textbf{Graph Level Order} on $G$ consists of the following structure:
 		\begin{enumerate}
@@ -212,8 +238,6 @@
 			\item Ancestry-Awareness: For each parent-child pair $u_i \to v_{i+1}$ with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$, the out-neighbors of $v_{i+1}$ are classified into the three disjoint sets according to Lemma \ref{nodepartition}: $\text{back}(u_i, v_{i+1})$, $\text{int}(u_i,v_{i+1})$, and $\text{ext}(u_i,v_{i+1})$.
 		\end{enumerate}
 	\end{definition}
-	
-	Prior SSNC efforts have largely followed two methodologies: One considers transitive triangles as building blocks to be leveraged \cite{FidlerYuster, MninyGhazal, Ghazal_2011, daamouch2024secondneighborhoodconjecturetournaments}, while the other think they should be ignored across a class of problems \cite{Da, HKPS, BBKS}. Our BFS layering approach moves beyond this binary of requiring or forbidding transitivity. By partitioning the graph, we isolate the influence of these triangles based on their inter-layer distribution. Forward-facing transitive triangles serve as a type that can enforce a non-decreasing neighborhood condition.
 	
 	This MCE will be constructed under the BFS-lex well-ordering on $V(G)$. This will be modeled through an iterative packing process. At any step $k$, the vertex set $V(G)$ is partitioned into a vector of three distinct, mutually exclusive zones:
 	
@@ -224,9 +248,7 @@
 		
 		\item Upcoming: These are the second and later neighbors of the proven non-Seymour nodes.
 	\end{itemize}
-	
-	Prior SSNC efforts have largely followed two methodologies: One considers transitive triangles as building blocks to be leveraged \cite{FidlerYuster, MninyGhazal, Ghazal_2011, daamouch2024secondneighborhoodconjecturetournaments}, 
-	
+		
 	\section{No Back Neighbors}
 	
 	When an MCE contains no back arcs, the vertex out-degree is strictly partitioned between interior and exterior directions.
@@ -246,14 +268,24 @@
 		These sets are disjoint because distance is disjoint and cover all of $N^+( v_{i+1})$.
 	\end{proof}
 	
-	The assumption of no back neighbors simplifies our analysis. As we will see, the BFS traversal reveals many types of transitive triangles. The exclusion of back neighbors from this case means that the only remaining ones are the forward facing transitive triangles and same layer transitive triangles. These forward facing transitive triangles are what were defined as interior neighbors and help to keep a parent node non-Seymour. 
+	Let $G \in \mathcal{C}$ be an MCE, and let $u_k \in R_k$ and $v_{k+1} \in R_{k+1}$ such that $u_k \to v_{k+1}$. Leveraging the Degree Partition of $v_{k+1}$'s out-neighborhood, we decompose the traditional Seymour condition into two localized criteria:Interior Seymour Property:
+	
+	A vertex $v_{k+1}$ satisfies the \textbf{Interior Seymour property} if its local second-neighborhood within the same layer meets or exceeds its first-neighborhood footprint:
+	$$|N^2(v_{k+1}) \cap R_{k+1}| \ge |N^+(v_{k+1}) \cap R_{k+1}|$$
+	
+	Eulerian cycle-packing give witnesses at distance $k$. They tightly regulate internal density. Nodes satisfy the Seymour requirement locally.
+	
+	A vertex $v_{k+1}$ satisfies the \textbf{Exterior Seymour property} if its outward expansion into subsequent layers meets or exceeds its immediate local volume. This is measured by the capacity and growth rates of the subsequent layers $R_{k+2}$ and $R_{k+3}$:
+	$$|R_{k+2}| \le |R_{k+3}|$$
+	
+	This forces layer sizes to contract. An equality or increase in layer sizes ($|R_{k+2}| \le |R_{k+3}|$) acts as a witness for a Seymour node. Therefore, a necessary condition to prevent nodes from becoming Exterior Seymour is a strict decrease in layer-sizes.
 	
 	\begin{theorem} (Neighborhood Size). Let $G \in \mathcal{O}$ be be an MCE with MDN $v_0$, with rooted neighborhoods $R_0$, $R_1$, $\ldots$, $R_k$ constructed by the BFS without back neighbors. Suppose all nodes are non-Seymour. Then for all $i \geq 0$, $|R_i| = \delta - i + 1$. 
 	\end{theorem} \label{layer_size}
 	
 	\begin{proof}
 		We proceed by a two-step rolling induction where the inductive hypothesis covers two consecutive layers ($R_{i+1}$ and 
-$R_{i+2}$). 
+		$R_{i+2}$). 
 		Base Case ($i = 0$): 
 		The root $R_0$ = $\{v_0\}$ has out-neighbors $R_1 = N^+(v_0) = \delta - 1 +1$. Consider $v_1 \in R_1$. If $v_1$ has more than $\delta$ exterior neighbors, then the node $v_0$ will be a Seymour node. The pigeonhole principle then forces $v_1$ to have at least one interior neighbor. If $v_1$ has more than one interior neighbor, then the subgraph $R_1$ violates the minimum neighborhood density metric, and thus $G$ would not be an MCE. This forces $v_1$ to have exactly 1 interior arc and $\delta - 1$ exterior arcs. Thus $|R_1|=\delta -1+1$ and $|R_2| = \delta - 2 + 1$. 
 		
@@ -263,7 +295,7 @@ $R_{i+2}$).
 		By the I.H., we know that $|R_{i+2}| = \delta - (i+1)$. These nodes in $R_{i+2}$ are all first neighbors of $u_{i+1}$. To ensure that $u_{i+1}$ is non-Seymour, every node $v_{i+2} \in R_{i+2}$ must send less than $\delta -(i+1)$ nodes to $R_{i+3}$. This implies that the pigeonhole principle applies where there are only $\delta - (i+1) -1$ for $\delta - (i+1)$ nodes. As a result, the nodes must overlap to meet their minimum out-degree requirements.
 		Finally, if any node $v_{i+2}$ were to send too few nodes to $R_{i+3}$, this would result in $v_{i+2}$ having more interior arcs than required. $G$ would thus violate the minimum neighborhood density requirement for an MCE. 
 		Thus, the bound holds at level $i + 1$ and by induction, the statement is true for all $i \geq 0$.
-\end{proof}
+	\end{proof}
 	
 	\begin{figure}
 		\centering
@@ -285,40 +317,40 @@ $R_{i+2}$).
 	The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
 	
 	\begin{lemma}
-Let $G$ be a Minimum Counterexample (MCE) that minimizes the total interior arc weight. 
-If an interior arc $e = (u, w)$ within layer $R_k$ can be removed such that:
-\begin{enumerate}
-    \item No vertex in $R_{k-1}$ (or subsequent layers) becomes a Seymour vertex, and
-    \item All preceding layer-size and degree constraints remain satisfied,
-\end{enumerate}
-then $G$ cannot be a minimum counterexample.
-\end{lemma}
-
-\begin{lemma} (Interior Arc Redundancy and Parent Invariance)
-Let $G$ be a Minimum Counterexample (MCE) under the metric minimizing interior neighbors and max total interior degree. 
-Let $u_k \in R_k$ be a parent node whose out-neighbors in $R_{k+1}$ include children $v_{k+1, 1}$ and $v_{k+1, 2}$. 
-If an interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ is redundant—meaning its removal respects the minimum interior degree requirement for $v_{k+1, 1}$—then removing $e$ leaves the first- and second-neighborhood sizes of $u_k$ completely unchanged, ensuring $u_k$ remains non-Seymour.
-\end{lemma}
-
-\begin{proof}
-Consider the interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ within layer $R_{k+1}$. We wish to show that removing $e$ preserves the non-Seymour status of parent node $u_k \in R_k$ by analyzing its neighborhoods:
-
-\begin{enumerate}
-    \item \textbf{First Neighborhood ($N^+(u_k)$):} 
-    By definition, $N^+(u_k) = \{v \in V(G) \mid (u_k, v) \in E(G)\}$. 
-    Because $e$ is an internal edge between two children of $u_k$ in $R_{k+1}$ rather than an outgoing edge from $u_k$ itself, its removal deletes no vertices and modifies no edges incident to $u_k$. Thus, both $N^+(u_k)$ and its cardinality $|N^+(u_k)|$ remain invariant.
-
-    \item \textbf{Second Neighborhood ($N^{++}(u_k)$):} 
-    The second neighborhood is defined as $N^{++}(u_k) = N^+(N^+(u_k)) \setminus (N^+(u_k) \cup \{u_k\})$. 
-    Since both endpoints of $e$ ($v_{k+1, 1}$ and $v_{k+1, 2}$) already belong to $N^+(u_k)$, the arc $e$ represents an internal transition entirely within the first neighborhood ($N^+(u_k) \to N^+(u_k)$). It creates no new paths to vertices outside $N^+(u_k)$ (such as $R_{k+2}$), meaning the underlying reachability set defining $N^{++}(u_k)$ is unaltered.
-\end{enumerate}
-
-Since neither $|N^+(u_k)|$ nor $|N^{++}(u_k)|$ changes when the redundant interior arc $e$ is removed, the strict anti-Seymour inequality for $u_k$:
-\[
-|N^{++}(u_k)| < |N^+(u_k)|
-\]
-continues to hold. Consequently, any interior arc in excess of a vertex's minimum structural requirement can be safely removed without generating a Seymour vertex, proving that an MCE must tightly bind every interior arc.
-\end{proof}
+		Let $G$ be a Minimum Counterexample (MCE) that minimizes the total interior arc weight. 
+		If an interior arc $e = (u, w)$ within layer $R_k$ can be removed such that:
+		\begin{enumerate}
+			\item No vertex in $R_{k-1}$ (or subsequent layers) becomes a Seymour vertex, and
+			\item All preceding layer-size and degree constraints remain satisfied,
+		\end{enumerate}
+		then $G$ cannot be a minimum counterexample.
+	\end{lemma}
+	
+	\begin{lemma} (Interior Arc Redundancy and Parent Invariance)
+		Let $G$ be a Minimum Counterexample (MCE) under the metric minimizing interior neighbors and max total interior degree. 
+		Let $u_k \in R_k$ be a parent node whose out-neighbors in $R_{k+1}$ include children $v_{k+1, 1}$ and $v_{k+1, 2}$. 
+		If an interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ is redundant—meaning its removal respects the minimum interior degree requirement for $v_{k+1, 1}$—then removing $e$ leaves the first- and second-neighborhood sizes of $u_k$ completely unchanged, ensuring $u_k$ remains non-Seymour.
+	\end{lemma}
+	
+	\begin{proof}
+		Consider the interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ within layer $R_{k+1}$. We wish to show that removing $e$ preserves the non-Seymour status of parent node $u_k \in R_k$ by analyzing its neighborhoods:
+		
+		\begin{enumerate}
+			\item \textbf{First Neighborhood ($N^+(u_k)$):} 
+			By definition, $N^+(u_k) = \{v \in V(G) \mid (u_k, v) \in E(G)\}$. 
+			Because $e$ is an internal edge between two children of $u_k$ in $R_{k+1}$ rather than an outgoing edge from $u_k$ itself, its removal deletes no vertices and modifies no edges incident to $u_k$. Thus, both $N^+(u_k)$ and its cardinality $|N^+(u_k)|$ remain invariant.
+			
+			\item \textbf{Second Neighborhood ($N^{++}(u_k)$):} 
+			The second neighborhood is defined as $N^{++}(u_k) = N^+(N^+(u_k)) \setminus (N^+(u_k) \cup \{u_k\})$. 
+			Since both endpoints of $e$ ($v_{k+1, 1}$ and $v_{k+1, 2}$) already belong to $N^+(u_k)$, the arc $e$ represents an internal transition entirely within the first neighborhood ($N^+(u_k) \to N^+(u_k)$). It creates no new paths to vertices outside $N^+(u_k)$ (such as $R_{k+2}$), meaning the underlying reachability set defining $N^{++}(u_k)$ is unaltered.
+		\end{enumerate}
+		
+		Since neither $|N^+(u_k)|$ nor $|N^{++}(u_k)|$ changes when the redundant interior arc $e$ is removed, the strict anti-Seymour inequality for $u_k$:
+		\[
+		|N^{++}(u_k)| < |N^+(u_k)|
+		\]
+		continues to hold. Consequently, any interior arc in excess of a vertex's minimum structural requirement can be safely removed without generating a Seymour vertex, proving that an MCE must tightly bind every interior arc.
+	\end{proof}
 	
 	\begin{lemma} (Interior Arc Redundancy and Parent Invariance).
 		Let $G$ be a Minimum Counterexample (MCE) under the metric minimizing interior neighbors and max total interior degree. Let $u_k \in R_k$ be a parent node with out-neighbors in $R_{k+1}$, including children $v_{k+1, 1}$ and $v_{k+1, 2}$. If an interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ is redundant—meaning its removal does not violate the minimum interior degree requirement for $v_{k+1, 1}$—then removing $e$ does not alter the first- or second-neighborhood sizes of $u_k$, and $u_k$ remains non-Seymour.
@@ -354,16 +386,15 @@ continues to hold. Consequently, any interior arc in excess of a vertex's minimu
 		This proving that an MCE must tightly bind every single interior arc to its exact minimum requirement.
 	\end{proof}
 	
-	
 	\begin{theorem}
 		Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $\text{int}(u, v) \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
 	\end{theorem}
 	\begin{proof}
 		Let $v_{k+1} \in R_{k+1}$ be a child of $u_k \in R_k$. 
 		By Theorem \ref{layer_size} we know that at least $\delta - (k+1) + 1$ nodes are necessary in $R_{k+1}$ to keep $u_k$ from being Seymour. 
-		If $v_{k+1} had more than $k+1$ neighbors in $R_{k+1}$ then each of these neighbors is an interior neighbor with parent neighbors $u_k$. By Lemma \ref{int_arc_rem} the sizes first and second neighborhoods of the parents do not change. Thus $u_k$ remains non-Seymour. Thus can form a smaller counterexample when these extra interior arcs are present. 
+		If $v_{k+1}$ had more than $k+1$ neighbors in $R_{k+1}$ then each of these neighbors is an interior neighbor with parent neighbors $u_k$. By Lemma \ref{int_arc_rem} the sizes first and second neighborhoods of the parents do not change. Thus $u_k$ remains non-Seymour. Thus can form a smaller counterexample when these extra interior arcs are present. 
 	\end{proof}
-
+	
 	
 	Another consequence of the rooted neighborhood size formula is that it sets the worse possible rate of decrease. The lower bound for interior neighbors is also an upper bound for exterior neighbors (because there are no back neighbors). 
 	
