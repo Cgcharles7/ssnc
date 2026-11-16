@@ -286,6 +286,7 @@
 	
 	This causes the sizes of the layers to decrease. If the size of layers are increasing or staying the same ($|R_{k+2}| \le |R_{k+3}|$ then we have a witness for a Seymour node. To ensure that nodes do not become  Exterior Seymour nodes, we must have strictly decreasing layer sizes.
 	
+	
 	\begin{theorem} (Optimality of Eulerian Cycle-Packing in Layer $R_k$)
 	Consider a graph $G$ $ \in \mathcal{O}$ created by the BFS-Lex algorithm starting from node $v_0 \in V(G)$ with minimum out-degree. Let $R_k$ be the $k$-th layer in the rooted layering.
 	
@@ -352,6 +353,16 @@
 	\end{figure}
 	
 	The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
+	
+	\begin{lemma}(Interior Degrees Lower Bound)
+		Let $G\in \mathcal{O}$ and let $v_0$ be a minimum out-degree node. Suppose every node in $G$ is non-Seymour. Let $x$ be a node at distance $i$ from $v_0$, and $v_{i-1}$ be a node at distance $i-1$ from $v_0$. Then the interior degree of $x$ with respect to $v_{i-1}$, denoted as $|\text{int}(v_{i-1},x)|$, is at least $i$. 
+	\end{lemma}
+	
+	\begin{proof}
+		Let $x$ be a node at distance $i$ from $v_0$. By \ref{layer_size}, we know that the exterior degree of $v_{i-1}$, $|ext(v_{i-1},x)|$, is bounded by $\delta - i + 1$. This places a limit on the number of nodes $x$ can map to at distance $i+1$ from $v_0$. Now, since $x$ has at least the same degree as $v_0$, $x$ must map to at least $i$ other nodes. Given that back arcs are not allowed, $x$ cannot map to nodes at earlier distances. 
+		
+		Therefore, since we just concluded that exterior arcs are pigeonholed out, the only remaining possibility is that $x$ maps to interior nodes. Since $x$’s degree must account for at least $i$ mappings, and these must be to interior nodes, we conclude that $x$ must map to at least $i$ interior nodes. Thus, $|int(v_{i-1},x)| \ge i$, as required.
+	\end{proof}
 	
 	\begin{lemma}
 		Let $G$ be a Minimum Counterexample (MCE) that minimizes the total interior arc weight. 
@@ -468,7 +479,7 @@
 	\end{proof}
 	
 	\begin{lemma}[MCE Interior Degree]\label{intdeg}
-		Let $G \in mathcal{O}$ be a counterexample. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child pair. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
+		Let $G \in \mathcal{O}$ be a counterexample. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child pair. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
 		
 		$$\text{int}(u_k, v_{k+1}) = k+1$$
 	\end{lemma}
