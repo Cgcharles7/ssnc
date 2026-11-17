@@ -139,7 +139,7 @@
 	
 	Graph theory is concerned with studying the relationships between objects. The Graph Level Order brings set theory concepts into the relationships. After identifying the shortcomings of current terminology we will formally define the Graph Level Order architectural framework. This will include new set theory based neighbor concepts, neighbor partition concepts and theorems that relate them to the existing terminology. This new systematic framework then gives us the clarity needed to solve the SSNC.	
 	
-	Previous work on SSNC's have primarily taken one of two approaches: either transitive triangles are treated as basic building blocks to be used \cite{FidlerYuster MninyGhazal, Ghazal_2011 daamouch2024secondneighborhoodconjecturetournaments} or they are considered an irrelevance in this class of problem \cite{Da, HKPS, BBKS}. By considering layering of our BFS, we are able to look at the effect transitive triangles have depending on which layers they are found in. As it turns out, Forward Facing transitive triangles provide a class of transitive triangle that can be used to help satisfy a decreasing neighbourhood condition.
+	Previous work on SSNC's have primarily taken one of two approaches: either transitive triangles are treated as basic building blocks to be used \cite{FidlerYuster, MninyGhazal, Ghazal_2011, daamouch2024secondneighborhoodconjecturetournaments} or they are considered an irrelevance in this class of problem \cite{Da, HKPS, BBKS}. By considering layering of our BFS, we are able to look at the effect transitive triangles have depending on which layers they are found in. As it turns out, Forward Facing transitive triangles provide a class of transitive triangle that can be used to help satisfy a decreasing neighbourhood condition.
 	
 	Transitive triangles complicate the conjecture because first neighbors seem to steal counts from second neighbors. Here, degree and distance conflict: one arc increases the degree of a vertex, while one path defines distance. Resolving the conjecture requires mastering this interaction between degree and distance, particularly within these triangular structures.	
 	
@@ -403,10 +403,9 @@
 		Let $G$ be an MCE without back arcs with unique node coordinates. Let $u_k, v_{k+1} \in G$ be nodes such that $u_k \to v_{k+1} \in G$. 
 		
 		If the number of exterior neighbors associated with $(u_k, v_{k+1})$ bounds $u_k$'s out-degree from below, i.e.,
-		$$|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})|$$
+		$|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})|$
 		then $u_k$ will be a Seymour vertex: 
-		
-		$$|N^+(u_k)| \le |N^{++}(u_k)|$$
+		$|N^+(u_k)| \le |N^{++}(u_k)|$
 	\end{lemma}\label{extExt}
 	
 	\begin{proof}
@@ -414,17 +413,14 @@
 		By definition of exterior neighbors in $G$, $w_{k+2}$ is reachable from $u_k$ via a path of length 2 passing through $v_{k+1}$. 
 		Thus, every exterior neighbor $w_{k+2}$ belongs to the second neighborhood $N^{++}(u)$. 
 		This gives the set inclusion:
-		$$
-		\text{ext}(u_k, v_{k+1}) \subseteq N^{++}(u_k)
-		$$
+		$\text{ext}(u_k, v_{k+1}) \subseteq N^{++}(u_k)$
 		
 		This implies that 
-		$$	|\text{ext}(u_k, v_{k+1})| \le |N^{++}(u_k)|$$
+		$	|\text{ext}(u_k, v_{k+1})| \le |N^{++}(u_k)|$
 		By assumption, the first neighborhood of $u_k$ is bounded by the exterior neighbors:
-		$$	|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})|$$
+		$	|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})|$
 		Combining these inequalities gives:
-		
-		$$|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})| \le |N^{++}(u_k)| \implies |N^+(u_k)| \le |N^{++}(u_k)|$$
+		$|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})| \le |N^{++}(u_k)| \implies |N^+(u_k)| \le |N^{++}(u_k)|$
 		
 		This proves that $u_k$ is a Seymour vertex.
 	\end{proof}
@@ -432,14 +428,14 @@
 	\begin{lemma}[MCE Interior Degree Equality]\label{intdeg}
 		Let $G \in \mathcal{O}$ be a MCE with root node $v_0$. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child relationship. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
 		
-		$$\text{int}(u_k, v_{k+1}) = k+1$$
+		$\text{int}(u_k, v_{k+1}) = k+1$
 	\end{lemma}\label{MCEInt}
 	\begin{proof}
 		Suppose for the sake of contradiction that the interior degree is strictly greater than $v_{k+1}$'s distance from $v_0$:
-		$$int(u_k, v_{k+1})>k+1$$
+		$int(u_k, v_{k+1})>k+1$
 		The MCE and in particular non-Seymour constraints only require $k+1$ arcs at distance $k+1$. 
 		Any graph that has an arc above this threshold is not minimal. 
-		Thus an interior arc can be removed via \ref{arcremoval}. 
+		Thus an interior arc can be removed via \ref{parOk}. 
 		
 		The assumption of $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, so this graph is not an MCE. 
 		Thus an interior arc can be removed. This forms a smaller counterexample. 
@@ -491,7 +487,7 @@
 		Therefore, $|N^+(u_k)| \le |N^{++}(u_k)|$, making $u_k$ a Seymour vertex. 
 	\end{proof}		
 	
-	Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such a case, there is the possibility of an infinite descending chain. However, this MCE is based on a BFS-Lex tracersal, which gives a well founded set. This guarantees that any recursive decent must terminate. Thus, every terminal node in that chain must become a Seymour vertex. This implies that disconnected back arcs cannot exist in either case of an MCE. 
+	Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such a case, there is the possibility of an infinite descending chain. However, this MCE is based on a BFS-Lex traversal, which gives a well founded set. This guarantees that any recursive decent must terminate. Thus, every terminal node in that chain must become a Seymour vertex. This implies that disconnected back arcs cannot exist in either case of an MCE. 
 	
 	\begin{theorem}[Termination and Loop Closure of Back-Arc Chains]
 		Let $G$ be an MCE under the BFS-Lex coordinate system. Any recursive propagation of back-arcs forms a well-founded sequence that must terminate by closing a loop, thereby forcing a Seymour vertex.
@@ -527,10 +523,8 @@
 		Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would create a bi-directional arc, violating the oriented graph property. Thus, connected back neighbors are not permitted 
 	\end{proof}
 	
-	\section{Graph Level Order} \label{glover}
-	
-	ok can you give me the latex for this image? this is the core of it but without the back arcs. 
-	
+%	\section{Graph Level Order} \label{glover}
+		
 	\begin{figure}
 		\centering
 		\begin{tikzpicture}[>=latex, line width=0.9pt]
@@ -677,9 +671,9 @@
 	
 	Because of this universal representation of graphs, when we speak of oriented graphs we are always talking of a Graph Level Order environment.
 	
-	\subsection{Using Graph Level Order}
+%	\subsection{Using Graph Level Order}
 	
-	With the Graph Level Order vocabulary established, these definitions now must connect to the mathematical foundation. Interior neighbors relate to the first neighbors of a parent. Exterior neighbors relate to the second neighbors. In an MCE environment, Theorem \ref{lbl} (Load Balance) shows the only purpose of these interior neighbors is to be forward-facing transitive triangles that reduce the parent’s second neighborhood.
+%	With the Graph Level Order vocabulary established, these definitions now must connect to the mathematical foundation. Interior neighbors relate to the first neighbors of a parent. Exterior neighbors relate to the second neighbors. In an MCE environment, Theorem \ref{MCEInt} shows the only purpose of these interior neighbors is to be forward-facing transitive triangles that reduce the parent’s second neighborhood.
 	
 	\begin{corollary}[Hierholzer's Algorithm]\label{ilb}
 		Let $G=(V,E)$ be an MCE to the SSNC with root $v_0$ and let $R_k$ be a rooted neighborhood at distance $k$ from $v_0$. Because every node has interior degree of $k$ in $R_k$ Hierholzer's Algorithm will find at least $k$ disjoint cycles in $R_k$.
@@ -744,15 +738,15 @@
 		\caption{\textit{\textbf{False Flag problem of back arcs}. Assuming that $z_{k+2} \to w_{k+1}$ is the first back arc, $w_{k+1}$ must map to a new exterior neighbor. This will make $u_k$ a Seymour vertex.} }\label{backexwk}
 	\end{figure}
 	
-	The rooted structure of the Graph Level Order is an important characteristic. Consider Example \ref{backexwk}. At first glance, the back arc $z_{k+2} \to w_{k+1}$ may seem to violate the principles of the Graph Level Order. However, this does not take into account their respective distances from the root node. Assuming this is the first back arc, what we can show is that this back arc cannot exist.
+%	The rooted structure of the Graph Level Order is an important characteristic. Consider Example \ref{backexwk}. At first glance, the back arc $z_{k+2} \to w_{k+1}$ may seem to violate the principles of the Graph Level Order. However, this does not take into account their respective distances from the root node. Assuming this is the first back arc, what we can show is that this back arc cannot exist.
 	
-	Let $u_k$ be at distance $k$. Then $v_{k+1}$ and $w_{k+1}$ are at distance $k+1$ and $z_{k+2}$ is at distance $k+2$. The nodes $v_{k+1}$ interior degree must be $k+1$, implying they have $\delta-k-2$ exterior neighbors. One of $v_{k+1}$'s exterior neighbors is $z_{k+2}$, but $w_{k+1}$ cannot relate to $z_{k+2}$ by definition of an oriented graph. This node $w_{k+1}$ must still have $\delta-k-2$ exterior neighbors. So $w_{k+1}$ must relate to a new node $y_{k+2}$. This means that $u_k$'s second neighborhood did not decrease by one as the Load Balance Theorem \ref{lbl} says it must by the cycles in its first neighborhood. Thus, $u_k$ will be is a Seymour vertex.
+%	Let $u_k$ be at distance $k$. Then $v_{k+1}$ and $w_{k+1}$ are at distance $k+1$ and $z_{k+2}$ is at distance $k+2$. The nodes $v_{k+1}$ interior degree must be $k+1$, implying they have $\delta-k-2$ exterior neighbors. One of $v_{k+1}$'s exterior neighbors is $z_{k+2}$, but $w_{k+1}$ cannot relate to $z_{k+2}$ by definition of an oriented graph. This node $w_{k+1}$ must still have $\delta-k-2$ exterior neighbors. So $w_{k+1}$ must relate to a new node $y_{k+2}$. This means that $u_k$'s second neighborhood did not decrease by one as the Load Balance Theorem \ref{lbl} says it must by the cycles in its first neighborhood. Thus, $u_k$ will be is a Seymour vertex.
 	
-	By definition, an MCE is always on the edge of collapse. Maximizing the number of non-Seymour nodes formalizes this fragility. Although it is invoked as a contradictory hypothesis, the argument is inherently constructive. The graph was set up based on distance. Set-theoretic, ancestral neighborhoods were constructed to resolve past obstructions. This is explicitly explaining why these things happened.
+%	By definition, an MCE is always on the edge of collapse. Maximizing the number of non-Seymour nodes formalizes this fragility. Although it is invoked as a contradictory hypothesis, the argument is inherently constructive. The graph was set up based on distance. Set-theoretic, ancestral neighborhoods were constructed to resolve past obstructions. This is explicitly explaining why these things happened.
 	
-	Let $G \in \mathcal{O}$ be an oriented graph represented by a Graph Level Order. Define $v_k \sim w_k$ for two vertices $v_k, w_k \in R_k$ if there exists a rooted degree preserving mapping on $G$ fixing $v_0$ and preserving rooted neighborhoods $R_i$ such that $v_k \mapsto w_k$
+%	Let $G \in \mathcal{O}$ be an oriented graph represented by a Graph Level Order. Define $v_k \sim w_k$ for two vertices $v_k, w_k \in R_k$ if there exists a rooted degree preserving mapping on $G$ fixing $v_0$ and preserving rooted neighborhoods $R_i$ such that $v_k \mapsto w_k$
 	
-	This would be a futile attempt at proving the SSNC if we could not manage the complications mentioned in previous papers. First are transitive triangles, where Brantner et al. \cite{BBKS} showed that oriented graphs without transitive triangles contain a Seymour vertex, the MDN.
+%	This would be a futile attempt at proving the SSNC if we could not manage the complications mentioned in previous papers. First are transitive triangles, where Brantner et al. \cite{BBKS} showed that oriented graphs without transitive triangles contain a Seymour vertex, the MDN.
 	
 	\begin{theorem}[Load-Balancing Triangles]\label{lbt}The only possible transitive triangles in an MCE are load-balancing triangles.\end{theorem}
 	\begin{proof}
@@ -819,7 +813,7 @@
 		This eliminates double-counting for the node $u_i$.
 	\end{proof}
 	
-	The two main hindrances of this conjecture have been shown that they are not roadblocks. The data structure used throughout this paper has been defined. This data structure provides an understanding of interior and exterior arcs, and guides the search for a counterexample. It also provides understanding of non-Seymour nodes and guides the nodes in this proof process.
+%	The two main hindrances of this conjecture have been shown that they are not roadblocks. The data structure used throughout this paper has been defined. This data structure provides an understanding of interior and exterior arcs, and guides the search for a counterexample. It also provides understanding of non-Seymour nodes and guides the nodes in this proof process.
 	
 	\section{Main Theorem} \label{main}
 	
