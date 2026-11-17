@@ -62,21 +62,21 @@
 	\keywords{oriented graphs, minimum counterexample, breadth-first search, minimum out-degree node, set theory}
 	\maketitle
 	
-	\abstract{We provide a constructive proof of the maximal set version of the Seymour Second Neighborhood Conjecture (SSNC) by reframing the problem as a set-packing optimization problem. The universal family of oriented graphs $\mathcal{O}$ is classified by their minimum out-degree $\delta$. This shifts the objective to maximizing the number of non-Seymour vertices.
+	\abstract{We provide a constructive proof of the maximal set version of the Seymour Second Neighborhood Conjecture (SSNC). This approach re-frames the problem as a set-packing optimization problem. The universal family of oriented graphs $\mathcal{O}$ is classified by their minimum out-degree $\delta$. This shifts the objective to maximizing the number of non-Seymour vertices.
 		
-		A counterexample is a packing of vertices that fail the SSNC. To prove such a packing is unsustainable, we introduce the Graph Level Order (GLOVER). This BFS-based coordinate system partitions $\mathcal{O}$ into rooted neighborhoods $R_i$ from a minimum out-degree node.
-		
-		Set-theoretic multiple parents resolve the double-counting that has plagued Seymour diamonds. This coordinate system also categorizes transitive triangles into eight distinct types and proves that seven are inconsistent in an MCE environment.
-		
-		Distinguishing it from standard BFS, the dual MCE metric first minimizes the number of interior neighbors, then maximizes total interior degree. This environment forces cycles in the first neighborhood of every parent, causing neighborhoods to become quadratically dense as they both decrease in size and demand more arcs.
-		
-		The proof concludes with a supply-demand collision. Arc capacity is consumed when $i > \frac{\delta}{3}$, making the packing of non-Seymour vertices unsustainable. Consequently, the appearance of a Seymour set of vertices is forced in every MCE. The algorithm to identify these vertices runs in $O(\vert{}V\vert{}+\vert{}E\vert{})$ time, confirming its capability to operate on large, dense oriented networks in polynomial time.
+	A counterexample is a packing of vertices that fail the SSNC. To prove such a packing is unsustainable, we introduce the Graph Level Order (GLOVER). This BFS-based coordinate system partitions $\mathcal{O}$ into rooted neighborhoods $R_i$ from a minimum out-degree node.
+	
+	Set-theoretic multiple parents resolve the double-counting that has frustrated Seymour diamonds. This coordinate system also classifies transitive triangles into eight distinct types and proves that seven are impossible in an MCE environment.
+	
+	The dual MCE metric first minimizes the number of interior neighbors, then maximizes total interior degree. This environment forces cycles in the first neighborhood of every parent. As distance increases, it causes neighborhoods to become quadratically dense. They are required to both decrease in size and demand more arcs.
+	
+	The proof concludes with a supply-demand collision. Arc capacity is consumed when $i > \frac{\delta}{3}$, making the packing of non-Seymour vertices unsustainable. Consequently, the appearance of a Seymour set of vertices is forced in every MCE. The algorithm to identify these vertices runs in $O(|V|+|E|)$ time. This confirms its capability to operate on large, dense oriented networks in polynomial time.
 	}
 	
 	
 	\section{Introduction}\label{intr}
 	
-	The Seymour Second Neighborhood Conjecture (SSNC), proposed in 1990, remains a famously stubborn problem in graph theory. It asks if every oriented graph contains a vertex whose second out-neighborhood is at least as large as its first. We prove this conjecture by analyzing the universal family of oriented graphs $\mathcal(O)$. Our solution introduces the Graph Level Order. This is a coordinate system that organizes vertices by minimum out-degree $\delta$. This framework also provides an efficient algorithm for identifying the vertex.
+	The Seymour Second Neighborhood Conjecture (SSNC), proposed in 1990, remains a unyielding problem in graph theory. It asks if every oriented graph contains a vertex whose second out-neighborhood is at least as large as its first. We prove this conjecture by analyzing the universal family of oriented graphs $\mathcal(O)$. Our solution introduces the Graph Level Order. This is a coordinate system that organizes vertices by the minimum out-degree $\delta$. We also provide an efficient algorithm for identifying the vertex.
 	
 	\begin{conjecture}\label{nbconj}
 		(Seymour's Second Neighborhood Conjecture (SSNC)). For every oriented graph $G \in \mathcal{O}$, there exists a vertex $v \in V(G)$ such that $|N^{++}(v)| \geq |N^+(v)|$. The sets $N^+(v)$ and $N^{++}(v)$ denote the first and second out-neighborhoods of $v$, respectively.
@@ -92,7 +92,7 @@
 	
 	Chen et al. \cite{CS} established a lower bound for the SSNC. They demonstrated that a vertex meets a relaxed version of the condition. This work was extended by Huang and Peng \cite{HP}. These researchers used Constraint Satisfaction Programming (CSP) to find variable assignments that satisfy the conjecture. This is a method that frames the SSNC as logical constraints to be satisfied and optimized using SAT solvers.
 	
-	Recent work by Diaz et al. \cite{Di}, extending Bottler et al. \cite{BMN}, confirms that almost all random graphs $G(n, p)$ satisfy the conjecture. By analyzing binomial random graphs with random orientations, they show that Seymour vertices are statistically typical. This provides a valuable average-case perspective, even if the worst-case proof remains out of reach. Botler et al. use shortest paths to define neighborhoods, which performed well for analyzing pseudo-random orientations on a global scale.
+	Recent work by Diaz et al. \cite{Di}, extending Botler et al. \cite{BMN}, confirms that almost all random graphs $G(n, p)$ satisfy the conjecture. By analyzing binomial random graphs with random orientations, they show that Seymour vertices are statistically typical. This provides a valuable average-case perspective, even if the worst-case proof remains out of reach. Botler et al. use shortest paths to define neighborhoods, which performed well for analyzing pseudo-random orientations on a global scale.
 	
 	However, identifying Seymour vertices in random graphs reveals nothing about the internal properties that guarantee the conjecture's truth. Fundamental questions remain: How do connectivity, degree distribution, and neighborhood growth force the existence of these vertices?
 	
@@ -128,28 +128,27 @@
 		\hline
 	\end{tabular}
 	
-	We provide an algorithmic construction to identify the target node and demonstrate its structural consistency. To ensure testability and reproducibility, implementations in Python and interactive visualizations in JavaScript are publicly available on \href{https://github.com/Cgcharles7/ssnc
+	We provide an algorithmic construction to identify the target node and demonstrate its structural consistency. To ensure testability and reproducibility, implementations in Python, Lean and interactive visualizations in JavaScript are publicly available on \href{https://github.com/Cgcharles7/ssnc
 	}{GitHub}.
 	
-	Prior work focused on proving existence in special cases or identifying missing substructures. These approaches, while foundational, offered no way to actually find a Seymour vertex. The Graph Level Order organizes the oriented graph space $\mathcal{O}$ into rooted neighborhoods based on distance from a minimum out-degree vertex $\delta$. When combined with the negation of the conjecture, this method identifies set-theoretic relationships forcing cycles to exist, leading to a path to a Seymour vertex. This framework transforms the conjecture from an existential puzzle into a constructive set packing problem. It enables the linear-time identification of nodes and unifyies decades of disparate research.
+	Prior work focused on proving existence in special cases or identifying missing substructures. These approaches, while foundational, offered no way to actually find a Seymour vertex. The Graph Level Order organizes the oriented graph space $\mathcal{O}$ into rooted neighborhoods based on distance from a minimum out-degree vertex $\delta$. This method identifies set-theoretic relationships forcing cycles to exist, leading to a path to a Seymour vertex. This framework transforms the conjecture from an existential puzzle into a constructive set packing problem. It enables the linear-time identification of nodes and unifyies decades of disparate research.
 	
 	This paper presents our methodology, supported by lemmas and examples. A novel data structure is then introduced to tackle the conjecture's core challenges and show how it integrates with maximizing non-Seymour nodes. After proving our main theorem and analyzing the algorithm's complexity, we conclude with future research directions.
 	
-	\section{Exploring the Minimum Counterexample}\label{cont}
+	\section{The Minimum Counterexample}\label{cont}
 	
-	Graph theory is concerned with studying the relationships between objects. The Graph Level Order brings set theory concepts into the relationships. After identifying the shortcomings of current terminology we will formally define the Graph Level Order architectural framework. This will include new set theory based neighbor concepts, neighbor partition concepts and theorems that relate them to the existing terminology. This new systematic framework then gives us the clarity needed to solve the SSNC.	
+	Graph theory is concerned with studying the relationships between objects. The Graph Level Order brings more set theoretic concepts into these relationships. After identifying the shortcomings of the current terminology, we will formally define the Graph Level Order architectural framework. This will include new neighbor concepts, and theorems that relate them to the existing terminology. This new framework will then give the clarity needed to solve the SSNC.	
 	
-	Previous work on SSNC's have primarily taken one of two approaches: either transitive triangles are treated as basic building blocks to be used \cite{FidlerYuster, MninyGhazal, Ghazal_2011, daamouch2024secondneighborhoodconjecturetournaments} or they are considered an irrelevance in this class of problem \cite{Da, HKPS, BBKS}. By considering layering of our BFS, we are able to look at the effect transitive triangles have depending on which layers they are found in. As it turns out, Forward Facing transitive triangles provide a class of transitive triangle that can be used to help satisfy a decreasing neighbourhood condition.
+	Previous work on the SSNC has primarily taken one of two approaches: either transitive triangles are treated as basic building blocks to be used \cite{FidlerYuster, MninyGhazal, Ghazal_2011, daamouch2024secondneighborhoodconjecturetournaments} or they are considered avoided \cite{Da, HKPS, BBKS}. Our layered BFS approach is able to look at the effect different triangles have depending where they occur in the graph. As it turns out, forward facing transitive triangles provide a powerful dynamic that can be combined within a counterexample environment.
 	
-	Transitive triangles complicate the conjecture because first neighbors seem to steal counts from second neighbors. Here, degree and distance conflict: one arc increases the degree of a vertex, while one path defines distance. Resolving the conjecture requires mastering this interaction between degree and distance, particularly within these triangular structures.	
+	In general, transitive triangles complicate the conjecture because first neighbors seem to steal counts from second neighbors. There is an apparent conflict between the degree of a node and its distance. One arc increases the degree of a vertex, while one path defines distance. Resolving the conjecture requires mastering this interaction between degree and distance, particularly within these triangles.	
 	
-	By using our BFS layered approach, we are able to classify transitive triangles by breaking the graph into multiple layers. We can distinguish between Forward Facing transitive triangles that act as conduits of activity. These allow Parent Nodes to communicate structural necessities to its child nodes. This carefully structured approach to arc classification allows this complex issue to become a stable component of the Graph Level Order.
+	The vertices that satisfy the conjecture are called Seymour nodes. Non-Seymour nodes, then are nodes where the negation of the SSNC holds ($|N^{++}(u)| < |N^+(u)|$). Any minimal counterexample will have all the nodes as non-Seymour. If at any point the non-Seymour property disappears then the conjecture is immediately proved. This results in cooperation between parent and child nodes throughout the BFS layers. 
 	
-	The vertices that satisfy the conjecture are called Seymour nodes. The non-Seymour nodes are nodes where the negation of the SSNC holds ($|N^{++}(u)| < |N^+(u)|$). Any minimal counterexample will have all the nodes as non-Seymour since if at any point the non-Seymour property disappears then the conjecture is immediately proved. This results in cooperation between parent and child nodes throughout the BFS layers. 
+	This BFS approach breaks the graph into multiple layers. In contrast to other types of triangles, forward facing transitive triangles allow parent nodes to communicate necessities to child nodes. This creates a downward flow of activity from parent to child. In order to prevent a parent from becoming Seymour, children of that parent must interlock into cycles. These children will then become parent nodes to children in a later layer. These new children will also need to form cycles to prevent the newer parents from becoming Seymour nodes. This process continues repeat as the BFS distance increases. This dependency will be formally defined as neighbors interior neighbors. 
 		
-	The responsibility for being Seymour is passed to child nodes by parent nodes. In an MCE, the child nodes cannot refuse. They will have to fulfill their role as a forward facing transitive triangle first. Once they have done this they will become parent nodes and pass on the responsibility to their children. This will continue to repeat. This dependency will be formally defined as neighbors interior neighbours. Interior neighbours are used as the mechanism within Graph Level Order architecture.
-	
-	The problem with using standard definitions of neighborhoods is that you cannot separate out first and second neighbors without losing information. Once influence is passed to a nodes first neighbors, the connection between the node and second neighbors can only be represented by the number of connections. This also leads to loss of information about the ancestry of neighbors, causing a disconnect and making it impossible to track exact distribution of out-degree influence.
+	\subsection{Old-Definitions}
+	The problem with using standard definitions of neighborhoods is that first neighborhoods cannot be separated from second neighbors without losing information. Once influence is passed, the connection between the node and second neighbors can only be represented by the number of connections. This also leads to loss of information about the ancestry of those neighbors. It causes a disconnect and makes it impossible to track exact distribution of out-degree influence.
 	
 	This counting problem is demonstrated in the following case:
 	
@@ -168,16 +167,16 @@
 			\draw [->](w_{i+1}) -- (y_{i+2});
 			
 		\end{tikzpicture}
-		\caption{\textit{\textbf{A Seymour diamond}. A parent node $u_{i}$ with children $v_{i+1}$ and $w_{i+1}$, and a shared grandchild $y_{i+2}$ resulting in double counting in neighborhood analysis. The sum of the children's out-degrees is $|N^{+}(v_{i+1})|+|N^{+}(w_{i+1})|$. The actual contribution to the second out-neighborhood $|N^{++}(u_{i})|$ is only one, as both arcs terminate at the same node, $y_{i+2}$.} }
+		\caption{\textit{\textbf{A Seymour diamond}. A parent node $u_{i}$ with children $v_{i+1}$ and $w_{i+1}$, and a shared grandchild $y_{i+2}$ resulting in double counting. The sum of the children's out-degrees is $|N^{+}(v_{i+1})|+|N^{+}(w_{i+1})|$. The actual contribution to the second out-neighborhood $|N^{++}(u_{i})|$} }
 		\label{smdmpic}
 	\end{figure}
 	
 	Seymour diamonds double-count second neighbors.
 	If there are two children $v_{i+1}$ and $w_{i+1}$ at distance one who both have an edge to the same node $y_{i+2}$, then we cannot simply add their out-degrees. The operation $|N^+(v_{i+1})| + |N^+(w_{i+1})|$ will count this node twice.
 	
-	\begin{remark}{Why New Definitions Are Needed}
-		The traditional definitions that are used to define the neighborhoods $N^+(v)$ and $N^{++}(v)$ do not take into account the layering structure causing double counting with Seymour's diamond. Two children of a parent having the same child will result in duplicates when summing the out-degree. By using the canonical partition we can make sure this does not happen. The second neighborhood can be defined by taking the union of forward neighbor sets.
-	\end{remark}
+%	\begin{remark}{Why New Definitions Are Needed}
+%		The traditional definitions that are used to define the neighborhoods $N^+(v)$ and $N^{++}(v)$ do not take into account the layering structure causing double counting with Seymour's diamond. Two children of a parent having the same child will result in duplicates when summing the out-degree. By using the canonical partition we can make sure this does not happen. The second neighborhood can be defined by taking the union of forward neighbor sets.
+%	\end{remark}
 	
 \begin{theorem}[BFS-Lex Coordinate System]\label{bfslex}
 	For a given finite connected oriented graph $G \in \mathcal{O}$ and root vertex $v_0 \in V(G)$, we obtain a unique Well-Ordering induced by the combination of a BFS-algorithm and a lexicographical ordering of V(G).
@@ -200,11 +199,15 @@
 	
 	Back neighbors are a well studied problem in graph theory and this definition is consistent with literature. To assist with solving the SSNC, we will partition the set of back neighbors further: connected and disconnected back neighbors. 
 	
-	Given a parent-child arc $u \to v$ where $u \in R_i$ and $v \in R_{i+1}$, an outgoing arc from $v$ to a target vertex $w$, denoted as $u \to v \to w$, is classified as \textbf{connected back neighbors} if the target vertex $w$ resides in the immediately preceding adjacent layer. \label{conn_back_def}
+	Let a parent-child arc $u \to v$ where $u \in R_i$ and $v \in R_{i+1}$. An outgoing arc from $v$ to a target vertex $w$, denoted as $u \to v \to w$, is classified as \textbf{connected back neighbors} if the target vertex $w$ resides in the immediately preceding adjacent layer. \label{conn_back_def}
 	
-	Given a parent-child arc $u \to v$ where $u \in R_i$ and $v \in R_{i+1}$, an outgoing arc from $v$ to a target vertex $w$, denoted as $u \to v \to w$, is classified as \textbf{disconnected back neighbors} if the target vertex $w$ resides in an earlier layer that is separated by at least one intermediate layer. Disconnected back neighbors bypass at least one layer. \label{disc_back_def}
+	Let a parent-child arc $u \to v$ where $u \in R_i$ and $v \in R_{i+1}$. An outgoing arc from $v$ to a target vertex $w$, denoted as $u \to v \to w$, is classified as \textbf{disconnected back neighbors} if the target vertex $w$ resides in an earlier layer that is separated by at least one intermediate layer. Disconnected back neighbors bypass at least one layer. \label{disc_back_def}
 	
-	This is a minimum counterexample approach to the SSNC. Let $G \in \mathcal{O}$ be an oriented graph. Let $\mathcal{C}$ be the (possibly empty) set of all counterexamples to SSNC. Let $G \in \mathcal{C}$ be a counterexample. Let $\omega$ be a BFS-Lex well-ordering $G$ rooted at its minimum out-degree node $v_0$. For a fixed integer $k$, let $G_k$ denote the induced subgraph consisting of the first $k$ vertices of $G$ under the ordering $\omega$. The graph $G \in \mathcal{C}$ is a \textbf{Minimum Counterexample (MCE)} if it is constructed using the BFS-Lex algorithm rooted at a minimum out-degree node $v_0$ and which also minimizes the interior neighbors and the maximum total interior degree in each layer. 	
+	This is a minimum counterexample approach to the SSNC. Let $G \in \mathcal{O}$ be an oriented graph. Let $\mathcal{C}$ be the (possibly empty) set of all counterexamples to SSNC. Let $G \in \mathcal{C}$ be a counterexample. Let $\omega$ be a BFS-Lex well-ordering $G$ rooted at its minimum out-degree node $v_0$. For a fixed integer $k$, let $G_k$ denote the induced subgraph consisting of the first $k$ vertices of $G$ under the ordering $\omega$. The graph $G \in \mathcal{C}$ is a \textbf{Minimum Counterexample (MCE)} if it is constructed using the BFS-Lex algorithm rooted at a minimum out-degree node $v_0$ and which also minimizes 
+	\begin{itemize}
+		\item The interior neighbors 
+		\item The maximum total interior degree in each layer
+	\end{itemize}
 	
 	\begin{remark}
 	Let $G\in \mathcal{O}$ be an MCE. The interior neighbors of $v_{i+1}$ with respect to $u_i$ are the vertices $\text{int}(u_i, v_{i+1}) = N^+(u_i) \cap N^+(v_{i+1})$. By definition, $\text{int}(u_i, v_{i+1}) \subseteq N^+(u_i)$. 
@@ -214,10 +217,12 @@
 	Let $G\in \mathcal{O}$ be an MCE. The exterior neighbors of $v_{i+1}$ with respect to $u_i$ are given by $\text{ext}(u_i, v_{i+1}) = N^2(u_i) \cap N^+(v_{i+1})$. By definition, $\text{ext}(u_i, v_{i+1}) \subseteq N^2(u_i)$.
 	\end{remark}
 	
+	Many other approaches began with a minim out-degree node $v_0$ \cite{KL, BMN, Di}. The well ordering of the BFS-Lex approach to the SSNC has a stark advantage these approaches. Lemma \ref{layerCoverage} utilizes this well ordering to show that every path begins with $v_0$ and must conclude with some node in a BFS layer. From this, we are able to conclude that these layers are a subset of the union of the first neighborhoods of these nodes. 
+	
 	\begin{lemma}{Layer $R_{k+1}$ Neighborhood Coverage}
 		For any $k \ge 0$, the ($k+1$)-th layer is contained within the union of out-neighborhoods of vertices in the $k$-th layer:
 		$$R_{k+1} \subseteq \bigcup_{u_k \in R_k} N^+(u_k)$$
-	\end{lemma}
+	\end{lemma}\label{layerCoverage}
 	
 	\begin{proof}
 		Let $x$ be a vertex in the ($k+1$)-th layer $R_{k+1}$. 
@@ -227,10 +232,12 @@
 		So $x$ is in $N^+(u_k)$. 
 		As $u_k$ is in $R_k$ then $x$ is in the union of the out-neighborhoods of all vertices in $R_k$. 
 		Therefore $R_{k+1}$ is contained within the union of out-neighborhoods of vertices in $R_k$.
-	\end{proof}\label{layerCoverage}	
+	\end{proof}	
+	
+	The last proof gives that the neighborhoods are contained within the union of the first neighborhoods of the parents. This allows for an update of the classification of interior and exterior neighbors. They are known to be in first and second neighborhoods of their parent nodes respectively. What the previous proof allows for is an understanding of interior and exterior neighbors with respect to the root node. 
 		
 	\begin{lemma}
-	Let $G \in mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ which contains no back-neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
+	Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ which contains no back-neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
 	$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
 	$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
 	\end{lemma}\label{layerEquiv}
@@ -241,16 +248,7 @@
 		\item Exterior Neighbors: These are found at the intersection of the second neighborhood of $u_k$ and first neighborhood of  $v_{k+1}$ (i.e. $N^2(u_k) \cap N^+(v_{k+1})$). Second neighbors of $u_k$ may go to nodes in $R_{k+1}$ and $R_{k+2}$ and out-neighbors of $v_{k+1}$ will go to nodes in $R_{k+1}$ and  $R_{k+2}$. So at first our candidates for exterior neighbors are $R_{k+1} \cup R_{k+2}$. However, all the nodes in $R_{k+1}$ are already covered by first step out-neighbors from $R_k$. The first and second neighborhoods are completely disjoint. So removing all nodes in $R_{k+1}$ gives us that exterior neighbors are strictly contained within $R_{k+2}$.
 	\end{itemize}
 	\end{proof}
-	
-	\begin{definition}\label{glover1}
-		Let $G = (V,E)$ be an oriented graph represented by an MCE, and let $v_0 \in V$ be the vertex of minimum out-degree. A \textbf{Graph Level Order} on $G$ consists of the following structure:
-		\begin{enumerate}
-			\item Well Ordered Rooted Neighborhoods: Partition the vertices of $V$ into rooted neighborhoods $$R_i=\{v \in V : \text{dist}(v_0,v)=i\}, \text{ for } i=0,1,\dots,n.$$
-			\item Well Ordered Vertices: For vertices $u_{i,k_1}, u_{i,k_2} \in R_i$ and $v_{j,m_1}, v_{j,m_2} \in R_j$ with $i<j$, we have $u_{i,k_1}, u_{i,k_2}<v_{j,m_1}, v_{j,m_2}$ and $u_{i,k_1} < u_{i,k_2}$.			
-			\item Ancestry-Awareness: For each parent-child pair $u_i \to v_{i+1}$ with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$, the out-neighbors of $v_{i+1}$ are classified into the three disjoint sets according to Lemma \ref{nodepartition}: $\text{back}(u_i, v_{i+1})$, $\text{int}(u_i,v_{i+1})$, and $\text{ext}(u_i,v_{i+1})$.
-		\end{enumerate}
-	\end{definition}
-	
+		
 	This MCE will be constructed under the BFS-lex well-ordering on $V(G)$. This will be modeled through an iterative packing process. At any step $k$, the vertex set $V(G)$ is partitioned into a vector of three distinct, mutually exclusive zones:
 	
 	\begin{itemize}
@@ -263,7 +261,17 @@
 		
 	\section{No Back Neighbors}
 	
-	When an MCE contains no back arcs, the vertex out-degree is strictly partitioned between interior and exterior directions.
+	When an MCE contains no back arcs, the vertex's out-degree can be strictly partitioned between interior and exterior directions. 
+	The existence of a back arc could potentially lead to a feedback loop. 
+	We will first show that, without back arcs, this BFS-Lex has a proper ordering and is indeed powerful enough to handle the SSNC. 
+	Then we will relax the claim of no back arcs and show how the total ordering can handle back arcs. 
+	Because this is a total ordering, these back arcs are ordered as well. 
+	As such these back arcs -- both connected and disconnected -- should have a first member. 
+	Our proof will show that neither of these first members can exist. 
+	
+	The elimination of back arcs does not relax the graph into a line graph. 
+	Instead, we will show that cycles must exist within each BFS layer to prevent the parents in the previous layer from becoming Seymour. 
+	It is the existence of these cycles that detract this approach from standard BFS approaches to the SSNC. 
 	
 	\begin{lemma}[Degree Partition]\label{nodepartition}
 		Let $u_i \in R_i$ and let $v_{i+1} \in R_{i+1}$ be vertices of an MCE, with $u_i \to v_{i+1} \in G$. Then the out-neighborhood of $v_{i+1}$ admits the disjoint partition
@@ -281,7 +289,7 @@
 		These sets are disjoint because distance is disjoint and cover all of $N^+( v_{i+1})$.
 	\end{proof}
 	
-	Let $G \in \mathcal{O}$ be an MCE, and let $u_k \in R_k$ and $v_{k+1} \in R_{k+1}$ such that $u_k \to v_{k+1}$. Leveraging the Degree Partition of $v_{k+1}$'s out-neighborhood, we decompose the traditional Seymour condition into two criterias: Interior Seymour Property and Exterior Seymour Property
+	Let $G \in \mathcal{O}$ be an MCE, and let $u_k \in R_k$ and $v_{k+1} \in R_{k+1}$ such that $u_k \to v_{k+1}$. Leveraging the Degree Partition of $v_{k+1}$'s out-neighborhood, we decompose the traditional Seymour condition into two criteria: Interior Seymour Property and Exterior Seymour Property
 	
 	A vertex $v_{k+1}$ has the \textbf{Interior Seymour Property} if it has a second-neighborhood within the same layer of at least size equal to its first-neighborhood:
 	$$|N^2(v_{k+1}) \cap R_{k+1}| \ge |N^+(v_{k+1}) \cap R_{k+1}|$$
@@ -292,6 +300,19 @@
 	$$|R_{k+2}| \le |R_{k+3}|$$
 	
 	This causes the sizes of the layers to decrease. If the size of layers are increasing or staying the same ($|R_{k+2}| \le |R_{k+3}|$ then we have a witness for a Seymour node. To ensure that nodes do not become  Exterior Seymour nodes, we must have strictly decreasing layer sizes.
+	
+	\begin{lemma}
+	If $x \in G$ and $y \in N^+(x)$ are both non-Seymour and $y$ is interior Seymour in $G[N^+(x)]$ and for all $z \in ext(x, y)$, $ext(y, z) \cap N^+ (x) = \emptyset$, then for all $z \in ext(x, y)$, $|ext(y, z)| < |ext(x, y)|$.
+	\end{lemma}
+	\begin{proof}
+	Suppose there is a node $z \in ext(x, y)$ such that $|exty (z)| \ge |extx (y)|$, then y’s out-degree in $G$ will be impacted by $ext (x, y)$ and $ext (y, z)$.
+	$|ext (y, z)| \ge |ext (z, y)|$
+	$|ext (y, z)| + |ext (x, y)| \ge |ext (x, y)| + |ext (x, y)|$
+	$|ext (y, z)| + |ext (x, y)| \ge 2 * |ext (x, y)|$
+	We now have a node y whose degree doubles in $G[N^+ (x)]$ and in $G[ext (x, y) \cup ext (y, z) \cup y]$. We need
+	to consider$|(ext (x, y) \cup ext (y, z) \cup y) \cap N^+ (x)|$. By definition, $ext (x, y) \cap N^+ (x) = \emptyset$. By assumption,
+	we have that $ext (y, z) \cap N^+ (x) = \emptyset$. So since we assumed that $y$ is Seymour in $G[N^+ (x)]$, the node $y$’s out-degree will double in this case, contradicting that $y$ is non-Seymour. 
+	\end{proof}
 	
 	\begin{theorem} (Neighborhood Size). 
 	Let $G \in \mathcal{O}$ be be an MCE with MDN $v_0$, with rooted neighborhoods $R_0$, $R_1$, $\ldots$, $R_k$ generated using the BFS traversed with no back neighbors. All nodes are non-Seymour nodes. Then for all $i \geq 0$, $|R_i| = \delta - i + 1$. 
@@ -332,13 +353,15 @@
 	
 	\begin{lemma}(Interior Degrees Lower Bound)
 		Let $G\in \mathcal{O}$ and let $v_0$ be a minimum out-degree node. Suppose every node in $G$ is non-Seymour. Let $x$ be a node at distance $i$ from $v_0$, and $v_{i-1}$ be a node at distance $i-1$ from $v_0$. Then the interior degree of $x$ with respect to $v_{i-1}$, denoted as $|\text{int}(v_{i-1},x)|$, is at least $i$. 
-	\end{lemma}\label{ilb2}
+	\end{lemma}\label{ilb}
 	
 	\begin{proof}
 		Let $x$ be a node at distance $i$ from $v_0$. By \ref{layer_size}, we know that the exterior degree of $v_{i-1}$, $|ext(v_{i-1},x)|$, is bounded by $\delta - i + 1$. This places a limit on the number of nodes $x$ can map to at distance $i+1$ from $v_0$. Now, since $x$ has at least the same degree as $v_0$, $x$ must map to at least $i$ other nodes. Given that back arcs are not allowed, $x$ cannot map to nodes at earlier distances. 
 		
 		Therefore, since we just concluded that exterior arcs are pigeonholed out, the only remaining possibility is that $x$ maps to interior nodes. Since $x$’s degree must account for at least $i$ mappings, and these must be to interior nodes, we conclude that $x$ must map to at least $i$ interior nodes. Thus, $|int(v_{i-1},x)| \ge i$, as required.
 	\end{proof}
+	
+	The definition of an MCE above, combines with the proofs of a lower bound for interior degree and a formula for neighborhood size allow for an MCE witness. Rather that speaking descriptively about what the characteristics are Theorem \ref{cyclePacking} shows that Eulerian graphs where every node has out-degree $k$ at distance $k$ are exactly the constructions necessary for the SSNC. 
 	
 	\begin{theorem} (Optimality of Eulerian Cycle-Packing in Layer $R_k$)
 		Consider a graph $G$ $ \in \mathcal{O}$ created by the BFS-Lex algorithm starting from node $v_0 \in V(G)$ with minimum out-degree. Let $R_k$ be the $k$-th layer in the rooted layering.
@@ -362,6 +385,8 @@
 		
 		Therefore the Eulerian cycles graphs will give us the unique optimal solutions to the MCEs. 
 	\end{proof}
+	
+	What an MCE seeks to do is minimize the interior arcs. Lemma \ref{parOk} shows that removing an extra arc from a child node does not impact any parent node in the previous layer, as their status will remain non-Seymour. 
 	
 	\begin{lemma} (Interior Arcs and Parent Vertices)
 		Let $G \in \mathcal{O}$ be a Minimum Counterexample (MCE). Let $u_k \in R_k$ be a parent node with out-neighbors $v_{k+1,1}, v_{k+1,2} \in R{k+1}$. 
@@ -387,15 +412,6 @@
 		Therefore, any interior arc above the minimum required amount for a vertex can be removed safely without creating a Seymour vertex. 
 		This proves that an MCE can tightly bind every interior arc.
 	\end{proof}
-
-%	\begin{theorem}
-%		Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $|\text{int}(u, v)| \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
-%	\end{theorem}
-%	\begin{proof}
-%		Let $v_{k+1} \in R_{k+1}$ be a child of $u_k \in R_k$. 
-%		By Theorem \ref{layer_size} we know that at least $\delta - (k+1) + 1$ nodes are necessary in $R_{k+1}$ to keep $u_k$ from being Seymour. 
-%		If $v_{k+1}$ had more than $k+1$ neighbors in $R_{k+1}$ then each of these neighbors is an interior neighbor with parent neighbors $u_k$. By Lemma \ref{parOk} the sizes first and second neighborhoods of the parents do not change. Thus $u_k$ remains non-Seymour. Thus can form a smaller counterexample when these extra interior arcs are present. 
-%	\end{proof}
 		
 	Another consequence of the rooted neighborhood size formula is that it sets the worse possible rate of decrease. The lower bound for interior neighbors is also an upper bound for exterior neighbors (because there are no back neighbors). 
 	
@@ -425,7 +441,7 @@
 		This proves that $u_k$ is a Seymour vertex.
 	\end{proof}
 	
-	\begin{lemma}[MCE Interior Degree Equality]\label{intdeg}
+	\begin{lemma}[MCE Interior Degree Equality]
 		Let $G \in \mathcal{O}$ be a MCE with root node $v_0$. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child relationship. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
 		
 		$\text{int}(u_k, v_{k+1}) = k+1$
@@ -652,7 +668,15 @@
 	\vspace{2.8ex}
 	
 	As the number of second neighbors is iteratively reduced, nodes must compensate by connecting to more of their own siblings. This allows their parents to become non-Seymour nodes. The out-neighbors must form forward facing transitive triangles. These triangles must repeatedly interlock to form cycles to reduce the parent's second neighborhood.
-	
+
+\begin{definition}\label{glover1}
+	Let $G = (V,E)$ be an oriented graph represented by an MCE, and let $v_0 \in V$ be the vertex of minimum out-degree. A \textbf{Graph Level Order} on $G$ consists of the following structure:
+	\begin{enumerate}
+		\item Well Ordered Rooted Neighborhoods: Partition the vertices of $V$ into rooted neighborhoods $$R_i=\{v \in V : \text{dist}(v_0,v)=i\}, \text{ for } i=0,1,\dots,n.$$
+		\item Well Ordered Vertices: For vertices $u_{i,k_1}, u_{i,k_2} \in R_i$ and $v_{j,m_1}, v_{j,m_2} \in R_j$ with $i<j$, we have $u_{i,k_1}, u_{i,k_2}<v_{j,m_1}, v_{j,m_2}$ and $u_{i,k_1} < u_{i,k_2}$.			
+		\item Ancestry-Awareness: For each parent-child pair $u_i \to v_{i+1}$ with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$, the out-neighbors of $v_{i+1}$ are classified into the three disjoint sets according to Lemma \ref{nodepartition}: $\text{back}(u_i, v_{i+1})$, $\text{int}(u_i,v_{i+1})$, and $\text{ext}(u_i,v_{i+1})$.
+	\end{enumerate}
+\end{definition}	
 	
 	\begin{theorem}[Graph Level Order Representation of Oriented Graphs]\label{gloverrep}
 	Every oriented graph $G = (V,E)$ can be represented by an MCE in a Graph Level Order. \end{theorem}
@@ -675,7 +699,7 @@
 	
 %	With the Graph Level Order vocabulary established, these definitions now must connect to the mathematical foundation. Interior neighbors relate to the first neighbors of a parent. Exterior neighbors relate to the second neighbors. In an MCE environment, Theorem \ref{MCEInt} shows the only purpose of these interior neighbors is to be forward-facing transitive triangles that reduce the parent’s second neighborhood.
 	
-	\begin{corollary}[Hierholzer's Algorithm]\label{ilb}
+	\begin{corollary}[Hierholzer's Algorithm]
 		Let $G=(V,E)$ be an MCE to the SSNC with root $v_0$ and let $R_k$ be a rooted neighborhood at distance $k$ from $v_0$. Because every node has interior degree of $k$ in $R_k$ Hierholzer's Algorithm will find at least $k$ disjoint cycles in $R_k$.
 	\end{corollary}\label{hier}
 	
@@ -748,7 +772,7 @@
 	
 %	This would be a futile attempt at proving the SSNC if we could not manage the complications mentioned in previous papers. First are transitive triangles, where Brantner et al. \cite{BBKS} showed that oriented graphs without transitive triangles contain a Seymour vertex, the MDN.
 	
-	\begin{theorem}[Load-Balancing Triangles]\label{lbt}The only possible transitive triangles in an MCE are load-balancing triangles.\end{theorem}
+	\begin{theorem}[Triangle Classification]\label{lbt}The only possible transitive triangles in an MCE are forward facing triangles.\end{theorem}
 	\begin{proof}
 		We classify all transitive triangles by examining the first two arcs and determine whether a valid third arc can close the triangle.
 		
