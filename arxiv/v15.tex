@@ -62,7 +62,7 @@
 	\keywords{oriented graphs, minimum counterexample, breadth-first search, minimum out-degree node, set theory}
 	\maketitle
 	
-	\abstract{We provide a constructive proof of the **maximal set version** of the Seymour Second Neighborhood Conjecture (SSNC) by reframing the problem as a set-packing optimization problem. The universal family of oriented graphs $\mathcal{O}$ is classified by their minimum out-degree $\delta$. This shifts the objective to maximizing the number of non-Seymour vertices.
+	\abstract{We provide a constructive proof of the maximal set version of the Seymour Second Neighborhood Conjecture (SSNC) by reframing the problem as a set-packing optimization problem. The universal family of oriented graphs $\mathcal{O}$ is classified by their minimum out-degree $\delta$. This shifts the objective to maximizing the number of non-Seymour vertices.
 		
 		A counterexample is a packing of vertices that fail the SSNC. To prove such a packing is unsustainable, we introduce the Graph Level Order (GLOVER). This BFS-based coordinate system partitions $\mathcal{O}$ into rooted neighborhoods $R_i$ from a minimum out-degree node.
 		
@@ -109,9 +109,7 @@
 	This work extends to $m$-free, $k$-transitive, and $k$-anti-transitive graphs. An $m$-free graph contains no directed cycles of length $m$ or less. Daamouch \cite{Da} showed that certain shortcuts—specifically $k$-transitive graphs (for $k \leq 6$) and $k$-anti-transitive graphs (for $k \leq 4$)—guarantee a Seymour vertex. Hassan et al. \cite{HKPS} later extended these results to include 6-anti-transitive graphs.
 	
 	Other researchers have tested the conjecture on tournaments missing specific substructures. Fidler and Yuster \cite{FidlerYuster} confirmed it for tournaments missing a star or multiple edges from a single node, a result Ghazal \cite{Ghazal_2011} later reinforced. Similarly, Mniny and Ghazal \cite{MninyGhazal} proved the conjecture for oriented graphs missing configurations like $C_4$, the chair, or the co-chair. Most recently, Daamouch et al. \cite{daamouch2024secondneighborhoodconjecturetournaments} extended this to tournaments missing two stars or disjoint paths.
-	
-	Transitive triangles complicate the conjecture because first neighbors seem to steal counts from second neighbors. Here, degree and distance conflict: one arc increases the degree of a vertex, while one path defines distance. Resolving the conjecture requires mastering this interaction between degree and distance, particularly within these triangular structures.
-	
+		
 	Another approach uses subset-level expansion bounds to restrict the behavior of potential counterexamples. Seacrest \cite{Scrt} used neighborhood ratios across subsets rather than individual nodes. This showed that a hypothetical minimum counterexample could be bounded in size to at most $\binom{\delta +1}{2}$ vertices, where $\delta$ is the minimum out-degree. The problem with this approach is that out proves facts about average neighborhood expansion. However, the SSNC seeks a single vertex whose degree doubles. Bridging the gap between average subset behavior and the existence of a single vertex remains a major challenge.
 	
 	In a 2021 poster, Illia Nalyvaiko \cite{NALYVAIKO2021poster} explored the conjecture's contrapositive. He introduced a penalty function to evaluate potential counterexamples. His intuition differs from non-Seymour vertices. Both approaches shift the focus from verifying the conjecture to testing its bounds. Nalyvaiko's method offered a novel perspective that aligns with our motivations.
@@ -142,6 +140,8 @@
 	Graph theory is concerned with studying the relationships between objects. The Graph Level Order brings set theory concepts into the relationships. After identifying the shortcomings of current terminology we will formally define the Graph Level Order architectural framework. This will include new set theory based neighbor concepts, neighbor partition concepts and theorems that relate them to the existing terminology. This new systematic framework then gives us the clarity needed to solve the SSNC.	
 	
 	Previous work on SSNC's have primarily taken one of two approaches: either transitive triangles are treated as basic building blocks to be used \cite{FidlerYuster MninyGhazal, Ghazal_2011 daamouch2024secondneighborhoodconjecturetournaments} or they are considered an irrelevance in this class of problem \cite{Da, HKPS, BBKS}. By considering layering of our BFS, we are able to look at the effect transitive triangles have depending on which layers they are found in. As it turns out, Forward Facing transitive triangles provide a class of transitive triangle that can be used to help satisfy a decreasing neighbourhood condition.
+	
+	Transitive triangles complicate the conjecture because first neighbors seem to steal counts from second neighbors. Here, degree and distance conflict: one arc increases the degree of a vertex, while one path defines distance. Resolving the conjecture requires mastering this interaction between degree and distance, particularly within these triangular structures.	
 	
 	By using our BFS layered approach, we are able to classify transitive triangles by breaking the graph into multiple layers. We can distinguish between Forward Facing transitive triangles that act as conduits of activity. These allow Parent Nodes to communicate structural necessities to its child nodes. This carefully structured approach to arc classification allows this complex issue to become a stable component of the Graph Level Order.
 	
@@ -215,19 +215,25 @@
 	\end{remark}
 	
 	\begin{lemma}{Layer $R_{k+1}$ Neighborhood Coverage}
-	For any $k \ge 0$, the ($k+1$)-th layer is contained within the union of out-neighbourhoods of vertices in the $k$-th layer:
-	$$R_{k+1} \subseteq \bigcup_{u_k \in R_k} N^+(u_k)$$
+		For any $k \ge 0$, the ($k+1$)-th layer is contained within the union of out-neighborhoods of vertices in the $k$-th layer:
+		$$R_{k+1} \subseteq \bigcup_{u_k \in R_k} N^+(u_k)$$
 	\end{lemma}
+	
 	\begin{proof}
-	Let $x$ be a vertex in the ($k+1$)-th layer $R_{k+1}$. As we know by the definition of BFS layers, all vertices in the ($k+1$)-th layer are at distance $k+1$ from the root $v_0$. Therefore a shortest directed path from the root to $x$ must go through some parent vertex $u_k \in R_k$. Hence there is an arc from $u_k \to x$ and so $x$ is in $N^+(u_k)$. As $u_k$ is in $R_k$ then $x$ is in the union of  out-neighbourhoods of all vertices in $R_k$. Therefore $R_{k+1}$ is contained within the union of out-neighbourhoods of vertices in $R_k$.
-	\end{proof}	
-	
-	
+		Let $x$ be a vertex in the ($k+1$)-th layer $R_{k+1}$. 
+		By the definition of BFS layers, all vertices in the ($k+1$)-th layer are at distance $k+1$ from the root $v_0$. 
+		Therefore a shortest directed path from the root to $x$ must go through some parent vertex $u_k \in R_k$. 
+		Hence there is an arc from $u_k \to x$. 
+		So $x$ is in $N^+(u_k)$. 
+		As $u_k$ is in $R_k$ then $x$ is in the union of the out-neighborhoods of all vertices in $R_k$. 
+		Therefore $R_{k+1}$ is contained within the union of out-neighborhoods of vertices in $R_k$.
+	\end{proof}\label{layerCoverage}	
+		
 	\begin{lemma}
 	Let $G \in mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ which contains no back-neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
 	$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
 	$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
-	\end{lemma}
+	\end{lemma}\label{layerEquiv}
 	\begin{proof}
 	\begin{itemize}
 		\item Interior Neighbors: By definition, these are the nodes which can be reached by both $u_k$ and $v_{k+1}$ (i.e. $N^+(u_k) \cap N^+(v_{k+1})$). As we are assuming there are no back neighbors in the BFS, out-neighbors from nodes in layer $R_k$ only go to nodes in $R_k$ and $R_{k+1}$. Out-neighbors from nodes in layer $R_{k+1}$ will only go to nodes in $R_{k+1}$ and $R_{k+2}$. The intersection of the previous two results just leaves the nodes in $R_{k+1}$. Hence, all interior neighbors are found in the layer $R_{k+1}$.
@@ -262,7 +268,8 @@
 	\begin{lemma}[Degree Partition]\label{nodepartition}
 		Let $u_i \in R_i$ and let $v_{i+1} \in R_{i+1}$ be vertices of an MCE, with $u_i \to v_{i+1} \in G$. Then the out-neighborhood of $v_{i+1}$ admits the disjoint partition
 		
-		$$N^+(v_{i+1}) = \text{int}( u_i, v_{i+1}) \;\dot{\cup}\; \text{ext}( u_i, v_{i+1}).$$ \end{lemma}
+		$$N^+(v_{i+1}) = \text{int}( u_i, v_{i+1}) \;\dot{\cup}\; \text{ext}( u_i, v_{i+1}).$$ 
+	\end{lemma}
 	\begin{proof}
 		Every out-neighbor of $ v_{i+1}$ lies in exactly one rooted neighborhood.
 		Arcs may point only to vertices in layers $R_{i}$, $R_{i+1}$, or $R_{i+2}$.
@@ -276,7 +283,7 @@
 	
 	Let $G \in \mathcal{O}$ be an MCE, and let $u_k \in R_k$ and $v_{k+1} \in R_{k+1}$ such that $u_k \to v_{k+1}$. Leveraging the Degree Partition of $v_{k+1}$'s out-neighborhood, we decompose the traditional Seymour condition into two criterias: Interior Seymour Property and Exterior Seymour Property
 	
-	A vertex $v_{k + 1}$ has the \textbf{Interior Seymour Property} if it has a second-neighbourhood within the same layer of at least size equal to its first-neighbourhood:
+	A vertex $v_{k+1}$ has the \textbf{Interior Seymour Property} if it has a second-neighborhood within the same layer of at least size equal to its first-neighborhood:
 	$$|N^2(v_{k+1}) \cap R_{k+1}| \ge |N^+(v_{k+1}) \cap R_{k+1}|$$
 	
 	Eulerian cycle-packing provides distance $k$ witnesses. This is a strict measure of the internal density. Vertices have a local Seymour property. 
@@ -285,37 +292,6 @@
 	$$|R_{k+2}| \le |R_{k+3}|$$
 	
 	This causes the sizes of the layers to decrease. If the size of layers are increasing or staying the same ($|R_{k+2}| \le |R_{k+3}|$ then we have a witness for a Seymour node. To ensure that nodes do not become  Exterior Seymour nodes, we must have strictly decreasing layer sizes.
-	
-	
-	\begin{theorem} (Optimality of Eulerian Cycle-Packing in Layer $R_k$)
-	Consider a graph $G$ $ \in \mathcal{O}$ created by the BFS-Lex algorithm starting from node $v_0 \in V(G)$ with minimum out-degree. Let $R_k$ be the $k$-th layer in the rooted layering.
-	
-	For parent node $u_k \in R_k$ with children $v_{k+1, i} \in R_{k+1}$, where all vertices have in-degree and out-degree equal to $k+1$ ($d^+_{R_{k+1}}(v_{k+1, i}) = d^-_{R_{k+1}}(v_{k+1, i}) = k+1$), the layer $R_{k+1}$ will satisfy the MCE optimization criteria:
-	\begin{itemize}
-	\item Minimize overall amount of interior neighbors.
-	\item Minimize the maximum total interior degree ($\max_{v_{k+1, i} \in R_{k+1}} \text{deg}_{\text{int}}(u_k, v_{k+1, i})$).
-	\end{itemize}
-	\end{theorem}
-	
-	\begin{proof}
-	Given a parent node $u_k$ in layer $R_k$ and a child node $v_{k+1}$ in layer $R_{k+1}$, the interior neighbors are defined as:
-	$$int(u_k,v_{k+1}) = N^+(u_k) \cap N^+(v_{k+1})$$
-		
-	The MCE is required to optimize each layer so that internal intersections are minimized and maximal total internal degree is kept to a minimum.	
-	
-	By definition, an Eulerian directed graph satisfy:	
-	$$V(R_{k+1})| = |E(R_{k+1})|$$
-		
-	Within the BFS-Lex layering, each edge $e = (x,y) \in E_k$ represents a functional transition from one node to another. This means that they are all internal neighbors between their respective parent-child pairs. If there are less edges than vertices in layer $R_{k+1}$ then some node will not meet their minimum out-degree criteria. However, if there are more edges than vertices then we have redundant edges. This will cause the total internal degree to strictly increase. The Eulerian graph condition ensures that we have the minimum number of edges between our vertices whilst meeting the necessary connectivity conditions.
-	
-	In a regular directed cycle configuration, each vertex $v_{k+1} \in R_{k+1}$ has exactly one incoming arc and one outgoing arc per cycle path it participates in. This yields a uniform local interior degree contribution. Suppose, for the sake of contradiction, that there exists an alternative edge distribution $E'_{k+1}$ on the same vertex set $R_{k+1}$ that achieves a strictly smaller maximum total interior degree, i.e.:
-	
-	$$\max_{v \in R_{k+1}} \text{deg}'_{\text{int}}(u_k, v_{k+1, i}) < 2$$
-	
-	To create this edge distribution from an Eulerian graph we must change the distribution of edges. Using the Pigeonhole Principle, every time we remove an edge from the set $A$, we decrease the total degree contribution. However, this will cause another vertex $B$ and their local neighborhood to have an increased internal degree of $$\text{deg}'_{\text{int}}(B) \ge 3$$
-	
-	Since we are trying to minimize the maximal total internal degree (i.e. $\min \max_{v \in R_k} deg_{int}(v)$) then any local fluctuations to the distribution of edges will cause the maximum value to strictly increase beyond 2. Therefore the regular and uniform degrees in the Eulerian cycles will give us the unique minima of out minimax function. 
-	\end{proof}
 	
 	\begin{theorem} (Neighborhood Size). 
 	Let $G \in \mathcal{O}$ be be an MCE with MDN $v_0$, with rooted neighborhoods $R_0$, $R_1$, $\ldots$, $R_k$ generated using the BFS traversed with no back neighbors. All nodes are non-Seymour nodes. Then for all $i \geq 0$, $|R_i| = \delta - i + 1$. 
@@ -356,7 +332,7 @@
 	
 	\begin{lemma}(Interior Degrees Lower Bound)
 		Let $G\in \mathcal{O}$ and let $v_0$ be a minimum out-degree node. Suppose every node in $G$ is non-Seymour. Let $x$ be a node at distance $i$ from $v_0$, and $v_{i-1}$ be a node at distance $i-1$ from $v_0$. Then the interior degree of $x$ with respect to $v_{i-1}$, denoted as $|\text{int}(v_{i-1},x)|$, is at least $i$. 
-	\end{lemma}
+	\end{lemma}\label{ilb2}
 	
 	\begin{proof}
 		Let $x$ be a node at distance $i$ from $v_0$. By \ref{layer_size}, we know that the exterior degree of $v_{i-1}$, $|ext(v_{i-1},x)|$, is bounded by $\delta - i + 1$. This places a limit on the number of nodes $x$ can map to at distance $i+1$ from $v_0$. Now, since $x$ has at least the same degree as $v_0$, $x$ must map to at least $i$ other nodes. Given that back arcs are not allowed, $x$ cannot map to nodes at earlier distances. 
@@ -364,88 +340,63 @@
 		Therefore, since we just concluded that exterior arcs are pigeonholed out, the only remaining possibility is that $x$ maps to interior nodes. Since $x$’s degree must account for at least $i$ mappings, and these must be to interior nodes, we conclude that $x$ must map to at least $i$ interior nodes. Thus, $|int(v_{i-1},x)| \ge i$, as required.
 	\end{proof}
 	
-	\begin{lemma}
-		Let $G$ be a Minimum Counterexample (MCE) that minimizes the total interior arc weight. 
-		If an interior arc $e = (u, w)$ within layer $R_k$ can be removed such that:
-		\begin{enumerate}
-			\item No vertex in $R_{k-1}$ (or subsequent layers) becomes a Seymour vertex, and
-			\item All preceding layer-size and degree constraints remain satisfied,
-		\end{enumerate}
-		then $G$ cannot be a minimum counterexample.
-	\end{lemma}
+	\begin{theorem} (Optimality of Eulerian Cycle-Packing in Layer $R_k$)
+		Consider a graph $G$ $ \in \mathcal{O}$ created by the BFS-Lex algorithm starting from node $v_0 \in V(G)$ with minimum out-degree. Let $R_k$ be the $k$-th layer in the rooted layering.
+		
+		For parent node $u_k \in R_k$ with children $v_{k+1, i} \in R_{k+1}$, where all vertices have in-degree and out-degree equal to $k+1$ ($d^+_{R_{k+1}}(v_{k+1, i}) = d^-_{R_{k+1}}(v_{k+1, i}) = k+1$), the layer $R_{k+1}$ will satisfy the MCE optimization criteria:
+		\begin{itemize}
+			\item Minimize overall amount of interior neighbors.
+			\item Minimize the maximum total interior degree ($\max_{v_{k+1, i} \in R_{k+1}} \text{deg}_{\text{int}}(u_k, v_{k+1, i})$).
+		\end{itemize}
+	\end{theorem}\label{cyclePacking}
 	
-	
-	\begin{lemma} (Interior Arc Redundancy and Parent Invariance)
-		Let $G \in \mathcal{O}$ be a Minimum Counterexample (MCE) with respect to metric minimizing interior neighbors and maximum total interior degree. Let $u_k \in R_k$ be a parent node with out-neighbors $v_{k+1,1}, v_{k+1,2} \in R{k+1}$. If there exists an interior arc $e = (v_{k+1,1} , v_{k+1,2})$ which is redundant (the removal of $e$ is allowed as it does not violate the minimum interior degree requirement for vertex $v_{k+1,1}$ ), then the size of the first and second neighborhoods of $u_k$ will be unchanged. Thus $u_k$ will remain non-Seymour.
-	\end{lemma}
-%	\begin{lemma} (Interior Arc Redundancy and Parent Invariance)
-%		Let $G$ be a Minimum Counterexample (MCE) under the metric minimizing interior neighbors and max total interior degree. 
-%		Let $u_k \in R_k$ be a parent node whose out-neighbors in $R_{k+1}$ include children $v_{k+1, 1}$ and $v_{k+1, 2}$. 
-%		If an interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ is redundant—meaning its removal respects the minimum interior degree requirement for $v_{k+1, 1}$—then removing $e$ leaves the first- and second-neighborhood sizes of $u_k$ completely unchanged, ensuring $u_k$ remains non-Seymour.
-%	\end{lemma}
 	\begin{proof}
-		Consider the interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ in layer $R_{k+1}$. We want to prove that the removal of $e$ will not make parent node $u_k \in R_k$ become Seymour.
+		A cycle packing is defined as a graph where every layer at distance $k$ has every node with in-degree equal to its out-degree equal of $k$. This enforces that there are at least $k$ disjoint cycles at distance $k$.
+		
+		Because every node has exactly degree $k$, no arc can be removed from any cycle on any layer . Removing an interior arc would lower its degree by 1. This would lower it below the $\delta$ threshold, which is not allowed as $\delta$ is the minimum out-degree. 
+		The only alternative is to raise the number of exterior neighbors. However, this would force the parent node to become a Seymour vertex which violates the MCE conditions.
+		
+		Consider now an alternative graph $H$ that is not a cycle packing. Then $H$ has two nodes that are not degree 2. These nodes have degrees less than 2 and greater than 2. 
+		The existence of a node greater than 2, implies that there is a subgraph $H'$ of $H$ where the maximality criteria yields a higher value than on the cycle graph. 
+		Thus $H$ is not an optimal graph for the MCE graph. 
+		
+		Therefore the Eulerian cycles graphs will give us the unique optimal solutions to the MCEs. 
+	\end{proof}
+	
+	\begin{lemma} (Interior Arcs and Parent Vertices)
+		Let $G \in \mathcal{O}$ be a Minimum Counterexample (MCE). Let $u_k \in R_k$ be a parent node with out-neighbors $v_{k+1,1}, v_{k+1,2} \in R{k+1}$. 
+		If there exists an interior arc $e = (v_{k+1,1} , v_{k+1,2})$ whose removal does not violate the minimum interior degree requirement for vertex $v_{k+1,1}$, then the size of the first and second neighborhoods of $u_k$ will be unchanged. Thus $u_k$ will remain non-Seymour.
+	\end{lemma} \label{parOk}
+	
+	\begin{proof}
+		Consider the interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ in layer $R_{k+1}$. We want to prove that the removal of $e$ will not make parent node $u_k \in R_k$ into a  Seymour vertex.
 		
 		\begin{enumerate}
 			\item \textbf{First Neighborhood ($N^+(u_k)$):} 
 			By definition, $N^+(u_k) = \{v \in V(G) \mid (u_k, v) \in E(G)\}$. 
-			Since $e$ is an internal arc between two children of $u_k$ in layer $R_{k+1}$ there are no vertices removed or edges incident to $u_k$ affected. Thus both $N^+(u_k)$ and $|N^+(u_k)|$ remain unchanged.
+			The arc $e$ is an internal arc between two children of $u_k$ in layer $R_{k+1}$. There are no vertices removed or edges incident to $u_k$ affected. Thus both $N^+(u_k)$ and $|N^+(u_k)|$ remain unchanged.
 			
 			\item \textbf{Second Neighborhood ($N^{++}(u_k)$):} 
 			By definition $N^{++}(u_k) = N^+(N^+(u_k)) \setminus (N^+(u_k) \cup \{u_k\})$. 
-			As both endpoints of $e$ are already in $N^+(u_k)$, the arc $e$ is completely within the first neighborhood ($N^+(u_k) \to N^+(u_k)$). Thus no new paths are being created to vertices not in $N^+(u_k)$ (such as $R_{k+2}$). So the underlying set of vertices used to determine $N^{++}(u_k)$ remains unchanged.
+			Both endpoints of $e$ are already in $N^+(u_k)$. The arc $e$ is completely within the first neighborhood ($N^+(u_k) \to N^+(u_k)$). No new paths are being created to vertices not in $N^+(u_k)$ (such as $R_{k+2}$). 
+			The set of vertices $N^{++}(u_k)$ remains unchanged.
 		\end{enumerate}
 		
-		As $|N^+(u_k)|$ and $|N^{++}(u_k)|$ do not change when the redundant interior arc $e$ is removed, we can see that the strict non-Seymour inequality for $u_k$ still holds:
-		\[ |N^{++}(u_k)| < |N^+(u_k)| \]
-		Therefore, any interior arc above the minimum required structure for a vertex can be removed safely without creating a Seymour vertex. This proves that an MCE must tightly bind every interior arc.
+		The sets $|N^+(u_k)|$ and $|N^{++}(u_k)|$ do not change when the interior arc $e$ is removed. Thus the strict non-Seymour inequality for $u_k$ still holds:
+		$$ |N^{++}(u_k)| < |N^+(u_k)| $$
+		Therefore, any interior arc above the minimum required amount for a vertex can be removed safely without creating a Seymour vertex. 
+		This proves that an MCE can tightly bind every interior arc.
 	\end{proof}
-	
-	\begin{lemma} (Interior Arc Redundancy and Parent Invariance).
-		Let $G$ be a Minimum Counterexample (MCE) under the metric minimizing interior neighbors and max total interior degree. Let $u_k \in R_k$ be a parent node with out-neighbors in $R_{k+1}$, including children $v_{k+1, 1}$ and $v_{k+1, 2}$. If an interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ is redundant—meaning its removal does not violate the minimum interior degree requirement for $v_{k+1, 1}$—then removing $e$ does not alter the first- or second-neighborhood sizes of $u_k$, and $u_k$ remains non-Seymour.
-	\end{lemma}
-	\begin{proof}
-		Consider the interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$.  
-		We will show that this preserves the non-Seymour status of parent node $u_k \in R_k$. 
-		Let us the impact on $u_k$'s first and second neighborhoods,  $N^+(u_k)$ and $N^{++}(u_k)$:
+
+%	\begin{theorem}
+%		Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $|\text{int}(u, v)| \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
+%	\end{theorem}
+%	\begin{proof}
+%		Let $v_{k+1} \in R_{k+1}$ be a child of $u_k \in R_k$. 
+%		By Theorem \ref{layer_size} we know that at least $\delta - (k+1) + 1$ nodes are necessary in $R_{k+1}$ to keep $u_k$ from being Seymour. 
+%		If $v_{k+1}$ had more than $k+1$ neighbors in $R_{k+1}$ then each of these neighbors is an interior neighbor with parent neighbors $u_k$. By Lemma \ref{parOk} the sizes first and second neighborhoods of the parents do not change. Thus $u_k$ remains non-Seymour. Thus can form a smaller counterexample when these extra interior arcs are present. 
+%	\end{proof}
 		
-		By definition, the first neighborhood of $u_k$ is the set of its direct out-neighbors:
-		$$N^+(u_k) = \{v \in V(G) \mid (u_k, v) \in E(G)\}$$
-		
-		The arc $e$ is an interior arc connecting two nodes ($v_{k+1, 1}$ and $v_{k+1, 2}$) within layer $R_{k+1}$. 
-		Removing $e$ deletes an edge between these children of $u_k$.
-		However, it does not delete any vertex from $R_{k+1}$. 
-		It also does not remove any outgoing edges from $u_k$ to its children. 
-		Thus, the set $N^+(u_k)$ and its cardinality $|N^+(u_k)|$ remain completely unchanged.
-		
-		The second neighborhood consists of vertices reachable from $u_k$ in exactly two steps, excluding $u_k$ and $N^+(u_k)$:
-		$$N^{++}(u_k) = N^+(N^+(u_k)) \setminus (N^+(u_k) \cup \{u_k\})$$
-		
-		Because $v_{k+1, 2} \in N^+(u_k)$, it belongs to the first neighborhood and cannot be an element of $N^{++}(u_k)$. An interior arc from $v_{k+1, 1}$ to $v_{k+1, 2}$ represents a transition within the first neighborhood ($N^+(u_k) \to N^+(u_k)$). 
-		This does not create paths to new vertices outside $N^+(u_k)$. Nor are any paths to $R_{k+2}$ dependent upon it. 
-		Every child node $v \in R_{k+1}$ is directly reached from $R_k$ via existing parent arcs. 
-		Therefore, the vertex reachability set defining $N^{++}(u_k)$ remains identical.
-		
-		Neither $|N^+(u_k)|$ nor $|N^{++}(u_k)|$ changes when the redundant interior arc $e$ is removed. 
-		This means that inequality defining the non-Seymour property:
-		
-		$$|N^{++}(u_k)| < |N^+(u_k)\vert{}$$
-		
-		continues to hold strictly for $u_k$.
-		Consequently, if an interior arc is in excess of what is required to keep the parent non-Seymour, it can be removed without introducing a Seymour vertex. 
-		This proving that an MCE must tightly bind every single interior arc to its exact minimum requirement.
-	\end{proof}
-	
-	\begin{theorem}
-		Let $G\in \mathcal{O}$ be an MCE represented by rooted neighborhoods $R_0, R_1, \ldots, R_n$. Further, let each $R_i$ have the size $|R_i| = \delta - i + 1$. For each node $u_i \in R_i$ we also have that without back arcs its nodes can be partitioned into interior and exterior neighbors. Then we have that $\text{int}(u, v) \ge k + 1$ for $u \in R_i$, $v \in R_{k+1}$, and $u \to v \in G$. 
-	\end{theorem}
-	\begin{proof}
-		Let $v_{k+1} \in R_{k+1}$ be a child of $u_k \in R_k$. 
-		By Theorem \ref{layer_size} we know that at least $\delta - (k+1) + 1$ nodes are necessary in $R_{k+1}$ to keep $u_k$ from being Seymour. 
-		If $v_{k+1}$ had more than $k+1$ neighbors in $R_{k+1}$ then each of these neighbors is an interior neighbor with parent neighbors $u_k$. By Lemma \ref{int_arc_rem} the sizes first and second neighborhoods of the parents do not change. Thus $u_k$ remains non-Seymour. Thus can form a smaller counterexample when these extra interior arcs are present. 
-	\end{proof}
-	
-	
 	Another consequence of the rooted neighborhood size formula is that it sets the worse possible rate of decrease. The lower bound for interior neighbors is also an upper bound for exterior neighbors (because there are no back neighbors). 
 	
 	\begin{lemma}[Extra Exterior Arc Produces Seymour Vertex]
@@ -456,7 +407,7 @@
 		then $u_k$ will be a Seymour vertex: 
 		
 		$$|N^+(u_k)| \le |N^{++}(u_k)|$$
-	\end{lemma}
+	\end{lemma}\label{extExt}
 	
 	\begin{proof}
 		Let $w_{k+2} \in \text{ext}(u_k, v_{k+1})$ be an exterior neighbor of $u_k$ relative to $v_{k+1}$. 
@@ -478,22 +429,23 @@
 		This proves that $u_k$ is a Seymour vertex.
 	\end{proof}
 	
-	\begin{lemma}[MCE Interior Degree]\label{intdeg}
-		Let $G \in \mathcal{O}$ be a counterexample. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child pair. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
+	\begin{lemma}[MCE Interior Degree Equality]\label{intdeg}
+		Let $G \in \mathcal{O}$ be a MCE with root node $v_0$. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child relationship. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
 		
 		$$\text{int}(u_k, v_{k+1}) = k+1$$
-	\end{lemma}
+	\end{lemma}\label{MCEInt}
 	\begin{proof}
-		Suppose for the sake of contradiction that the interior degree strictly exceeded the layer distance:
-		
+		Suppose for the sake of contradiction that the interior degree is strictly greater than $v_{k+1}$'s distance from $v_0$:
 		$$int(u_k, v_{k+1})>k+1$$
-		By MCE and non-Seymour constraints, an interior degree greater than $k+1$ is over-connected. 
-		This violates the MCE and is thus not minimal. 
+		The MCE and in particular non-Seymour constraints only require $k+1$ arcs at distance $k+1$. 
+		Any graph that has an arc above this threshold is not minimal. 
+		Thus an interior arc can be removed via \ref{arcremoval}. 
 		
-		Because assuming $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, this graph is not an MCE. Thus an interior arc can be removed, forming a smaller counterexample. 
+		The assumption of $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, so this graph is not an MCE. 
+		Thus an interior arc can be removed. This forms a smaller counterexample. 
 		
-		Therefore, the interior degree is bounded by $k+1$:
-		$$\text{int}(u_k, v_{k+1}) = k+1$$
+		The lower bound for these removals is $k+1$, as given by \ref{ilb}. 
+		Thus, we have $$\text{int}(u_k, v_{k+1}) = k+1.$$
 	\end{proof}
 	
 	\section{Disconnected Back Neighbors}
@@ -505,7 +457,7 @@
 	
 	If a node takes on too many interior arcs, it exceeds the local density threshold of the subgraph $R_i$. This violates the minimum counterexample's local density minimization condition.
 	
-	Thos implies that prior to the first disconnected back neighbor, the nodes are $\delta$-regular. Next. we analyze the first back neighbor in this environment. There are two cases: when the children overlap and then they do not. 
+	This implies that prior to the first disconnected back neighbor, the nodes are $\delta$-regular. Next. we analyze the first back neighbor in this environment. There are two cases: when the children overlap and then they do not. 
 	
 	The case when the children do not overlap implies that the first disconnected back neighbor will be similar to the situation of an extra forward neighbor. A back arc is $u_k \to v_{k+1} \to w_j$ where $j \le k-1$. The nodes $u_k$ and $v_{k+1}$ will be $\delta$-regular because there are no back arcs before 
 	
@@ -709,7 +661,7 @@
 	
 	
 	\begin{theorem}[Graph Level Order Representation of Oriented Graphs]\label{gloverrep}
-		Every oriented graph $G = (V,E)$ can be represented by a Graph Level Order. \end{theorem}
+	Every oriented graph $G = (V,E)$ can be represented by an MCE in a Graph Level Order. \end{theorem}
 	\begin{proof}
 		We present an algorithm for this procedure.
 		\begin{enumerate}
@@ -729,44 +681,9 @@
 	
 	With the Graph Level Order vocabulary established, these definitions now must connect to the mathematical foundation. Interior neighbors relate to the first neighbors of a parent. Exterior neighbors relate to the second neighbors. In an MCE environment, Theorem \ref{lbl} (Load Balance) shows the only purpose of these interior neighbors is to be forward-facing transitive triangles that reduce the parent’s second neighborhood.
 	
-	%	An edge $e$ is \textbf{unnecessary} to the MCE $G$ if replacing $e$ with an forward arc $e'$ in the MCE results in a graph that preserves the non-Seymour status of all vertices ($|N^{++}_{G'}(v)| < |N^{+}_{G'}(v)|$ for every $v \in V$).
-	
-	\begin{theorem}[Rooted Neighborhood Equivalence Relation]\label{nbhequiv}
-		Let $G$ be a Minimum Counterexample (MCE). Every vertex within a rooted neighborhood $R_k$ is indistinguishable under the rooted degree-preserving mapping $\sim$. The resulting quotient graph $G/\sim$ is a well-defined hyper-node graph that preserves the out-degree and non-Seymour status of $G$.
-	\end{theorem}
-	\begin{proof}
-		Let $v_k, w_k \in R_k$. By Theorem \ref{bfslex}, these nodes have identical parents because they lie at the same distance. Lemma \ref{nodepartition} (Degree Partition) implies that the degrees of $v_k$ and $w_k$ can be partitioned into interior and exterior components. Theorem \ref{lbl} (Load Balance) establishes that both nodes possess identical interior degrees of $k$. 
-		
-		Furthermore, since back arcs are excluded by Corollaries \ref{noDLBack} (No Disconnected Layer Back Arcs) and \ref{noCLBack} (No Connected Layer Back Arcs), they possess identical exterior neighbors. In addition, by Theorem \ref{lbl} (Load Balance), all interior arcs of $v_k$ and $w_k$ must induce forward-facing transitive triangles. Because these are the unique load-balancing triangles permitted by Theorem \ref{lbt} (Load-Balancing Triangles), the rooted induced subgraphs $G[R(v_k)]$ and $G[R(w_k)]$ are isomorphic under a neighborhood-preserving mapping fixing the root. 
-		
-		Since this structural equivalence holds for all pairs in $R_k$, the set $R_k$ constitutes an equivalence class under a rooted degree-preserving mapping. Collapsing these classes yields a well-defined quotient graph $G/\sim$ that preserves out-degrees and preserves the non-Seymour counterexample property.
-	\end{proof}
-	
-	The rooted neighborhood equivalence relation structure can be seen in Figure \ref{earlyssnc}. As shown in Section \ref{glover}, every node in the graph has an out-degree of 7. By neighborhood, all nodes at distance one have interior out-degree of one. All nodes at distance two have an interior out-degree of two. Nodes having the same distance from the root, interior and exterior exterior neighbor set, making them rooted degree equivalent.
-	
-	\begin{remark}[The Equivalence Relation is a Hyper-Graph, Not a Line Graph]
-		The rooted degree equivalence $\sim_k$ partitions $V$ into equivalence classes $R_0, R_1, \ldots, R_m$. Each class $R_k$ is collapsed to a single hyper-node forms a directed path on $m+1$ hyper-nodes. This is a 
-		property of the \emph{quotient hyper-graph}, not of $G$ itself. 
-		The original graph $G$ is not a line graph or a path --- it retains its full vertex set, arc set, and internal cycle structure within each layer $R_k$.
-	\end{remark}
-	
-	
-	\begin{lemma}[GLO Bridge] Let $G$ be an MCE with GLO decomposition $R_0, R_1, ..., R_m$. ,. For any parent $p \in R_{k-1}$ \label{bridge}
-		\[N^+(p) = R_k,\] \[N^{++}(p) = R_{k+1}\]
-		
-		Consequently, the SSNC condition $|N^{++}(p)| < |N^+{p}|$ is equivalent to $|R_{k+1}| < |R_k|$. 
-	\end{lemma}
-	\begin{proof}
-		By Theorem\ref{lbl}, every parent $p \in R_{k-1}$ has forward degree $\delta - (k-1) = \delta - k +1 = |R_K|$. Since no back arcs exist (\ref{noDLBack} and \ref{noCLBack}, all $\delta - k + 1$ forward arcs of $p$ land in $R_k$, which has exactly $\delta - k + 1$ vertices. Therefore $N^+_{fwd}(p) = R_k$, giving $N^+(p) = R_k$. 
-		
-		Every vertex $v_k \in R_k = N^+(p)$ has forward arcs into $R_{k+1}$. By Theorem \ref{lbl}, these forward neighborhoods are uniform and together cover $R_{k+1}$ completely. Therefore $N^{++}(p) = R_{k+1}$. 
-		
-		It follows that $|N^+(p)| = {R_k}$ and $|N^{++}(p)| = |R_{k+1}|$. so $|N^{++}(p)| < N^+(p)|$ if and only if $|R_{k+1}| < |R_{k}|$. 
-	\end{proof}
-	
 	\begin{corollary}[Hierholzer's Algorithm]\label{ilb}
 		Let $G=(V,E)$ be an MCE to the SSNC with root $v_0$ and let $R_k$ be a rooted neighborhood at distance $k$ from $v_0$. Because every node has interior degree of $k$ in $R_k$ Hierholzer's Algorithm will find at least $k$ disjoint cycles in $R_k$.
-	\end{corollary}
+	\end{corollary}\label{hier}
 	
 	\begin{figure}
 		\centering
@@ -835,7 +752,6 @@
 	
 	Let $G \in \mathcal{O}$ be an oriented graph represented by a Graph Level Order. Define $v_k \sim w_k$ for two vertices $v_k, w_k \in R_k$ if there exists a rooted degree preserving mapping on $G$ fixing $v_0$ and preserving rooted neighborhoods $R_i$ such that $v_k \mapsto w_k$
 	
-	\subsection{Power of the Data Structure}\label{power}
 	This would be a futile attempt at proving the SSNC if we could not manage the complications mentioned in previous papers. First are transitive triangles, where Brantner et al. \cite{BBKS} showed that oriented graphs without transitive triangles contain a Seymour vertex, the MDN.
 	
 	\begin{theorem}[Load-Balancing Triangles]\label{lbt}The only possible transitive triangles in an MCE are load-balancing triangles.\end{theorem}
@@ -866,17 +782,37 @@
 			\label{transtricases}
 		\end{table}
 		
-		From these 8 possible cases, three are excluded immediately because of impossibility (Cases 2, 4, 8). Theorem \ref{red} (Reduction) says that back arcs are unnecessary in an MCE (Cases 3, 5, and 6).
+		From these 8 possible cases, three are excluded immediately because of impossibility (Cases 2, 4, 8). Theorem \ref{???} says that back arcs are unnecessary in an MCE (Cases 3, 5, and 6).
 		
-		The remaining triangles are the following: Case 1: $x \to y \to z \to x$, all in $R_i$, and the Load-Balancing Triangle (Case 7). A triangle from Case 1 is not a load-balancing triangle, so it contains an extra interior arc. By Theorem \ref{lbl} (Load Balance) $G$ cannot be an MCE.
+		The remaining triangles are the following: Case 1: $x \to y \to z \to x$, all in $R_i$, and the Load-Balancing Triangle (Case 7). A triangle from Case 1 contains an extra interior arc, so it cannot be an MCE. By Theorem .
 	\end{proof}
 	
-	\begin{theorem}[Resolution of Seymour Diamonds]\label{smdiam}
-		Let $G \in \mathcal{O}$ be a Graph Level Order containing a Seymour diamond. Then the ambiguity is resolved via exterior neighbors. \end{theorem}
+		\begin{theorem}[Rooted Neighborhood Equivalence Relation]\label{nbhequiv}
+		Let $G$ be a Minimum Counterexample (MCE). Every vertex within a rooted neighborhood $R_k$ is indistinguishable under the rooted degree-preserving mapping $\sim$. The resulting quotient graph $G/\sim$ is a well-defined hyper-node graph that preserves the out-degree and non-Seymour status of $G$.
+	\end{theorem}\label{eqrel}
+	\begin{proof}
+		Let $v_k, w_k \in R_k$. By Theorem \ref{bfslex}, these nodes have identical parents because they lie at the same distance. Lemma \ref{nodepartition} (Degree Partition) implies that the degrees of $v_k$ and $w_k$ can be partitioned into interior and exterior components. Theorem \ref{lbl} (Load Balance) establishes that both nodes possess identical interior degrees of $k$. 
+		
+		Furthermore, since back arcs are excluded by Corollaries \ref{noDLBack} and \ref{noCLBack}, they possess identical exterior neighbors. In addition, by Theorem \ref{layer_size}, all interior arcs of $v_k$ and $w_k$ must induce forward-facing transitive triangles. These are the unique load-balancing triangles permitted by Theorem \ref{lbt} (Load-Balancing Triangles). The rooted induced subgraphs $G[R(v_k)]$ and $G[R(w_k)]$ are isomorphic under a neighborhood-preserving mapping fixing the root. 
+		
+		Since this structural equivalence holds for all pairs in $R_k$, the set $R_k$ constitutes an equivalence class under a rooted degree-preserving mapping. Collapsing these classes yields a well-defined quotient graph $G/\sim$ that preserves out-degrees and preserves the non-Seymour counterexample property.
+	\end{proof}
+	
+	The rooted neighborhood equivalence relation structure can be seen in Figure \ref{earlyssnc}. As shown in Section \ref{glover}, every node in the graph has an out-degree of 7. By neighborhood, all nodes at distance one have interior out-degree of one. All nodes at distance two have an interior out-degree of two. Nodes having the same distance from the root, interior and exterior exterior neighbor set, making them rooted degree equivalent.
+	
+	\begin{remark}[The Equivalence Relation is a Hyper-Graph, Not a Line Graph]
+		The rooted degree equivalence $\sim_k$ partitions $V$ into equivalence classes $R_0, R_1, \ldots, R_m$. Each class $R_k$ is collapsed to a single hyper-node forms a directed path on $m+1$ hyper-nodes. This is a 
+		property of the \emph{quotient hyper-graph}, not of $G$ itself. 
+		The original graph $G$ is not a line graph or a path --- it retains its full vertex set, arc set, and internal cycle structure within each layer $R_k$.
+	\end{remark}
+	
+	
+	\begin{theorem}[Resolution of Seymour Diamonds]
+		Let $G \in \mathcal{O}$ be a Graph Level Order containing a Seymour diamond. Then the ambiguity is resolved via exterior neighbors. \end{theorem}\label{smdiam}
 	
 	\begin{proof}
 		Assume $G$ has a Seymour diamond $u_i, v_{i+1}, w_{i+1},y_{i+2}$.
-		By theorem \ref{red} (Reduction),
+		Exterior neighbors are a subset of $N^{++}(u)$. 
 		$$N^{++}(u_i) = \bigcup_{v_{i+1} \in {N^+(u_i)}} \text{ext}(u_i, v_{i+1}).$$
 		
 		The exterior neighbors are sets, so any node reached by multiple length-2 paths is counted only once in $N^{++}(u_i)$.
