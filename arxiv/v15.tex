@@ -239,39 +239,17 @@ So $x$ is in $N^+(u_k)$.
 As $u_k$ is in $R_k$ then $x$ is in the union of the out-neighborhoods of all vertices in $R_k$. 
 Therefore $R_{k+1}$ is contained within the union of out-neighborhoods of vertices in $R_k$.
 \end{proof}	
- 	
-The BFS layering also allows for an update of the classification of interior and exterior neighbors. They are known to be in first and second neighborhoods of their parent nodes respectively. Instead, they can also be thought in terms of their respective distance to the root node. 
- 		
-\begin{lemma}[Layer Equivalence]
-Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ which contains no back-neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
-$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
-$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
-\label{layerEquiv}
-\end{lemma}
-\begin{proof}
-\begin{itemize}
-\item Interior Neighbors: By definition, these are the nodes which can be reached by both $u_k$ and $v_{k+1}$ (i.e. $N^+(u_k) \cap N^+(v_{k+1})$). As we are assuming there are no back neighbors in the BFS, out-neighbors from nodes in layer $R_k$ only go to nodes in $R_k$ and $R_{k+1}$. Out-neighbors from nodes in layer $R_{k+1}$ will only go to nodes in $R_{k+1}$ and $R_{k+2}$. The intersection of the previous two results just leaves the nodes in $R_{k+1}$. Hence, all interior neighbors are found in the layer $R_{k+1}$.
-
-\item Exterior Neighbors: 
-These are found at the intersection of the second neighborhood of $u_k$ and first neighborhood of  $v_{k+1}$ (i.e. $N^{++}(u_k) \cap N^+(v_{k+1})$). 
-Second neighbors of $u_k$ may go to nodes in $R_k$, $R_{k+1}$ and $R_{k+2}$ and out-neighbors of $v_{k+1}$ will go to nodes in $R_{k+1}$ and  $R_{k+2}$. 
-Our candidates for exterior neighbors are $R_{k+1} \cup R_{k+2}$. 
-Exterior neighbors are a subset of second neighbors of the parent node ($\text{ext}(u_k, v_{k+1}) \subseteq N^{++}(u_k))$. 
-A vertex in $R_{k+1}$ cannot be in $N^{++}(u_k)$ because it is distance 1 from $u_k$. 
-This implies that the exterior neighbors are contained within $R_{k+2}$. 
-
-\end{itemize}
-\end{proof}
- 		
+ 
 This MCE will be constructed under the BFS-lex well-ordering on $V(G)$. This will be modeled through an iterative packing process. At any step $k$, the vertex set $V(G)$ is partitioned into a vector of three distinct, mutually exclusive zones:
- 	
+
 \begin{itemize}
-\item Passed: These vertices have successfully achieved their non-Seymour status.
-
-\item Active: These vertices are actively being processed and their out-arcs might prevent a node from becoming non-Seymour.
-
-\item Upcoming: These are the second and later neighbors of the proven non-Seymour nodes.
+	\item Passed: Vertices that have been successfully processed and verified to satisfy the non-Seymour status within the layers. 
+	
+	\item Active: The current set of nodes being evaluated, where local out-degree bounds are actively being packed. The test is whether the non-Seymour property can be sustained without triggering a violation. 
+	
+	\item Upcoming: Downstream second-and later-layer neighborhoods waiting to receive the consequences of active zone. 
 \end{itemize}
+
 		
 \section{No Back Neighbors}
 	
@@ -288,7 +266,7 @@ Instead, we will show that cycles must exist within each BFS layer to prevent th
 It is the existence of these cycles that distinguishes this approach from standard BFS approaches to the SSNC. 
  	\label{nodepartition}
 \begin{lemma}[Degree Partition]
-Let $u_i \in R_i$ and let $v_{i+1} \in R_{i+1}$ be vertices of an MCE, with $u_i \to v_{i+1} \in G$. Then the out-neighborhood of $v_{i+1}$ admits the disjoint partition
+Let $G \in \mathcal{O}$ be an MCE without back arcs with $u_i \in R_i$ and let $v_{i+1} \in R_{i+1}$ be vertices of an MCE, with $u_i \to v_{i+1} \in G$. Then the out-neighborhood of $v_{i+1}$ admits the disjoint partition. 
 
 $$N^+(v_{i+1}) = \text{int}( u_i, v_{i+1}) \;\dot{\cup}\; \text{ext}( u_i, v_{i+1}).$$ 
 \end{lemma}
@@ -312,27 +290,36 @@ A vertex $v_{k+1}$ has the \textbf{Exterior Seymour Property} if it has a non-de
 $$|R_{k+2}| \ge |R_{k+3}|$$
 
 The packing of non-Seymour vertices into an MCE causes the sizes of the layers to decrease. If the size of layers are increasing or staying the same ($|R_k| \ge |R_{k+1}|$) then we have a witness for a Seymour node. To ensure that nodes do not become an exterior Seymour nodes, we must have strictly decreasing layer sizes.
- 	
-\begin{lemma}[Exterior Upper Bound]
-If $x \in G$ and $y \in N^+(x)$ are both non-Seymour and $y$ is interior Seymour in $G[N^+(x)]$ and for all $z \in ext(x, y)$, $ext(y, z) \cap N^+ (x) = \emptyset$, then for all $z \in ext(x, y)$, $|ext(y, z)| < |ext(x, y)|$.
+
+The BFS layering also allows for an update of the classification of interior and exterior neighbors. They are known to be in first and second neighborhoods of their parent nodes respectively. Instead, they can also be thought in terms of their respective distance to the root node. 
+
+\begin{lemma}[Layer Equivalence]
+Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ which contains no back-neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
+	$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
+	$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
+	\label{layerEquiv}
 \end{lemma}
 \begin{proof}
-Note that this proof uses a different but equivalent notation, denoted degree doubling. Suppose there is a node $z \in ext(x, y)$ such that $|ext (y, z)| \ge |ext (x, y)|$, then y’s out-degree in $G$ will be impacted by $ext (x, y)$ and $ext (y, z)$.
-\begin{align}
-ext (y, z)| &\ge |ext (z, y)| \\
-ext (y, z)| + |ext (x, y)| &\ge |ext (x, y)| + |ext (x, y)|\\
-ext (y, z)| + |ext (x, y)| &\ge 2 * |ext (x, y)|
-\end{align}
-We now have a node y whose degree doubles in $G[N^+ (x)]$ and in $G[ext (x, y) \cup ext (y, z) \cup y]$. We need
-to consider$|(ext (x, y) \cup ext (y, z) \cup y) \cap N^+ (x)|$. By definition, $ext (x, y) \cap N^+ (x) = \emptyset$. By assumption,
-we have that $ext (y, z) \cap N^+ (x) = \emptyset$. So since we assumed that $y$ is Seymour in $G[N^+ (x)]$, the node $y$’s out-degree will double in this case, contradicting that $y$ is non-Seymour. 
+	We will first show that interior neighbors are at a distance one from the parent. This will then allow us to show that exterior neighbors are distance two from the parent. 
+	\begin{itemize}
+		\item Interior Neighbors: By definition, these are the nodes which can be reached by both $u_k$ and $v_{k+1}$ (i.e. $N^+(u_k) \cap N^+(v_{k+1})$). As we are assuming there are no back neighbors in the BFS, out-neighbors from nodes in layer $R_k$ only go to nodes in $R_k$ and $R_{k+1}$. Out-neighbors from nodes in layer $R_{k+1}$ will only go to nodes in $R_{k+1}$ and $R_{k+2}$. The intersection of the previous two results just leaves the nodes in $R_{k+1}$. Hence, all interior neighbors are found in the layer $R_{k+1}$.
+		
+		\item Exterior Neighbors: 
+		These are found at the intersection of the second neighborhood of $u_k$ and first neighborhood of  $v_{k+1}$ (i.e. $N^{++}(u_k) \cap N^+(v_{k+1})$). 
+		Second neighbors of $u_k$ may go to nodes in $R_k$, $R_{k+1}$ and $R_{k+2}$ and out-neighbors of $v_{k+1}$ will go to nodes in $R_{k+1}$ and  $R_{k+2}$. 
+		Our candidates for exterior neighbors are $R_{k+1} \cup R_{k+2}$. 
+		Exterior neighbors are a subset of second neighbors of the parent node ($\text{ext}(u_k, v_{k+1}) \subseteq N^{++}(u_k))$. 
+		A vertex in $R_{k+1}$ cannot be in $N^{++}(u_k)$ because it is distance 1 from $u_k$. 
+		This implies that the exterior neighbors are contained within $R_{k+2}$. 
+		
+	\end{itemize}
 \end{proof}
 
 What an MCE seeks to do is minimize the interior arcs. Lemma \ref{parOk} shows that removing an extra arc from a child node does not impact any parent node in the previous layer, as their status will remain non-Seymour. 
 
 \begin{lemma}[Interior Arcs and Parent Vertices]
-	Let $G \in \mathcal{O}$ be a Minimum Counterexample (MCE). Let $u_k \in R_k$ be a parent node with out-neighbors $v_{k+1,1}, v_{k+1,2} \in R_{k+1}$. 
-	If there exists an interior arc $e = (v_{k+1,1} , v_{k+1,2})$ whose removal does not violate the minimum interior degree requirement for vertex $v_{k+1,1}$, then the size of the first and second neighborhoods of $u_k$ will be unchanged. Thus $u_k$ will remain non-Seymour.
+	Let $G \in \mathcal{O}$ be a Minimum Counterexample (MCE) without back arcs. Let $u_k \in R_k$ be a parent node with out-neighbors $v_{k+1,1}, v_{k+1,2} \in R_{k+1}$. 
+	If there exists an interior arc $e = (v_{k+1,1}, v_{k+1,2})$ whose removal does not violate the minimum interior degree requirement for vertex $v_{k+1,1}$, then the size of the first and second neighborhoods of $u_k$ will be unchanged. Thus $u_k$ will remain non-Seymour.
 	\label{parOk}
 \end{lemma} 
 
@@ -357,8 +344,73 @@ What an MCE seeks to do is minimize the interior arcs. Lemma \ref{parOk} shows t
 \end{proof}
 
  	
+\begin{lemma}[Decreasing Exteriors]
+Let $G \in \mathcal{O}$ be an MCE without back arcs. If $x \in G$ and $y \in N^+(x)$ are both non-Seymour and $y$ is interior Seymour in $G[N^+(x)]$ and for all $z \in ext(x, y)$, $ext(y, z) \cap N^+ (x) = \emptyset$, then for all $z \in ext(x, y)$, $|ext(y, z)| < |ext(x, y)|$.\label{eub}
+\end{lemma}
+\begin{proof}
+Note that this proof uses a different but equivalent notation, denoted degree doubling. Suppose there is a node $z \in ext(x, y)$ such that $|ext (y, z)| \ge |ext (x, y)|$, then y’s out-degree in $G$ will be impacted by $ext (x, y)$ and $ext (y, z)$.
+\begin{align}
+ext (y, z)| &\ge |ext (z, y)| \\
+ext (y, z)| + |ext (x, y)| &\ge |ext (x, y)| + |ext (x, y)|\\
+ext (y, z)| + |ext (x, y)| &\ge 2 * |ext (x, y)|
+\end{align}
+We now have a node y whose degree doubles in $G[N^+ (x)]$ and in $G[ext (x, y) \cup ext (y, z) \cup y]$. We need
+to consider$|(ext (x, y) \cup ext (y, z) \cup y) \cap N^+ (x)|$. By definition, $ext (x, y) \cap N^+ (x) = \emptyset$. By assumption,
+we have that $ext (y, z) \cap N^+ (x) = \emptyset$. So since we assumed that $y$ is Seymour in $G[N^+ (x)]$, the node $y$’s out-degree will double in this case, contradicting that $y$ is non-Seymour. 
+\end{proof}
+
+The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
+
+\begin{lemma}[Interior Degrees Lower Bound]
+	Let $G\in \mathcal{O}$ without back arcs, and let $v_0$ be a minimum out-degree node. 
+	Suppose every node in $G$ is non-Seymour. 
+	Let $x$ be a node at distance $i$ from $v_0$, and $v_{i-1}$ be a node at distance $i-1$ from $v_0$ without back arcs. Then the interior degree of $x$ with respect to $v_{i-1}$, denoted as $|\text{int}(v_{i-1},x)|$, is at least $i$. 
+	\label{ilb}
+\end{lemma}
+
+\begin{proof}
+%If $v_0$ is a minimum out-degree node in $G$ that is non-Seymour and $x_i$ is a node of distance $i$ from $v_0$ with $i > 1$. Then $|int(x_{i-1}, x_i)| \ge i$, where $x_{i-1}$ is of distance $i - 1$ from $v_0$ and $(x_{i-1}, x_i) \in G$.
+%Proof 
+
+The interior neighbors will lie in rooted neighborhoods $R_i$. 
+For any $v_i$ we will split its total out-degree into interior degree and exterior degree via Theorem \ref{nodepartition}. That is, its degree equation can be stated as $d^+(v_i) = |int(u_{i-1}, v_i)| + |ext(u_{i-1}, v_i)|$ for an arbitrary parent $u_{i-1}$. We proceed by induction on distance $i$ from $v_0$. 
+
+Base case ($i = !$): 
+
+Let $u_1 \in R_1$ with parent $v_0 \in R_0$. This is a situation where the nodes in $R_1$ need to form a cycle to prevent $v_0$ from becoming a Seymour node. Thus we have $|N^+(v_0) \cap N^+(u_1)| \geq 1$ and the base case holds. 
+
+Induction Hypothesis: Assume that for some $k \ge 1$, and any $u_k \in R_k$ with parent $u_{k-1} \in R_{k-1}$
+$$|N^+(u_{k-1}) \cap N^+(uk| \geq k$$
+
+Inductive Step: 
+
+Consider any $u_{k+1} \in R_{k+1}$ with parent $u_k \in R_k$. Suppose for contradiction that 
+$$|N^+(u_k) \cap N^+(u_{k+1})| < k+1$$
+
+i.e. 
+
+$|int(u_k, u_{k+1})| \leq i$. 
+
+The minimum out-degree nod $v_0$ says that the node $u_{k+1}$ must have out-degree of at least $\delta$. So we have that 
+
+$$|ext(u_k, u_{k+1})| = d^+(u_{k+1}) - |int(u_k, u_{k+1})| \geq \delta - i$$. 
+
+Because we have the Induction Hypothesis, and in particular name that they are Interior Seymour. This allows us to call Theorem \ref{eub}, which states that because we have interior degree of at least $k$ for every node $u_k \in R_k$, exterior degrees from $u_k$ must strictly decrease as we traverse outwards. Formally we have the following equation: 
+
+$$|ext(u_k, u_{k+1})| > |ext(u_{k+1}, z)|$$ for any $z \in ext(u_k, u_{k+1})$. 
+
+This implies that exterior degrees along the path decrease from $\delta$ by at least $1$ at each layer, bounding $|ext(u_i, u_{i+1})| < \delta - i$. 
+
+However, this contradicts the earlier inequality that $|ext(u_k, u_{k+1})| \ge \delta - k$. 
+
+This contradiction arises from assuming the interior degree is less than $k+1$. Hence, the assumption is false and we conclude that 
+$$|N^+(u_k) \cap N^+(u_{k+1})| \ge k+1$$
+This completes the induction and proves the theorem. 
+
+\end{proof}
+ 	
 \begin{theorem}[Neighborhood Size]
-Let $G \in \mathcal{O}$ be be an MCE with MDN $v_0$, with rooted neighborhoods $R_0$, $R_1$, $\ldots$, $R_k$ generated using the BFS traversed with no back neighbors. All nodes are non-Seymour nodes. Then for all $i \geq 0$, $|R_i| = \delta - i + 1$. 
+Let $G \in \mathcal{O}$ be an MCE without back arcs, with MDN $v_0$. Assume that the rooted neighborhoods are $R_0$, $R_1$, $\ldots$, $R_k$ generated using the BFS traversed with no back neighbors. All nodes are non-Seymour. Then for all $i \geq 0$, $|R_i| = \delta - i + 1$. 
 \label{layer_size}
 \end{theorem} 
 
@@ -410,25 +462,6 @@ Consider a node $v_{k+1} \in R_{k+1}$. By the I.H., this node cam send at most $
 \caption{\textit{\textbf{Iterated decrease in second neighborhood}. In a rooted environment, this means that there is a maximum value that every decrease comes from: $|R_k| = \delta - (k-1)$}}
 \end{figure}
  	
-The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
- 	
-\begin{lemma}[Interior Degrees Lower Bound]
-Let $G\in \mathcal{O}$ and let $v_0$ be a minimum out-degree node. 
-Suppose every node in $G$ is non-Seymour. 
-Let $x$ be a node at distance $i$ from $v_0$, and $v_{i-1}$ be a node at distance $i-1$ from $v_0$ without back arcs. Then the interior degree of $x$ with respect to $v_{i-1}$, denoted as $|\text{int}(v_{i-1},x)|$, is at least $i$. 
-\label{ilb}
-\end{lemma}
-
-\begin{proof}
-Let $v_i$ be a node at distance $i$ from $v_0$. 
-By Theorem \ref{layer_size}, $|ext(v_{i-1}, v_i)|$, is bounded by $\delta - i + 1$. This places an upper bound on the number of nodes $v_i$ can map to at distance $i+1$ from $v_0$. 
-Since $v_i$ has at least the same out-degree as $v_0$, $v_i$ must map to at least $i$ other nodes within $R_i$. 
-By assumption, back arcs are not allowed. 
-So $v_i$ cannot map to nodes at earlier distances. 
-
-Therefore, the only remaining possibility is that $v_i$ maps to at least $i$ interior nodes. 
-Since $v_i$’s degree must account for at least $i$ mappings, and these must be to interior nodes, we conclude that $x$ must map to at least $i$ interior nodes. Thus, $|int(v_{i-1},v_i)| \ge i$, as required.
-\end{proof}
  	
 The definition of an MCE above, combines with the proofs of a lower bound for interior degree and a formula for neighborhood size allow for an MCE witness. Rather that speaking descriptively about what the characteristics are Theorem \ref{cyclePacking} shows that Eulerian graphs where every node has out-degree $k$ at distance $k$ are exactly the constructions necessary for the SSNC. 
 
@@ -883,17 +916,18 @@ Let $v_1$, $v_2$ and $v_3$ be arbitrary nodes in $R_1$. We know that $R_1 = N^+(
 Because nodes in $R_1$ have the same parents, and their interior neighbor degrees as well as their exterior neighbor sets are symmetric reflexive and transitive, the properties of an equivalence relation hold at $R_1$. 
 
 I.H. 
-Suppose that at distance $k$ from $v_0$, the nodes have the same parents (at distance $k-1$) and also that the properties of an equivalence relation hold on the interior neighbor degrees as well as their exterior neighbor sets. 
+By the Theorems\ref{layer_size}   that nodes at distance $k$ from $v_0$, the same parents (at distance $k-1$) and also that the properties of an equivalence relation hold on the interior neighbor degrees as well as their exterior neighbor sets. 
 
 I.S. 
 Consider nodes at distance $k+1$ from $v_0$.
 First, by the BFS distance, every node in $R_{k+1}$ must have a parent in $R_k$. 
 By the I.H. these nodes in $R_k$ form an equivalence class, so every node in $R_{k+1}$ has the same class of parent from $R_k$. 
-Let $v_{k+1, 1}$, $v_{k+1, 2}$, and $v_{k+1, 3}$ be three arbitrary nodes from $R_{k+1}$ and let $u_k$ be an arbitrary node from $R_k$. Then the following relationships hold. 
+Let $v_{k+1, 1}$, $v_{k+1, 2}$, and $v_{k+1, 3}$ be three arbitrary nodes from $R_{k+1}$ and let $u_k$ be an arbitrary node from $R_k$. 
+Then the following relationships hold. 
 
 \begin{itemize}
 	\item Symmetric Interior Neighbors $|\text{int}(u_k, v_{k+1, 1})|=|\text{int}(u_k, v_{k+1, 2})| \implies  |\text{int}(u_k, v_{k+1, 2})|=|\text{int}(u_k, v_{k+1, 1})|$ by the commutativity of equality of natural numbers. 
-	\item Symmetric Exterior Neighbors$\text{ext}(u_k, v_{k+1, 1})=\text{ext}(u_k, v_{k+1, 2}) \implies  \text{ext}(u_k, v_{k+1, 2})=\text{ext}(u_k, v_{k+1, 1})$ by \ref{layer_size} which indicates that $\text{ext}{u_k, v_{k+1, 1}} = \text{ext}(u_k, v_{k+1, 2}) = R_{k+1}$. 
+	\item Symmetric Exterior Neighbors$\text{ext}(u_k, v_{k+1, 1})=\text{ext}(u_k, v_{k+1, 2}) \implies  \text{ext}(u_k, v_{k+1, 2})=\text{ext}(u_k, v_{k+1, 1})$ by \ref{layer_size} which indicates that $\text{ext}{u_k, v_{k+1, 1}} = \text{ext}(u_k, v_{k+1, 2}) = R_{k+2}$. 
 	\item Reflexive Interior Neighbors ($|\text{int}(u_k, v_{k+1, 1})|=|\text{int}(u_k, v_{k+1, 1})|$) by the reflexive property of equality of the natural numbers. 
 	\item Reflexive Exterior Neighbors ($\text{ext}(u_k, v_{k+1, 1}) = \text{ext}(u_k, v_{k+1, 1})$), again by the reflexive property of equality of sets. 
 	\item Transitive Interior Neighbors ($|\text{int}(u_k, v_{k+1, 1})|=|\text{int}(u_k, v_{k+1, 2})|$ and $|\text{int}(u_k, v_{k+1, 2})|=|\text{int}(u_k, v_{k+1, 3})| \implies |\text{int}(u_k, v_{k+1, 1})|=|\text{int}(u_k, v_{k+1, 3})|$) by the transitive property of equality of natural numbers. 
