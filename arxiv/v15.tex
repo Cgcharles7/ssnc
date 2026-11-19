@@ -222,7 +222,7 @@ Let $G\in \mathcal{O}$ be an MCE. The interior neighbors of $v_{i+1}$ with respe
 Let $G\in \mathcal{O}$ be an MCE. The exterior neighbors of $v_{i+1}$ with respect to $u_i$ are given by $\text{ext}(u_i, v_{i+1}) = N^{++}(u_i) \cap N^+(v_{i+1})$. By definition, $\text{ext}(u_i, v_{i+1}) \subseteq N^{++}(u_i)$.
 \end{remark}
 	
-Many other approaches began with a minimum out-degree node $v_0$ \cite{KL, BMN, Di}. The well ordering of the BFS-Lex approach to the SSNC has a stark advantage over these approaches. Lemma \ref{layerCoverage} utilizes this well ordering to show that every path begins with $v_0$ and must conclude with some node in a BFS layer. From this, we are able to conclude that these layers are a subset of the union of the first neighborhoods of these nodes. 
+Many other approaches began with a minimum out-degree node $v_0$ \cite{KL, BMN, Di}. The well-ordering of the BFS-Lex approach to the SSNC has a stark advantage over these approaches. Lemma \ref{layerCoverage} utilizes this well-ordering to show that every path begins with $v_0$ and must conclude with some node in a BFS layer. From this, we are able to conclude that these layers are a subset of the union of the first neighborhoods of these nodes. 
  	
 \begin{lemma}[Layer $R_{k+1}$ Neighborhood Coverage]
 For any $k \ge 0$, the ($k+1$)-th layer is contained within the union of out-neighborhoods of vertices in the $k$-th layer:
@@ -246,7 +246,8 @@ The BFS layering also allows for an update of the classification of interior and
 Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ which contains no back-neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
 $\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
 $\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
-\end{lemma}\label{layerEquiv}
+\label{layerEquiv}
+\end{lemma}
 \begin{proof}
 \begin{itemize}
 \item Interior Neighbors: By definition, these are the nodes which can be reached by both $u_k$ and $v_{k+1}$ (i.e. $N^+(u_k) \cap N^+(v_{k+1})$). As we are assuming there are no back neighbors in the BFS, out-neighbors from nodes in layer $R_k$ only go to nodes in $R_k$ and $R_{k+1}$. Out-neighbors from nodes in layer $R_{k+1}$ will only go to nodes in $R_{k+1}$ and $R_{k+2}$. The intersection of the previous two results just leaves the nodes in $R_{k+1}$. Hence, all interior neighbors are found in the layer $R_{k+1}$.
@@ -285,8 +286,8 @@ Our proof will show that neither of these first members can exist.
 The elimination of back arcs does not relax the graph into a simple path. 
 Instead, we will show that cycles must exist within each BFS layer to prevent the parents in the previous layer from becoming Seymour. 
 It is the existence of these cycles that distinguishes this approach from standard BFS approaches to the SSNC. 
- 	
-\begin{lemma}[Degree Partition]\label{nodepartition}
+ 	\label{nodepartition}
+\begin{lemma}[Degree Partition]
 Let $u_i \in R_i$ and let $v_{i+1} \in R_{i+1}$ be vertices of an MCE, with $u_i \to v_{i+1} \in G$. Then the out-neighborhood of $v_{i+1}$ admits the disjoint partition
 
 $$N^+(v_{i+1}) = \text{int}( u_i, v_{i+1}) \;\dot{\cup}\; \text{ext}( u_i, v_{i+1}).$$ 
@@ -330,9 +331,10 @@ we have that $ext (y, z) \cap N^+ (x) = \emptyset$. So since we assumed that $y$
 What an MCE seeks to do is minimize the interior arcs. Lemma \ref{parOk} shows that removing an extra arc from a child node does not impact any parent node in the previous layer, as their status will remain non-Seymour. 
 
 \begin{lemma}[Interior Arcs and Parent Vertices]
-	Let $G \in \mathcal{O}$ be a Minimum Counterexample (MCE). Let $u_k \in R_k$ be a parent node with out-neighbors $v_{k+1,1}, v_{k+1,2} \in R{k+1}$. 
+	Let $G \in \mathcal{O}$ be a Minimum Counterexample (MCE). Let $u_k \in R_k$ be a parent node with out-neighbors $v_{k+1,1}, v_{k+1,2} \in R_{k+1}$. 
 	If there exists an interior arc $e = (v_{k+1,1} , v_{k+1,2})$ whose removal does not violate the minimum interior degree requirement for vertex $v_{k+1,1}$, then the size of the first and second neighborhoods of $u_k$ will be unchanged. Thus $u_k$ will remain non-Seymour.
-\end{lemma} \label{parOk}
+	\label{parOk}
+\end{lemma} 
 
 \begin{proof}
 	Consider the interior arc $e = (v_{k+1, 1}, v_{k+1, 2})$ in layer $R_{k+1}$. We want to prove that the removal of $e$ will not make parent node $u_k \in R_k$ into a  Seymour vertex.
@@ -357,7 +359,8 @@ What an MCE seeks to do is minimize the interior arcs. Lemma \ref{parOk} shows t
  	
 \begin{theorem}[Neighborhood Size]
 Let $G \in \mathcal{O}$ be be an MCE with MDN $v_0$, with rooted neighborhoods $R_0$, $R_1$, $\ldots$, $R_k$ generated using the BFS traversed with no back neighbors. All nodes are non-Seymour nodes. Then for all $i \geq 0$, $|R_i| = \delta - i + 1$. 
-\end{theorem} \label{layer_size}
+\label{layer_size}
+\end{theorem} 
 
 \begin{proof}
 This will be proved using mathematical induction argument. We will assume that a parent in layer i is interior Seymour and show that that parent cannot be exterior Seymour. 
@@ -410,13 +413,21 @@ Consider a node $v_{k+1} \in R_{k+1}$. By the I.H., this node cam send at most $
 The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
  	
 \begin{lemma}[Interior Degrees Lower Bound]
-Let $G\in \mathcal{O}$ and let $v_0$ be a minimum out-degree node. Suppose every node in $G$ is non-Seymour. Let $x$ be a node at distance $i$ from $v_0$, and $v_{i-1}$ be a node at distance $i-1$ from $v_0$. Then the interior degree of $x$ with respect to $v_{i-1}$, denoted as $|\text{int}(v_{i-1},x)|$, is at least $i$. 
-\end{lemma}\label{ilb}
+Let $G\in \mathcal{O}$ and let $v_0$ be a minimum out-degree node. 
+Suppose every node in $G$ is non-Seymour. 
+Let $x$ be a node at distance $i$ from $v_0$, and $v_{i-1}$ be a node at distance $i-1$ from $v_0$ without back arcs. Then the interior degree of $x$ with respect to $v_{i-1}$, denoted as $|\text{int}(v_{i-1},x)|$, is at least $i$. 
+\label{ilb}
+\end{lemma}
 
 \begin{proof}
-Let $x$ be a node at distance $i$ from $v_0$. By \ref{layer_size}, we know that the exterior degree of $v_{i-1}$, $|ext(v_{i-1},x)|$, is bounded by $\delta - i + 1$. This places a limit on the number of nodes $x$ can map to at distance $i+1$ from $v_0$. Now, since $x$ has at least the same degree as $v_0$, $x$ must map to at least $i$ other nodes. Given that back arcs are not allowed, $x$ cannot map to nodes at earlier distances. 
+Let $v_i$ be a node at distance $i$ from $v_0$. 
+By Theorem \ref{layer_size}, $|ext(v_{i-1}, v_i)|$, is bounded by $\delta - i + 1$. This places an upper bound on the number of nodes $v_i$ can map to at distance $i+1$ from $v_0$. 
+Since $v_i$ has at least the same out-degree as $v_0$, $v_i$ must map to at least $i$ other nodes within $R_i$. 
+By assumption, back arcs are not allowed. 
+So $v_i$ cannot map to nodes at earlier distances. 
 
-Therefore, since we just concluded that exterior arcs are pigeonholed out, the only remaining possibility is that $x$ maps to interior nodes. Since $x$’s degree must account for at least $i$ mappings, and these must be to interior nodes, we conclude that $x$ must map to at least $i$ interior nodes. Thus, $|int(v_{i-1},x)| \ge i$, as required.
+Therefore, the only remaining possibility is that $v_i$ maps to at least $i$ interior nodes. 
+Since $v_i$’s degree must account for at least $i$ mappings, and these must be to interior nodes, we conclude that $x$ must map to at least $i$ interior nodes. Thus, $|int(v_{i-1},v_i)| \ge i$, as required.
 \end{proof}
  	
 The definition of an MCE above, combines with the proofs of a lower bound for interior degree and a formula for neighborhood size allow for an MCE witness. Rather that speaking descriptively about what the characteristics are Theorem \ref{cyclePacking} shows that Eulerian graphs where every node has out-degree $k$ at distance $k$ are exactly the constructions necessary for the SSNC. 
@@ -429,7 +440,8 @@ For parent node $u_k \in R_k$ with children $v_{k+1, i} \in R_{k+1}$, where all 
 \item Minimize overall amount of interior neighbors.
 \item Minimize the maximum total interior degree ($\max_{v_{k+1, i} \in R_{k+1}} \text{deg}_{\text{int}}(u_k, v_{k+1, i})$).
 \end{itemize}
-\end{theorem}\label{cyclePacking}
+\label{cyclePacking}
+\end{theorem}
 
 \begin{proof}
 A cycle packing is defined as a graph where every layer at distance $k$ has every node with in-degree equal to its out-degree equal of $k$. This enforces that there are at least $k$ disjoint cycles at distance $k$.
@@ -453,7 +465,8 @@ If the number of exterior neighbors associated with $(u_k, v_{k+1})$ bounds $u_k
 $|N^+(u_k)| \le |\text{ext}(u_k, v_{k+1})|$
 then $u_k$ will be a Seymour vertex: 
 $|N^+(u_k)| \le |N^{++}(u_k)|$
-\end{lemma}\label{extExt}
+\label{extExt}
+\end{lemma}
 
 \begin{proof}
 Let $w_{k+2} \in \text{ext}(u_k, v_{k+1})$ be an exterior neighbor of $u_k$ relative to $v_{k+1}$. 
@@ -476,7 +489,8 @@ This proves that $u_k$ is a Seymour vertex.
 Let $G \in \mathcal{O}$ be a MCE with root node $v_0$. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent child relationship. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
 
 $\text{int}(u_k, v_{k+1}) = k+1$
-\end{lemma}\label{MCEInt}
+\label{MCEInt}
+\end{lemma}
 \begin{proof}
 Suppose for the sake of contradiction that the interior degree is strictly greater than $v_{k+1}$'s distance from $v_0$:
 $int(u_k, v_{k+1})>k+1$
@@ -496,25 +510,26 @@ Thus, we have $$\text{int}(u_k, v_{k+1}) = k+1.$$
 To prevent parents from becoming Seymour vertices, neighborhood sizes must decrease as distance increases.
 
 If a child node $v$ possesses an excess exterior arc, it is a second out-neighborhood of the parent $u$, 
-forcing $|N^{++}(u)| \ge |N^{+}(u)|$. This immediately makes $u$ Seymour vertex.
+forcing $|N^{++}(u)| \ge |N^{+}(u)|$. This immediately makes $u$ a Seymour vertex.
 
 If a node takes on too many interior arcs, it exceeds the local density threshold of the subgraph $R_i$. This violates the minimum counterexample's local density minimization condition.
 
 This implies that prior to the first disconnected back neighbor, the nodes are $\delta$-regular. Next. we analyze the first back neighbor in this environment. There are two cases: when the children overlap and then they do not. 
 
-The case when the children do not overlap implies that the first disconnected back neighbor will be similar to the situation of an extra forward neighbor. A back arc is $u_k \to v_{k+1} \to w_j$ where $j \le k-1$. The nodes $u_k$ and $v_{k+1}$ will be $\delta$-regular because there are no back arcs before 
+The case when the children do not overlap will be similar to the situation of an extra forward neighbor. A back arc is $u_k \to v_{k+1} \to w_j$ where $j \le k-1$. The nodes $u_k$ and $v_{k+1}$ will be $\delta$-regular because there are no back arcs before $v_{k+1}$. 
 
 \begin{theorem}[Seymour Property under Disjoint Back Arcs]
 Let $G$ be a graph represented by an MCE, and let $u_k, v_{k+1} \in V(G)$ such that $v_{k+1} \in N^+(u_k)$. If the out-neighbors are completely disjoint ($N^+(v_{k+1}) \cap N^+(u_k) = \emptyset$), the degree bounds satisfy $|N^+(u_k)| \le \delta \le |N^+(v_{k+1})|$, then $u_k$ is a  Seymour vertex:
 		
 $$|N^+(u_k)| \le |N^{++}(u_k)|$$
-\end{theorem}\label{no_disj}
+\label{no_disc}
+\end{theorem}
 \begin{proof}
 Every back neighbor $z_j \in N^+(v_{k+1})$ belongs to the second neighborhood $N^{++}(u_k)$. 
 To verify this, let $z_j \in N^+(v_{k+1})$. 
 By definition:
 \begin{itemize}
-\item $z_j$ is reachable from $u_j$ in two steps via the path $u_k \to v_{k+1} \to z_j$).
+\item $z_j$ is reachable from $u_k$ in two steps via the path $u_k \to v_{k+1} \to z_j$).
 \item $z_j \neq u_k$, because $u_k \notin N^+(v_{k+1})$  by the anti-symmetry constraint.
 \item $z_j \notin N^+(u_k)$, because $N^+(v_{k+1}) \cap N^+(u_k) = \emptyset$.
 \end{itemize}
@@ -534,10 +549,11 @@ $$|N^+(u_k)| = \delta = |N^+(v_{k+1})| = \le |N^{++}(u_k)|$$
 Therefore, $|N^+(u_k)| \le |N^{++}(u_k)|$, making $u_k$ a Seymour vertex. 
 \end{proof}		
 	
-Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such a case, there is the possibility of an infinite descending chain. However, this MCE is based on a BFS-Lex traversal, which gives a well founded set. This guarantees that any recursive decent must terminate. Thus, every terminal node in that chain must become a Seymour vertex. This implies that disconnected back arcs cannot exist in either case of an MCE. 
+Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such a case, there is the possibility of an infinite descending chain. However, this MCE is based on a BFS-Lex traversal, which gives a well-founded set. This guarantees that any recursive decent must terminate. Thus, every terminal node in that chain must become a Seymour vertex. This implies that disconnected back arcs cannot exist in either case of an MCE. 
 
 \begin{theorem}[Termination and Loop Closure of Back-Arc Chains]
 Let $G$ be an MCE under the BFS-Lex coordinate system. Any recursive propagation of back-arcs forms a well-founded sequence that must terminate by closing a loop, thereby forcing a Seymour vertex.
+\label{no_chain}
 \end{theorem}
 
 \begin{proof}
@@ -553,17 +569,18 @@ Since a minimum counterexample cannot contain any Seymour vertices, this configu
 \end{proof}
 	
 \section{Connected Back Neighbors}
-We have already covered both situations where there are no back neighbors and when there are disconnected back neighbors. In the first case we reached regularity in the MCE and in the second case we excluded disconnected back neighbors. 
+We have already covered both situations where there are no back neighbors and when there are disconnected back neighbors. In the first case we reached regularity in the MCE and in the second case we concluded that disconnected back neighbors cannot exist. 
 
-Thus, when we arrive at the case of connected back neighbors what we arrive at is the case of the first connected back neighbor and the question of where can it happen in a well ordering. 
+Thus, what remains is the situation question of what happens to the first connected back neighbor in a well-ordering. 
 
 Regularity prior to the first connected back neighbor implies that every child node in that layer will need to send all of its exterior neighbors to the next layer. what this means is that a connected back neighbor would violate the bi-directional property of oriented graph. 
 
 \begin{theorem}[No Connected Back Arcs]
 Let $G\in\mathcal{O}$ be an MCE represented by the rooted neighbors $R_0, R_1, \ldots, R_k$. Then the first connected back neighbor in $G$ cannot exist. 
+\label{no_conn}
 \end{theorem}
 \begin{proof}
-Theorems \ref {no_disj} and \ref{no_cbain} state that disconnected back neighbors are not possible. Further, from Theorem \ref{intbnd}, we have that $text{int}(u_k, v_{k+1}) = k+1$. The combination of the above two formulas yoelds that $text{ext}(u_k, v_{k+1}) = \delta - (k+1)$.
+Theorems \ref {no_disj} and \ref{no_cbain} state that disconnected back neighbors are not possible. Further, from Theorem \ref{intbnd}, we have that $\text{int}(u_k, v_{k+1}) = k+1$. The combination of the above two formulas yields that $\text{ext}(u_k, v_{k+1}) = \delta - (k+1)$.
 
 This says that every $y_{k+1} \in R_{k+1}$ must be a parent to every node $z_{k+2} \in R_{k+2}$. 
 
@@ -679,7 +696,7 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 			Let $G[R_1]$ be te subgraph induced by $R_1$ and let $G[R_2]$ be the subgraph induced by $R_2$. The nodes in $R_1$ are first neighbors of $v_0$ and the nodes in $R_2$ are the second neighbors. By the pigeonhole principle, to make $v_0$ a non-Seymour vertex, we need to establish that $|R_2| < |R_1| = \delta$. This gives a maximum size of $\delta - 1$ on $R_2$, forcing every node in $R_1$ to have at least one interior neighbor. Lemma \ref{extraArcs} shows that no node in $R_1$ can have a higher more than one same level cross arc, forcing these nodes to be regular at distance 1.
 			
 			We next examine the vertices in $R_2$, which similarly must satisfy $\delta^+(G) = 7$. Again, the pigeonhole principle applies here to make the nodes in $R_1$ non-Seymour. As $|R_2| = \delta - 1$ has already had its capacity limited, there are even fewer holes for the pigeons to land in here. Consequently, we see that to make nodes in $R_1$ non-Seymour, these nodes must each connect to two arcs in $R_2$. Corollary \ref{noDLBack} shows that back arcs are not possible in this case.
-			If a parent vertex $u_1 \in R_1$ of $u_2$ satisfies $|R_2| \le |R_3|$, then $u_1$'s forward property is Seymour. Similarly, because it has already been shown that $u_1$ has a degree $\le 6$ in $R_1$ irs local property is Seymour as well.. This implies that $u_1$ is a Seymour vertex. Thus, we must have $d^+_{G[R_2]}(u) \ge 2$ for all $u \in R_2$.
+			If a parent vertex $u_1 \in R_1$ of $u_2$ satisfies $|R_2| \le |R_3|$, then $u_1$'s forward property is Seymour. Similarly, because it has already been shown that $u_1$ has a degree $\le 6$ in $R_1$ irs local property is Seymour as well. This implies that $u_1$ is a Seymour vertex. Thus, we must have $d^+_{G[R_2]}(u) \ge 2$ for all $u \in R_2$.
 			
 			To summarize, the cardinality of the rooted neighborhoods required to pack these non-Seymour vertices is given by:
 			
@@ -703,9 +720,9 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 \begin{definition}\label{glover1}
 	Let $G = (V,E)$ be an oriented graph represented by an MCE, and let $v_0 \in V$ be the vertex of minimum out-degree. A \textbf{Graph Level Order} on $G$ consists of the following structure:
 	\begin{enumerate}
-		\item Well Ordered Rooted Neighborhoods: Partition the vertices of $V$ into rooted neighborhoods $$R_i=\{v \in V : \text{dist}(v_0,v)=i\}, \text{ for } i=0,1,\dots,n.$$
-		\item Well Ordered Vertices: For vertices $u_{i,k_1}, u_{i,k_2} \in R_i$ and $v_{j,m_1}, v_{j,m_2} \in R_j$ with $i<j$, we have $u_{i,k_1}, u_{i,k_2}<v_{j,m_1}, v_{j,m_2}$ and $u_{i,k_1} < u_{i,k_2}$.			
-		\item Ancestry-Awareness: For each parent-child pair $u_i \to v_{i+1}$ with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$, the out-neighbors of $v_{i+1}$ are classified into the three disjoint sets according to Lemma \ref{nodepartition}: $\text{back}(u_i, v_{i+1})$, $\text{int}(u_i,v_{i+1})$, and $\text{ext}(u_i,v_{i+1})$.
+		\item Partition the vertices of $V$ into rooted neighborhoods $$R_i=\{v \in V : \text{dist}(v_0,v)=i\}, \text{ for } i=0,1,\dots,n.$$
+		\item For vertices $u_{i,k_1}, u_{i,k_2} \in R_i$ and $v_{j,m_1}, v_{j,m_2} \in R_j$ with $i<j$, we have $u_{i,k_1}, u_{i,k_2}<v_{j,m_1}, v_{j,m_2}$ and $u_{i,k_1} < u_{i,k_2}$.			
+		\item For each parent-child pair $u_i \to v_{i+1}$ with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$, the out-neighbors of $v_{i+1}$ are classified into the three disjoint sets according to Lemma \ref{nodepartition}: $\text{back}(u_i, v_{i+1})$, $\text{int}(u_i,v_{i+1})$, and $\text{ext}(u_i,v_{i+1})$.
 	\end{enumerate}
 \end{definition}	
 	
@@ -731,8 +748,8 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 %	With the Graph Level Order vocabulary established, these definitions now must connect to the mathematical foundation. Interior neighbors relate to the first neighbors of a parent. Exterior neighbors relate to the second neighbors. In an MCE environment, Theorem \ref{MCEInt} shows the only purpose of these interior neighbors is to be forward-facing transitive triangles that reduce the parent’s second neighborhood.
 	
 	\begin{corollary}[Hierholzer's Algorithm]
-		Let $G=(V,E)$ be an MCE to the SSNC with root $v_0$ and let $R_k$ be a rooted neighborhood at distance $k$ from $v_0$. Because every node has interior degree of $k$ in $R_k$ Hierholzer's Algorithm will find at least $k$ disjoint cycles in $R_k$.
-	\end{corollary}\label{hier}
+		Let $G=(V,E)$ be an MCE to the SSNC with root $v_0$ and let $R_k$ be a rooted neighborhood at distance $k$ from $v_0$. Because every node has interior degree of $k$ in $R_k$ Hierholzer's Algorithm will find at least $k$ disjoint cycles in $R_k$.\label{hier}
+	\end{corollary}
 	
 	\begin{figure}
 		\centering
@@ -803,7 +820,8 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 	
 %	This would be a futile attempt at proving the SSNC if we could not manage the complications mentioned in previous papers. First are transitive triangles, where Brantner et al. \cite{BBKS} showed that oriented graphs without transitive triangles contain a Seymour vertex, the MDN.
 	
-	\begin{theorem}[Triangle Classification]\label{lbt}The only possible transitive triangles in an MCE are forward facing triangles.\end{theorem}
+	\begin{theorem}[Triangle Classification]\label{lbt}
+		The only possible transitive triangles in an MCE are forward facing triangles.\end{theorem}
 	\begin{proof}
 		We classify all transitive triangles by examining the first two arcs and determine whether a valid third arc can close the triangle.
 		
@@ -836,16 +854,54 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 		The remaining triangles are the following: Case 1: $x \to y \to z \to x$, all in $R_i$, and the Load-Balancing Triangle (Case 7). A triangle from Case 1 contains an extra interior arc, so it cannot be an MCE. By Theorem .
 	\end{proof}
 	
-		\begin{theorem}[Rooted Neighborhood Equivalence Relation]\label{nbhequiv}
-		Let $G$ be a Minimum Counterexample (MCE). Every vertex within a rooted neighborhood $R_k$ is indistinguishable under the rooted degree-preserving mapping $\sim$. The resulting quotient graph $G/\sim$ is a well-defined hyper-node graph that preserves the out-degree and non-Seymour status of $G$.
-	\end{theorem}\label{eqrel}
-	\begin{proof}
-		Let $v_k, w_k \in R_k$. By Theorem \ref{bfslex}, these nodes have identical parents because they lie at the same distance. Lemma \ref{nodepartition} (Degree Partition) implies that the degrees of $v_k$ and $w_k$ can be partitioned into interior and exterior components. Theorem \ref{lbl} (Load Balance) establishes that both nodes possess identical interior degrees of $k$. 
-		
-		Furthermore, since back arcs are excluded by Corollaries \ref{noDLBack} and \ref{noCLBack}, they possess identical exterior neighbors. In addition, by Theorem \ref{layer_size}, all interior arcs of $v_k$ and $w_k$ must induce forward-facing transitive triangles. These are the unique load-balancing triangles permitted by Theorem \ref{lbt} (Load-Balancing Triangles). The rooted induced subgraphs $G[R(v_k)]$ and $G[R(w_k)]$ are isomorphic under a neighborhood-preserving mapping fixing the root. 
-		
-		Since this structural equivalence holds for all pairs in $R_k$, the set $R_k$ constitutes an equivalence class under a rooted degree-preserving mapping. Collapsing these classes yields a well-defined quotient graph $G/\sim$ that preserves out-degrees and preserves the non-Seymour counterexample property.
-	\end{proof}
+\begin{theorem}[Rooted Neighborhood Equivalence Relation]\label{nbhequiv}
+Let $G$ be a Minimum Counterexample (MCE) formed by BFS-Lex layers $R_i$. Then the vertices within the layer $R_i$ form an equivalence relation via degree structure, and the equivalence classes are the BFS layers. 
+\end{theorem}\label{eqrel}
+\begin{proof}
+We will prove this by induction on the distance from the root node $v_0$. 
+Base cases: 
+$k = 0$: 
+Consider the root node in $R_0$. The properties of an equivalence relation are ,  . 
+\begin{itemize}
+	\item Symmetric ($d^+(u)=d^+(v_0)  \implies d^+(v_0)=d^+(u)$) because $u = v_0$. 
+	\item Reflexive ($d^+(v_0)=d^+(v_0)$) trivially. 
+	\item Transitive ($d^+(u)=d^+(v_0) \and d^+(v_0)=d^+(w) \implies d^+(u)=d^+(w)$) because there is only one node in $R_0$. 
+\end{itemize}
+Because all three properties hold, the equivalence relation holds for $R_0$. 
+
+$k=1$: 
+Let $v_1$, $v_2$ and $v_3$ be arbitrary nodes in $R_1$. We know that $R_1 = N^+(v_0)$, so these nodes all have the same parent $v_0$. We will show that the properties of symmetric, reflexive and transitive hold for their interior neighbor size as well as their exterior neighbor sets in $R_1$. 
+\begin{itemize}
+	\item Symmetric Interior Neighbors $|\text{int}(v_0, v_1)|=|\text{int}(v_0, v_2)| \implies  |\text{int}(v_0, v_2)|=|\text{int}(v_0, v_1)|$ by the commutativity of equality of natural numbers. 
+	\item Symmetric Exterior Neighbors$\text{ext}(v_0, v_1)=\text{ext}(v_0, v_2) \implies  \text{ext}(v_0, v_2)=\text{ext}(v_0, v_1)$ by \ref{layer_size} which indicates that $\text{ext}{v_0, v_1} = \text{ext}(v_0, v_2) = R_2$. 
+	\item Reflexive Interior Neighbors ($|\text{int}(v_0, v_1)|=|\text{int}(v_0, v_1)|$) by the reflexive property of equality of the natural numbers. 
+	\item Reflexive Exterior Neighbors ($\text{ext}(v_0, v_1) = \text{ext}(v_0, v_1)$), again by the reflexive property of equality of sets. 
+	\item Transitive Interior Neighbors ($|\text{int}(v_0, v_1)|=|\text{int}(v_0, v_2)|$ and $|\text{int}(v_0, v_2)|=|\text{int}(v_0, v_3)| \implies |\text{int}(v_0, v_1)|=|\text{int}(v_0, v_3)|$) by the transitive property of equality of natural numbers. 
+	\item Transitive Exterior Neighbors ($\text{ext}(v_0, v_1)=\text{ext}(v_0, v_2)$ and $\text{ext}(v_0, v_2)=\text{ext}(v_0, v_3) \implies \text{ext}(v_0, v_1)=\text{ext}(v_0, v_3)$) by the transitive property of equality of sets. 
+\end{itemize}
+
+Because nodes in $R_1$ have the same parents, and their interior neighbor degrees as well as their exterior neighbor sets are symmetric reflexive and transitive, the properties of an equivalence relation hold at $R_1$. 
+
+I.H. 
+Suppose that at distance $k$ from $v_0$, the nodes have the same parents (at distance $k-1$) and also that the properties of an equivalence relation hold on the interior neighbor degrees as well as their exterior neighbor sets. 
+
+I.S. 
+Consider nodes at distance $k+1$ from $v_0$.
+First, by the BFS distance, every node in $R_{k+1}$ must have a parent in $R_k$. 
+By the I.H. these nodes in $R_k$ form an equivalence class, so every node in $R_{k+1}$ has the same class of parent from $R_k$. 
+Let $v_{k+1, 1}$, $v_{k+1, 2}$, and $v_{k+1, 3}$ be three arbitrary nodes from $R_{k+1}$ and let $u_k$ be an arbitrary node from $R_k$. Then the following relationships hold. 
+
+\begin{itemize}
+	\item Symmetric Interior Neighbors $|\text{int}(u_k, v_{k+1, 1})|=|\text{int}(u_k, v_{k+1, 2})| \implies  |\text{int}(u_k, v_{k+1, 2})|=|\text{int}(u_k, v_{k+1, 1})|$ by the commutativity of equality of natural numbers. 
+	\item Symmetric Exterior Neighbors$\text{ext}(u_k, v_{k+1, 1})=\text{ext}(u_k, v_{k+1, 2}) \implies  \text{ext}(u_k, v_{k+1, 2})=\text{ext}(u_k, v_{k+1, 1})$ by \ref{layer_size} which indicates that $\text{ext}{u_k, v_{k+1, 1}} = \text{ext}(u_k, v_{k+1, 2}) = R_{k+1}$. 
+	\item Reflexive Interior Neighbors ($|\text{int}(u_k, v_{k+1, 1})|=|\text{int}(u_k, v_{k+1, 1})|$) by the reflexive property of equality of the natural numbers. 
+	\item Reflexive Exterior Neighbors ($\text{ext}(u_k, v_{k+1, 1}) = \text{ext}(u_k, v_{k+1, 1})$), again by the reflexive property of equality of sets. 
+	\item Transitive Interior Neighbors ($|\text{int}(u_k, v_{k+1, 1})|=|\text{int}(u_k, v_{k+1, 2})|$ and $|\text{int}(u_k, v_{k+1, 2})|=|\text{int}(u_k, v_{k+1, 3})| \implies |\text{int}(u_k, v_{k+1, 1})|=|\text{int}(u_k, v_{k+1, 3})|$) by the transitive property of equality of natural numbers. 
+	\item Transitive Exterior Neighbors ($\text{ext}(u_k, v_{k+1, 1})=\text{ext}(u_k, v_{k+1, 2})$ and $\text{ext}(u_k, v_{k+1, 2})=\text{ext}(u_k, v_{k+1, 3}) \implies \text{ext}(u_k, v_{k+1, 1})=\text{ext}(u_k, v_{k+1, 3})$) by the transitive property of equality of sets. 
+\end{itemize}
+
+
+\end{proof}
 	
 	The rooted neighborhood equivalence relation structure can be seen in Figure \ref{earlyssnc}. As shown in Section \ref{glover}, every node in the graph has an out-degree of 7. By neighborhood, all nodes at distance one have interior out-degree of one. All nodes at distance two have an interior out-degree of two. Nodes having the same distance from the root, interior and exterior exterior neighbor set, making them rooted degree equivalent.
 	
@@ -1099,7 +1155,7 @@ Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would
 	
 	\section{Conclusion}
 	
-	This work approached the SSNC through a minimum counterexample angle. Naturally, that led to layered embeddings of oriented graphs. By starting from a minimum out-degree node, the well ordering that was established gave the minimum counterexample its power.
+	This work approached the SSNC through a minimum counterexample angle. Naturally, that led to layered embeddings of oriented graphs. By starting from a minimum out-degree node, the well-ordering that was established gave the minimum counterexample its power.
 	
 	The key insight is that BFS is not simply a traversal algorithm. Along with lexicographic ordering, this algorithm can impose a well-ordering on a graph. By connecting the neighborhoods to BFS layers, the structure of Seymour vertices became dependent on cycle packing.
 	
