@@ -128,12 +128,14 @@
 		\hline
 	\end{tabular}
 	
+	Previous work has largely overlooked the existence of a path to a Seymour vertex. By treating the conjecture as a binary search for a node, the structure for of oriented graphs remains hidden from these methods. 
+	
 	We provide an algorithmic construction to identify the target node and demonstrate its structural consistency. To ensure testability and reproducibility, implementations in Python, Lean and interactive visualizations in JavaScript are publicly available on \href{https://github.com/cgcharles7/ssnc
 	}{GitHub}.
 	
-	Prior work focused on proving existence in special cases or identifying missing substructures. These approaches, while foundational, offered no way to actually find a Seymour vertex. The Graph Level Order organizes the oriented graph space $\mathcal{O}$ into rooted neighborhoods based on distance from a minimum out-degree vertex $\delta$. This method identifies set-theoretic relationships forcing cycles to exist, leading to a path to a Seymour vertex. This framework transforms the conjecture from an existential puzzle into a constructive set packing problem. It enables the linear-time identification of nodes and unifies decades of disparate research.
+	The Graph Level Order organizes the oriented graph space $\mathcal{O}$ into rooted neighborhoods based on distance from a minimum out-degree vertex $\delta$. This method identifies set-theoretic relationships forcing cycles to exist, leading to a path to a Seymour vertex. This framework transforms the conjecture from an existential puzzle into a constructive set packing problem. It enables the linear-time identification of nodes and unifies decades of disparate research.
 	
-	This paper presents our methodology, supported by lemmas and examples. A novel data structure is then introduced to tackle the conjecture's core challenges and show how it integrates with maximizing non-Seymour nodes. After proving our main theorem and analyzing the algorithm's complexity, we conclude with future research directions.
+	This paper begins with our methodology. We then outline the core structure of the BFS-Lex system when there are no back-arcs. With these proofs established, we show that in a well-ordered environment, a first back arc cannot be introduced. The Graph Level Order data structure is then introduced. We show that this data structure can handle the conjecture's core challenges of transitive triangles and Seymour diamonds. We move on to the main theorem. We close with the algorithm's complexity and future research directions.
 	
 	\section{The Minimum Counterexample}\label{cont}
 	
@@ -207,7 +209,13 @@
 	
 	Let $u \to v$ be a parent-child arc, where $u \in R_i$ and $v \in R_{i+1}$. An outgoing arc from $v$ to a target vertex $w$, denoted as $u \to v \to w$, is classified as \textbf{disconnected back neighbors} if the target vertex $w$ resides in an earlier layer that is separated by at least one intermediate layer. Disconnected back neighbors bypass at least one layer. \label{disc_back_def}
 	
-	This is a minimum counterexample approach to the SSNC. Let $G \in \mathcal{O}$ be an oriented graph. Let $\mathcal{C}$ be the (possibly empty) set of all counterexamples to SSNC. Let $G \in \mathcal{C}$ be a counterexample. Let $\omega$ be a BFS-Lex well-ordering $G$ rooted at its minimum out-degree node $v_0$. For a fixed integer $k$, let $G_k$ denote the induced subgraph consisting of the first $k$ vertices of $G$ under the ordering $\omega$. The graph $G \in \mathcal{C}$ is a \textbf{Minimum Counterexample (MCE)} if it is constructed using the BFS-Lex algorithm rooted at a minimum out-degree node $v_0$ and which also minimizes subject to lexicographic minimization of
+	This is a minimum counterexample approach to the SSNC. 
+	Let $G \in \mathcal{O}$ be an oriented graph. 
+	Let $\mathcal{C}$ be the (possibly empty) set of all counterexamples to SSNC. 
+	Let $G \in \mathcal{C}$ be a counterexample. 
+	Let $\omega$ be a BFS-Lex well-ordering $G$ rooted at its minimum out-degree node $v_0$. 
+	For a fixed integer $k$, let $G_k$ denote the induced subgraph consisting of the first $k$ vertices of $G$ under the ordering $\omega$. 
+	The graph $G \in \mathcal{C}$ is a \textbf{Minimum Counterexample (MCE)} if it is constructed using the BFS-Lex algorithm rooted at a minimum out-degree node $v_0$ and which also minimizes subject to lexicographic minimization of
 	
 	\begin{itemize}
 		\item The number of interior neighbors in each neighborhood
@@ -253,17 +261,18 @@
 	
 	\section{No Back Neighbors}
 	
-	When an MCE contains no back arcs, the vertex's out-degree can be strictly partitioned between interior and exterior directions. 
-	The existence of a back arc may induce directed cycles. 
-	%We will first show that, without back arcs, this BFS-Lex has a proper ordering and is indeed powerful enough to handle the SSNC. 
-	Then we will relax the claim of no back arcs and show how the total ordering can handle back arcs. 
-	Because this is a total ordering, these back arcs are ordered as well. 
-	As such, these back arcs connected and disconnected have a first member. 
-	Our proof will show that neither of these first members can exist. 
-	
 	The elimination of back arcs does not relax the graph into a simple path. 
 	Instead, we will show that cycles must exist within each BFS layer to prevent the parents in the previous layer from becoming Seymour. 
 	It is the existence of these cycles that distinguishes this approach from standard BFS approaches to the SSNC. 
+	
+	When an MCE does not contain back arcs, a vertex's out-degree can be strictly partitioned between interior and exterior sets. 
+	%The existence of a back arc may induce directed cycles. 
+	%We will first show that, without back arcs, this BFS-Lex has a proper ordering and is indeed powerful enough to handle the SSNC. 
+	%Then we will relax the claim of no back arcs and show how the total ordering can handle back arcs. 
+	%Because this is a total ordering, these back arcs are ordered as well. 
+	%As such, these back arcs connected and disconnected have a first member. 
+	%Our proof will show that neither of these first members can exist. 
+	
 	\label{nodepartition}
 	\begin{lemma}[Degree Partition]
 		Let $G \in \mathcal{O}$ be an MCE without back arcs with $u_i \in R_i$ and let $v_{i+1} \in R_{i+1}$ be vertices of an MCE, with $u_i \to v_{i+1} \in G$. Then the out-neighborhood of $v_{i+1}$ admits the disjoint partition. 
@@ -281,16 +290,14 @@
 		These sets are disjoint because the sets are the layer indices $R_{i+1}$ vs $R_{i+2}$ are mutually exclusive partitions of the vertex set. 
 	\end{proof}
 	
-	Let $G \in \mathcal{O}$ be an MCE, and let $u_k \in R_k$ and $v_{k+1} \in R_{k+1}$ such that $u_k \to v_{k+1}$. Leveraging the Degree Partition of $v_{k+1}$'s out-neighborhood, we decompose the traditional Seymour condition into two criteria: Interior Seymour Property and Exterior Seymour Property
+	Let $G \in \mathcal{O}$ be an MCE, and let $u_k \in R_k$ and $v_{k+1} \in R_{k+1}$ such that $u_k \to v_{k+1}$. Leveraging the Degree Partition of $v_{k+1}$'s out-neighborhood, the traditional Seymour condition can be decomposed into two criteria: Interior Seymour Property and Exterior Seymour Property. 
 	
-	A vertex $v_{k+1}$ has the \textbf{Interior Seymour Property} if it has a second-neighborhood within the same layer of at least size equal to its first-neighborhood:
+	A vertex $v_{k+1}$ is \textbf{Interior Seymour} if it has a second-neighborhood within the same layer of at least size equal to its first-neighborhood:
 	$$|N^{++}(v_{k+1}) \cap R_{k+1}| \ge |N^+(v_{k+1}) \cap R_{k+1}|$$
 	
-	A vertex $v_{k+1}$ has the \textbf{Exterior Seymour Property} if it has a non-decreasing size in its next two layers, $R_{k+2}$, $R_{k+3}$:
+	A vertex $v_{k+1}$ is \textbf{Exterior Seymour} if it has a non-decreasing size in its next two layers, $R_{k+2}$, $R_{k+3}$:
 	$$|R_{k+2}| \ge |R_{k+3}|$$
-	
-	The packing of non-Seymour vertices into an MCE causes the sizes of the layers to decrease. If the size of layers are non-decreasing ($|R_k| \ge |R_{k+1}|$) then we have a witness for a Seymour node. To ensure that nodes do not become an exterior Seymour nodes, we must have strictly decreasing layer sizes.
-	
+		
 	The BFS layering also allows for an update of the classification of interior and exterior neighbors. They are known to be in the first and second neighborhoods of their parent nodes, respectively. Instead, they can also be thought in terms of their respective distance to the root node. 
 	
 	\begin{lemma}[Layer Equivalence]
@@ -343,9 +350,10 @@
 		This proves that an MCE can tightly bind every interior arc.
 	\end{proof}
 	
+	The packing of non-Seymour vertices into an MCE causes the sizes of the layers to decrease. If the size of layers are non-decreasing ($|R_k| \ge |R_{k+1}|$) then we have a witness of a Seymour node. To ensure that nodes do not become an exterior Seymour nodes, when an interior Seymour node is already present, we must have strictly decreasing layer sizes.	
 	
 	\begin{lemma}[Decreasing Exteriors]
-		Let $G \in \mathcal{O}$ be an MCE without back arcs. If $x \in G$ and $y \in N^+(x)$ are both non-Seymour and $y$ is interior Seymour in $G[N^+(x)]$ and for all $z \in ext(x, y)$, $ext(y, z) \cap N^+ (x) = \emptyset$, then for all $z \in ext(x, y)$, $|ext(y, z)| < |ext(x, y)|$.\label{eub}
+		Let $G \in \mathcal{O}$ be an MCE without back-arcs. If $x \in G$ and $y \in N^+(x)$ are both non-Seymour and $y$ is interior Seymour in $G[N^+(x)]$ and for all $z \in ext(x, y)$, $ext(y, z) \cap N^+ (x) = \emptyset$, then for all $z \in ext(x, y)$, $|ext(y, z)| < |ext(x, y)|$.\label{eub}
 	\end{lemma}
 	\begin{proof}
 		Note that this proof uses a different but equivalent notation, denoted degree doubling. Suppose there is a node $z \in ext(x, y)$ such that $|ext (y, z)| \ge |ext (x, y)|$, then y’s out-degree in $G$ will be impacted by $ext (x, y)$ and $ext (y, z)$.
@@ -359,7 +367,7 @@
 		we have that $ext (y, z) \cap N^+ (x) = \emptyset$. So since we assumed that $y$ is Seymour in $G[N^+ (x)]$, the node $y$’s out-degree will double in this case, contradicting that $y$ is non-Seymour. 
 	\end{proof}
 	
-	The neighborhood size requires a number of nodes in each layer. These layers decrease in size with distance. This implies that as layers move further from the root, the nodes within the layers will need to make more intra-layer connections to meet their minimum out-degree requirements. 
+	The Lemma \ref{eub} is important because if we have a parent node that is interior Seymour, its children need to have decreasing exteriors. The next Lemma shows how this can be used in a constructive way to help build lower bounds for interior degrees. 
 	
 	\begin{lemma}[Interior Degrees Lower Bound]
 		Let $G\in \mathcal{O}$ without back arcs, and let $v_0$ be a minimum out-degree node. 
@@ -369,9 +377,6 @@
 	\end{lemma}
 	
 	\begin{proof}
-		%If $v_0$ is a minimum out-degree node in $G$ that is non-Seymour and $x_i$ is a node of distance $i$ from $v_0$ with $i > 1$. Then $|int(x_{i-1}, x_i)| \ge i$, where $x_{i-1}$ is of distance $i - 1$ from $v_0$ and $(x_{i-1}, x_i) \in G$.
-		%Proof 
-		
 		The interior neighbors will lie in rooted neighborhoods $R_i$. 
 		For any $v_i$ we will split its total out-degree into interior degree and exterior degree via Theorem \ref{nodepartition}. That is, its degree equation can be stated as $d^+(v_i) = |int(u_{i-1}, v_i)| + |ext(u_{i-1}, v_i)|$ for an arbitrary parent $u_{i-1}$. We proceed by induction on distance $i$ from $v_0$. 
 		
@@ -462,6 +467,25 @@
 		\caption{\textit{\textbf{Iterated decrease in second neighborhood}. In a rooted environment, this means that there is a maximum value that every decrease comes from: $|R_k| = \delta - (k-1)$}}
 	\end{figure}
 	
+	\begin{lemma}[MCE Interior Degree Equality]
+		Let $G \in \mathcal{O}$ be a MCE with root node $v_0$. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent-child relationship. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
+		
+		$\text{int}(u_k, v_{k+1}) = k+1$
+		\label{MCEInt}
+	\end{lemma}
+	\begin{proof}
+		Suppose for the sake of contradiction that the interior degree is strictly greater than $v_{k+1}$'s distance from $v_0$:
+		$int(u_k, v_{k+1})>k+1$
+		The MCE and in particular non-Seymour constraints only require $k+1$ arcs at distance $k+1$. 
+		Any graph that has an arc above this threshold is not minimal. 
+		Thus, an interior arc can be removed via \ref{parOk}. 
+		
+		The assumption of $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, so this graph is not an MCE. 
+		Thus an interior arc can be removed. This forms a smaller counterexample. 
+		
+		The lower bound for these removals is $k+1$, as given by \ref{ilb}. 
+		Thus, we have $$\text{int}(u_k, v_{k+1}) = k+1.$$
+	\end{proof}
 	
 	The definition of an MCE above, combined with the proofs of a lower bound for interior degree and a formula for neighborhood size allow for an MCE witness. Rather that speaking descriptively about what the characteristics are Theorem \ref{cyclePacking} shows that Eulerian graphs where every node has out-degree $k$ at distance $k$ are exactly the constructions necessary for the SSNC. 
 	
@@ -517,28 +541,8 @@
 		
 		This proves that $u_k$ is a Seymour vertex.
 	\end{proof}
-	
-	\begin{lemma}[MCE Interior Degree Equality]
-		Let $G \in \mathcal{O}$ be a MCE with root node $v_0$. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent-child relationship. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
-		
-		$\text{int}(u_k, v_{k+1}) = k+1$
-		\label{MCEInt}
-	\end{lemma}
-	\begin{proof}
-		Suppose for the sake of contradiction that the interior degree is strictly greater than $v_{k+1}$'s distance from $v_0$:
-		$int(u_k, v_{k+1})>k+1$
-		The MCE and in particular non-Seymour constraints only require $k+1$ arcs at distance $k+1$. 
-		Any graph that has an arc above this threshold is not minimal. 
-		Thus, an interior arc can be removed via \ref{parOk}. 
-		
-		The assumption of $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, so this graph is not an MCE. 
-		Thus an interior arc can be removed. This forms a smaller counterexample. 
-		
-		The lower bound for these removals is $k+1$, as given by \ref{ilb}. 
-		Thus, we have $$\text{int}(u_k, v_{k+1}) = k+1.$$
-	\end{proof}
-	
-	\section{Disconnected Back Neighbors}
+	\section{Back Neighbors}
+	\subsection{Disconnected Back Neighbors}
 	
 	To prevent parents from becoming Seymour vertices, neighborhood sizes must decrease as distance increases.
 	
@@ -601,7 +605,7 @@
 		Since a minimum counterexample cannot contain any Seymour vertices, this configuration is unsustainable, proving that no such infinite back-arc chain can exist.
 	\end{proof}
 	
-	\section{Connected Back Neighbors}
+	\subsection{Connected Back Neighbors}
 	We have already covered both situations where there are no back neighbors and when there are disconnected back neighbors. In the first case we reached regularity in the MCE and in the second case we concluded that disconnected back neighbors cannot exist. 
 	
 	Thus, what remains is the situation question of what happens to the first connected back neighbor in a well-ordering. 
@@ -613,14 +617,19 @@
 		\label{no_conn}
 	\end{theorem}
 	\begin{proof}
-		Theorems \ref {no_disc} and \ref{no_chain} state that disconnected back neighbors are not possible. Further, from Theorem \ref{MCEInt}, we have that $\text{int}(u_k, v_{k+1}) = k+1$. The combination of the above two formulas yields that $\text{ext}(u_k, v_{k+1}) = \delta - (k+1)$.
+		Corollary \ref {no_disc} states that disconnected back neighbors are not possible. Further, from Theorem \ref{MCEInt}, we have that $\text{int}(u_k, v_{k+1}) = k+1$. The combination of the above two formulas yields that $\text{ext}(u_k, v_{k+1}) = \delta - (k+1)$.
 		
 		This says that every $y_{k+1} \in R_{k+1}$ must be a parent to every node $z_{k+2} \in R_{k+2}$. 
 		
 		Suppose there exists a $z_i \in R_{k+2}$ such that $z_i \to y_{k+1}$. This would create a bi-directional arc, violating the oriented graph property. Thus, connected back neighbors are not permitted 
 	\end{proof}
 	
-	%	\section{Graph Level Order} \label{glover}
+	\begin{corollary}
+		Let $G\in\mathcal{O}$ be an MCE represented by the rooted neighbors $R_0, R_1, \ldots, R_k$. Then $G$ has no back neighbors. 
+		\label{no_back}
+	\end{corollary}
+	
+	\section{Graph Level Order} \label{glover}
 	
 	\begin{figure}
 		\centering
@@ -728,7 +737,7 @@
 			
 			Let $G[R_1]$ be the subgraph induced by $R_1$ and let $G[R_2]$ be the subgraph induced by $R_2$. The nodes in $R_1$ are the first neighbors of $v_0$ and the nodes in $R_2$ are the second neighbors. By the pigeonhole principle, to make $v_0$ a non-Seymour vertex, we need to establish that $|R_2| < |R_1| = \delta$. This gives a maximum size of $\delta - 1$ on $R_2$, forcing every node in $R_1$ to have at least one interior neighbor. Lemma \ref{MCEInt} shows that no node in $R_1$ can have more than one same-level cross arc, forcing these nodes to be regular at distance 1.
 			
-			We next examine the vertices in $R_2$, which similarly must satisfy $\delta^+(G) = 7$. Again, the pigeonhole principle applies here to make the nodes in $R_1$ non-Seymour. As $|R_2| = \delta - 1$ has already had its capacity limited, there are even fewer holes for the pigeons to land in here. Consequently, we see that to make nodes in $R_1$ non-Seymour, these nodes must each connect to two arcs in $R_2$. Theorem \ref{no_disc} and \ref {no_conn} show that back arcs are not possible in this case.
+			We next examine the vertices in $R_2$, which similarly must satisfy $\delta^+(G) = 7$. Again, the pigeonhole principle applies here to make the nodes in $R_1$ non-Seymour. As $|R_2| = \delta - 1$ has already had its capacity limited, there are even fewer holes for the pigeons to land in here. Consequently, we see that to make nodes in $R_1$ non-Seymour, these nodes must each connect to two arcs in $R_2$. Theorem \ref{no_back} show that back arcs are not possible in this case.
 			
 			If a parent vertex $u_1 \in R_1$ of $u_2$ satisfies $|R_2| \le |R_3|$, then $u_1$'s forward property is Seymour. Similarly, because it has already been shown that $u_1$ has a degree $\le 6$ in $R_1$ its local property is Seymour as well. This implies that $u_1$ is a Seymour vertex. Thus, we must have $d^+_{G[R_2]}(u) \ge 2$ for all $u \in R_2$.
 			
@@ -756,7 +765,7 @@
 		\begin{enumerate}
 			\item Partition the vertices of $V$ into rooted neighborhoods $$R_i=\{v \in V : \text{dist}(v_0,v)=i\}, \text{ for } i=0,1,\dots,n.$$
 			\item For vertices $u_{i,k_1}, u_{i,k_2} \in R_i$ and $v_{j,m_1}, v_{j,m_2} \in R_j$ with $i<j$, we have $u_{i,k_1}, u_{i,k_2}<v_{j,m_1}, v_{j,m_2}$ and $u_{i,k_1} < u_{i,k_2}$.			
-			\item For each parent-child pair $u_i \to v_{i+1}$ with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$, the out-neighbors of $v_{i+1}$ are classified into the three disjoint sets according to Lemma \ref{nodepartition}: $\text{back}(u_i, v_{i+1})$, $\text{int}(u_i,v_{i+1})$, and $\text{ext}(u_i,v_{i+1})$.
+			\item For each parent-child pair $u_i \to v_{i+1}$ with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$, the out-neighbors of $v_{i+1}$ are classified into the three disjoint sets according to Lemma \ref{nodepartition}: $\text{int}(u_i,v_{i+1})$, and $\text{ext}(u_i,v_{i+1})$.
 		\end{enumerate}
 	\end{definition}	
 	
@@ -847,7 +856,7 @@
 			\label{transtricases}
 		\end{table}
 		
-		From these 8 possible cases, three are excluded immediately because of impossibility (Cases 2, 4, 8). Theorems \ref{no_chain}, \ref{no_disc} and \ref{no_conn} say that back arcs are unnecessary in an MCE (Cases 3, 5, and 6).
+		From these 8 possible cases, three are excluded immediately because of impossibility (Cases 2, 4, 8). Corollary \ref{no_back} says that back arcs are unnecessary in an MCE (Cases 3, 5, and 6).
 		
 		The remaining triangles are the following: Case 1: $x \to y \to z \to x$, all in $R_i$, forward-facing triangle (Case 7). A triangle from Case 1 contains an extra interior arc, so by the first element of the definition of an MCE, these triangles are not minimal. 
 	\end{proof}
@@ -1325,7 +1334,7 @@
 		An oriented graph with minimum out degree $\delta$. $\lceil n/r \rceil$. In particular, the existence of a Seymour vertex implies the existence of a triangle.
 	\end{corollary}
 	\begin{proof}
-		Theorems \ref{no_chain}, \ref{no_chain}, and \ref{no_disc} prevent back-arcs before the Seymour vertices.
+		Corollary \ref{no_back} prevents back-arcs before the Seymour vertices.
 		
 		The binomial theorem does not allow these Seymour vertices to have all their arcs through standard neighborhood decreasing. Instead, back-arcs must come into place to compensate.
 		%		To prevent earlier neighborhoods from having a Seymour vertex in an MCE,
