@@ -198,7 +198,7 @@
 	Let $u_i \in R_i$ be a parent of $v_{i+1} \in R_{i+1}$. The \textbf{exterior neighbors} of $v_{i+1}$ with respect to $u_i$ are the vertices $$ \text{ext}(u_i,v_{i+1}) = N^{++}(u_i) \cap N^+(v_{i+1}). $$
 	The \textbf{exterior degree} of $v_{i+1}$ with respect to $u_i$ is $$ |\text{ext}(u_i, v_{i+1})|. $$\label{ext_nbr}
 	
-	\begin{remark} For the MDN $v_0$, it has no interior or exterior neighbors because it has no parents. There are no earlier neighborhoods $R_{-1}$. 
+	\begin{remark} The MDN $v_0$ has no interior or exterior neighbors because it has no parents. There are no earlier neighborhoods $R_{-1}$. 
 	\end{remark}
 	
 	Let $v_0$ be the MDN, and let $u_i \to v_{i+1} \in G$, with $u_i \in R_i$ and $v_{i+1} \in R_{i+1}$. The set of \textbf{back neighbors} from $v_{i+1}$ is $\text{back}(v_{i+1})$. The set of all back neighbors of $u_i$ is denoted $\bigcup_{j <= i} R_j \text{back}(u_i)$. \label{back_def} 
@@ -231,22 +231,60 @@
 	\end{remark}
 	
 	Many other approaches began with a minimum out-degree node $v_0$ \cite{KL, BMN, Di}. The well-ordering of the BFS-Lex approach to the SSNC has a stark advantage over these approaches. Lemma \ref{layerCoverage} utilizes this well-ordering to show that every path begins with $v_0$ and must conclude with some node in a BFS layer. From this, we are able to conclude that these layers are a subset of the union of the first neighborhoods of these nodes. 
+		
+	\begin{figure}
+	\centering
+	\begin{tikzpicture}[scale=0.9]
+		% Parent Node (R_0)
+		\node[fill=green!70!black, draw, circle, inner sep=2pt] (v0) at (0, -0.5) {\(v_0\)};
+		
+		% Parameters for the cycle
+		\def\n{7}
+		\def\radius{1.3}
+		\def\centerx{3.5}
+		
+		% Draw the Cycle of Neighbors (v_i) in R_1
+		\foreach \i in {1,...,\n} {
+			\node[fill=cyan, draw, circle, inner sep=1.2pt] (v1\i) at ({\centerx + \radius*cos(360/\n*(\i-1))}, {\radius*sin(360/\n*(\i-1))}) {\small \(v_{i,\i}\)};
+		}
+		
+		% Build the regular cycle (Slides 1-7)
+		\foreach \start/\target in {4/5, 5/6, 6/7, 7/1, 1/2, 2/3, 3/4}
+		{
+			\draw [lightgray, ->, thick] (v0) -- (v1\start);
+			\draw [lightgray, ->, thick] (v0) -- (v1\target);
+			\draw [cyan, ->, thick] (v1\start) -- (v1\target);
+		}
+		
+		% The "Stray" Forbidden Arc (Slide 8)
+		Using red and dashed to signify "This is banned"
+		%		\draw<8> [red, dashed, thick, ->, bend left=20] (v15) to node[auto] {\small %\textbf{Double-Covered}} (v17);
+		
+		% Labeling
+		\node[anchor=north] at (\centerx, -2) {
+			% \only<1-7>{Constructing the MCE-mandated regular cycle...}
+			% \only<8>{By minimality, extra interior arcs (like $v_{1,5} \to v_{1,7}$) are infeasible.}
+		};
+	\end{tikzpicture}
+	\caption{ \textit { \textbf{Eulerian Cycles}. Nodes in $R_1$ have in-degree and out-degree = 1. This implies the existence of at least one cycle. This cycle prevents $v_0$ from being a Seymour node. }}
+\end{figure}
+
 	
-	\begin{lemma}[Layer $R_{k+1}$ Neighborhood Coverage]
-		For any $k \ge 0$, the ($k+1$)-th layer is contained within the union of out-neighborhoods of vertices in the $k$-th layer:
-		$$R_{k+1} \subseteq \bigcup_{u_k \in R_k} N^+(u_k)$$
-		\label{layerCoverage}
+	\begin{lemma}
+		Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ which contains no back-neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
+		$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
+		$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
 	\end{lemma}
-	
 	\begin{proof}
-		Let $x$ be a vertex in the ($k+1$)-th layer $R_{k+1}$. 
-		By the definition of BFS layers, all vertices in the ($k+1$)-th layer are at distance $k+1$ from the root $v_0$. 
-		Therefore, a shortest directed path from the root to $x$ must go through some parent vertex $u_k \in R_k$. 
-		Hence there is an arc from $u_k \to x$. 
-		So $x$ is in $N^+(u_k)$. 
-		As $u_k$ is in $R_k$ then $x$ is in the union of the out-neighborhoods of all vertices in $R_k$. 
-		Therefore $R_{k+1}$ is contained within the union of out-neighborhoods of vertices in $R_k$.
-	\end{proof}	
+		\begin{itemize}
+			\item Interior Neighbors: By definition, these are the nodes which can be reached by both $u_k$ and $v_{k+1}$ (i.e. $N^+(u_k) \cap N^+(v_{k+1})$). As we are assuming there are no back neighbors in the BFS, out-neighbors from nodes in layer $R_k$ only go to nodes in $R_k$ and $R_{k+1}$. Out-neighbors from nodes in layer $R_{k+1}$ will only go to nodes in $R_{k+1}$ and $R_{k+2}$. The intersection of the previous two results just leaves the nodes in $R_{k+1}$. Hence, all interior neighbors are found in the layer $R_{k+1}$.
+			
+			\item Exterior Neighbors: These are found at the intersection of the second neighborhood of $u_k$ and first neighborhood of  $v_{k+1}$ (i.e. $N^2(u_k) \cap N^+(v_{k+1})$). Second neighbors of $u_k$ may go to nodes in $R_{k+1}$ and $R_{k+2}$ and out-neighbors of $v_{k+1}$ will go to nodes in $R_{k+1}$ and  $R_{k+2}$. So at first our candidates for exterior neighbors are $R_{k+1} \cup R_{k+2}$. However, if $w \in R_{k+1}$ has $u_k \to w$, then $w \in N^{+}(u_k)$, so $w \notin N^{++}(u_k)$ (and if $v_{k+1} \to w$, then $w \in \text{int}(u_k, v_{k+1})$). 
+			The only way $w \in R_{k+1}$ could land in $N^{++}(u_k) \cap N^{+}(v_{k+1})$ is if $u_k \not\to w$ while some $x \in N^{+}(u_k)$ has $x \to w$ and $v_{k+1} \to w$. 
+			The first and second neighborhoods are completely disjoint. So removing all nodes in $R_{k+1}$ gives us that exterior neighbors are strictly contained within $R_{k+2}$.
+		\end{itemize}
+	\end{proof}
+	
 	
 	This MCE will be constructed under the BFS-lex well-ordering on $V(G)$. This will be modeled through an iterative packing process. At any step $k$, the vertex set $V(G)$ is partitioned into a vector of three distinct, mutually exclusive zones:
 	
@@ -300,6 +338,28 @@
 		
 	The BFS layering also allows for an update of the classification of interior and exterior neighbors. They are known to be in the first and second neighborhoods of their parent nodes, respectively. Instead, they can also be thought in terms of their respective distance to the root node. 
 	
+	\begin{theorem}[Eulerian Cycle-Packing and Hierholzer Decomposition]
+		Let $G \in \mathcal{O}$ be a minimum counterexample (MCE) with root $v_0$ of minimum out-degree $\delta$, and let $R_i$ denote the rooted neighborhood at distance $i \ge 1$ from $v_0$ under the BFS-Lex ordering without back-arcs[cite: 4, 7, 10]. Suppose every vertex in $G$ is non-Seymour[cite: 5, 10], and that in layer $R_i$ every vertex has balanced interior in-degree and out-degree equal to $d_{\mathrm{int}}(i)$ while satisfying the MCE interior minimality criteria. Then the interior subgraph on $R_i$ is Eulerian and decomposes via Hierholzer's algorithm into edge-disjoint directed cycles.
+	\end{theorem}
+	
+	\begin{proof}
+		Consider the interior arcs within layer $R_i$. By the MCE minimality criteria, the graph minimizes the number of interior neighbors in the layer and minimizes the maximum total interior degree $\max_{v \in R_i} d_{text{int}}(v)$[cite: 10, 11]. Because every vertex in $G$ has out-degree at least $\delta$ and any excess exterior arcs would push a parent vertex in $R_{i-1}$ into becoming a Seymour vertex, the interior requirements within $R_i$ are tightly bounded.
+		
+		When every vertex in $R_i$ has equal interior in-degree and interior out-degree $d_{text{int}}(i)$, the interior restriction on $R_i$ is balanced. No interior arc needed to maintain this degree floor can be removed without either dropping a vertex's degree below its required threshold or shifting degree outward in a way that creates a Seymour vertex. Furthermore, if an alternative configuration on the same layer has uneven degrees—with some vertex exceeding the balanced interior degree while another falls below it—then the maximum interior degree is strictly larger than in the balanced cycle-packed configuration, violating the MCE minimality condition.
+		
+		Finally, because each vertex in this interior configuration has matched in-degree and out-degree, Hierholzer's algorithm applies directly to partition the interior arcs of $R_i$ into edge-disjoint directed cycles.
+	\end{proof}
+	
+	
+	\begin{lemma}[Layer $R_{k+1}$ Neighborhood Coverage]
+		For any $k \ge 0$, the ($k+1$)-th layer is contained within the union of out-neighborhoods of vertices in the $k$-th layer:
+		$$R_{k+1} \subseteq \bigcup_{u_k \in R_k} N^+(u_k)$$
+	\end{lemma}
+	\begin{proof}
+		Let $x$ be a vertex in the ($k+1$)-th layer $R_{k+1}$. As we know by the definition of BFS layers, all vertices in the ($k+1$)-th layer are at distance $k+1$ from the root $v_0$. Therefore a shortest directed path from the root to $x$ must go through some parent vertex $u_k \in R_k$. Hence, there is an arc from $u_k \to x$ and so $x$ is in $N^+(u_k)$. As $u_k$ is in $R_k$ then $x$ is in the union of  out-neighborhoods of all vertices in $R_k$. Therefore $R_{k+1}$ is contained within the union of out-neighborhoods of vertices in $R_k$.
+	\end{proof}	
+	
+	
 	\begin{lemma}[Layer Equivalence]
 		Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ that contains no back neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
 		$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
@@ -324,7 +384,7 @@
 	
 	What an MCE seeks to do is minimize the interior arcs. Lemma \ref{parOk} shows that removing an extra arc from a child node does not impact any parent node in the previous layer, as their status will remain non-Seymour. 
 	
-	\begin{lemma}[Interior Arcs and Parent Vertices]
+	\begin{lemma}[Parent Vertices]
 		Let $G \in \mathcal{O}$ be a Minimum Counterexample (MCE) without back arcs. Let $u_k \in R_k$ be a parent node with out-neighbors $v_{k+1,1}, v_{k+1,2} \in R_{k+1}$. 
 		If there exists an interior arc $e = (v_{k+1,1}, v_{k+1,2})$ whose removal does not violate the minimum interior degree requirement for vertex $v_{k+1,1}$, then the size of the first and second neighborhoods of $u_k$ will be unchanged. Thus $u_k$ will remain non-Seymour.
 		\label{parOk}
@@ -366,7 +426,7 @@
 		to consider$|(ext (x, y) \cup ext (y, z) \cup y) \cap N^+ (x)|$. By definition, $ext (x, y) \cap N^+ (x) = \emptyset$. By assumption,
 		we have that $ext (y, z) \cap N^+ (x) = \emptyset$. So since we assumed that $y$ is Seymour in $G[N^+ (x)]$, the node $y$’s out-degree will double in this case, contradicting that $y$ is non-Seymour. 
 	\end{proof}
-	
+		
 	The Lemma \ref{eub} is important because if we have a parent node that is interior Seymour, its children need to have decreasing exteriors. The next Lemma shows how this can be used in a constructive way to help build lower bounds for interior degrees. 
 	
 	\begin{lemma}[Interior Degrees Lower Bound]
@@ -413,6 +473,27 @@
 		This completes the induction and proves the theorem. 
 		
 	\end{proof}
+	
+	\begin{lemma}[MCE Interior Degree Equality]
+		Let $G \in \mathcal{O}$ be a MCE with root node $v_0$. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent-child relationship. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
+		
+		$\text{int}(u_k, v_{k+1}) = k+1$
+		\label{MCEInt}
+	\end{lemma}
+	\begin{proof}
+		Suppose for the sake of contradiction that the interior degree is strictly greater than $v_{k+1}$'s distance from $v_0$:
+		$int(u_k, v_{k+1})>k+1$
+		The MCE and in particular non-Seymour constraints only require $k+1$ arcs at distance $k+1$. 
+		Any graph that has an arc above this threshold is not minimal. 
+		Thus, an interior arc can be removed via \ref{parOk}. 
+		
+		The assumption of $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, so this graph is not an MCE. 
+		Thus an interior arc can be removed. This forms a smaller counterexample. 
+		
+		The lower bound for these removals is $k+1$, as given by \ref{ilb}. 
+		Thus, we have $$\text{int}(u_k, v_{k+1}) = k+1.$$
+	\end{proof}
+	
 	
 	\begin{theorem}[Neighborhood Size]
 		Let $G \in \mathcal{O}$ be an MCE without back arcs, with MDN $v_0$. Assume that the rooted neighborhoods are $R_0$, $R_1$, $\ldots$, $R_k$ generated using the BFS traversed with no back neighbors. All nodes are non-Seymour. Then for all $i \geq 0$, $|R_i| = \delta - i + 1$. 
@@ -466,27 +547,7 @@
 		\end{tikzpicture}
 		\caption{\textit{\textbf{Iterated decrease in second neighborhood}. In a rooted environment, this means that there is a maximum value that every decrease comes from: $|R_k| = \delta - (k-1)$}}
 	\end{figure}
-	
-	\begin{lemma}[MCE Interior Degree Equality]
-		Let $G \in \mathcal{O}$ be a MCE with root node $v_0$. Suppose $u_k \in R_k \to v_{k+1} \in R_{k+1}$ is a parent-child relationship. Let $\text{int}(u_k, v_{k+1})$ represent its interior degree, then:
 		
-		$\text{int}(u_k, v_{k+1}) = k+1$
-		\label{MCEInt}
-	\end{lemma}
-	\begin{proof}
-		Suppose for the sake of contradiction that the interior degree is strictly greater than $v_{k+1}$'s distance from $v_0$:
-		$int(u_k, v_{k+1})>k+1$
-		The MCE and in particular non-Seymour constraints only require $k+1$ arcs at distance $k+1$. 
-		Any graph that has an arc above this threshold is not minimal. 
-		Thus, an interior arc can be removed via \ref{parOk}. 
-		
-		The assumption of $\text{int}(u_k, v_{k+1}) > k+1$ leads to a violation of the MCE hypothesis, so this graph is not an MCE. 
-		Thus an interior arc can be removed. This forms a smaller counterexample. 
-		
-		The lower bound for these removals is $k+1$, as given by \ref{ilb}. 
-		Thus, we have $$\text{int}(u_k, v_{k+1}) = k+1.$$
-	\end{proof}
-	
 	The definition of an MCE above, combined with the proofs of a lower bound for interior degree and a formula for neighborhood size allow for an MCE witness. Rather that speaking descriptively about what the characteristics are Theorem \ref{cyclePacking} shows that Eulerian graphs where every node has out-degree $k$ at distance $k$ are exactly the constructions necessary for the SSNC. 
 	
 	\begin{theorem}[Optimality of Eulerian Cycle-Packing in Layer $R_k$]
@@ -541,6 +602,17 @@
 		
 		This proves that $u_k$ is a Seymour vertex.
 	\end{proof}
+	
+	\begin{corollary}[$\delta$-Regularity in a Minimum Counterexample]
+		\label{delta_regular}
+		Let $G$ be an MCE with MDN $\delta$. Then every vertex $v \in V(G)$ has out-degree $d^+(v) = \delta$.
+	\end{corollary}
+	
+	\begin{proof}
+		By definition of $\delta$ as the minimum out-degree in $G$. This implies that $d^+(v) \ge \delta$ for every $v \in V(G)$.
+		
+		For the reverse inequality, suppose for contradiction that $d^+(v) > \delta$ for some $v \in V(G)$. Along a forward arc $u \to v$, $v$'s out-neighbors partition into interior neighbors and exterior neighbors[cite: 2]. Interior degree regularity fixes the interior count to at most $k+1$ for $v \in R_{k+1}$ Theorem \ref{MCEInt}. An extra exterior-neighbor would push the parent $u$'s second neighborhood past $|N^+(u)|$ and making $u$ Seymour. This would contradicting that $G$is an MCE. Combining the interior and exterior bounds forces $d^+(v) \le \delta$, which contradicts $d^+(v) > \delta$. Thus $|N^+(v)| = \delta$.
+	\end{proof}
 	\section{Back Neighbors}
 	\subsection{Disconnected Back Neighbors}
 	
@@ -549,41 +621,45 @@
 	If a child node $v$ possesses an excess exterior arc, it is a second out-neighborhood of the parent $u$, 
 	forcing $|N^{++}(u)| \ge |N^{+}(u)|$. This immediately makes $u$ a Seymour vertex.
 	
-	If a node takes on too many interior arcs, it exceeds the local density threshold of the subgraph $R_i$. This violates the minimum counterexample's local density minimization condition.
+	If a node takes on too many interior arcs, it exceeds the local density threshold of the subgraph $R_i$. This violates the MCEs local density minimization condition.
 	
 	This implies that prior to the first disconnected back neighbor, the nodes are $\delta$-regular. Next, we analyze the first back neighbor in this environment. There are two cases: when the children overlap, and then they do not. 
 	
 	The case when the children do not overlap will be similar to the situation of an extra forward neighbor. A back arc is $u_k \to v_{k+1} \to w_j$ where $j \le k-1$. The nodes $u_k$ and $v_{k+1}$ will be $\delta$-regular because there are no back arcs before $v_{k+1}$. 
 	
+	\begin{lemma}[Out-Degree Conservation and Back-Arc Trade-Off]
+		\label{back_arc_tradeoff}
+		Let $G$ be an MCE with minimum out-degree $\delta$. Let $u \to v$ be a forward arc with $u \in R_k$ and $v \in R_{k+1}$. Partition the out-neighborhood of $v$ by BFS layer into
+		\[
+		N^+(v) = B(v) \sqcup I(v) \sqcup F(v),
+		\]
+		where $B(v) = N^+(v) \cap R_{\le k}$ are the back-neighbors of $v$, $I(v) = N^+(v) \cap R_{k+1}$ are its same-layer out-neighbors, and $F(v) = N^+(v) \cap R_{k+2}$ are its forward exterior neighbors. Then
+		\[
+		|B(v)| + |I(v)| + |F(v)| = \delta.
+		\]
+		In particular, whenever $|I(v)| = k + 1$, every back arc from $v$ reduces its forward exterior out-degree one-for-one:
+		\[
+		|F(v)| = \delta - (k + 1) - |B(v)|.
+		\]
+	\end{lemma}
+	
+	\begin{proof}
+		By BFS layering in an MCE, every out-neighbor of a vertex in $R_{k+1}$ lies in $R_{\le k}$, $R_{k+1}$, or $R_{k+2}$, and these three sets are pairwise disjoint. Thus $|N^+(v)| = |B(v)| + |I(v)| + |F(v)|$. By Corollary~\ref{delta_regular}, $|N^+(v)| = \delta$. This gives the equality. When $|I(v)| = k + 1$ yields $|F(v)| = \delta - |I(v)| - |B(v)| = \delta - (k + 1) - |B(v)|$.
+	\end{proof}
+	
 	\begin{theorem}[Seymour Property under Disjoint Back Arcs]
-		Let $G$ be a graph represented by an MCE, and let $u_k, v_{k+1} \in V(G)$ such that $v_{k+1} \in N^+(u_k)$. If the out-neighbors are completely disjoint ($N^+(v_{k+1}) \cap N^+(u_k) = \emptyset$), the degree bounds satisfy $|N^+(u_k)| \le \delta \le |N^+(v_{k+1})|$, then $u_k$ is a  Seymour vertex:
-		
-		$$|N^+(u_k)| \le |N^{++}(u_k)|$$
+		Let $G$ be a graph represented by an MCE, and let $u_k, v_{k+1} \in V(G)$ such that $v_{k+1} \in N^+(u_k)$. If the out-neighbors are completely disjoint ($N^+(v_{k+1}) \cap N^+(u_k) = \emptyset$), then $v_{k+1}$ is a  Seymour vertex. 
 		\label{no_disc}
 	\end{theorem}
 	\begin{proof}
-		Every back neighbor $z_j \in N^+(v_{k+1})$ belongs to the second neighborhood $N^{++}(u_k)$. 
-		To verify this, let $z_j \in N^+(v_{k+1})$. 
-		By definition:
-		\begin{itemize}
-			\item $z_j$ is reachable from $u_k$ in two steps via the path $u_k \to v_{k+1} \to z_j$).
-			\item $z_j \neq u_k$, because $u_k \notin N^+(v_{k+1})$  by the anti-symmetry constraint.
-			\item $z_j \notin N^+(u_k)$, because $N^+(v_{k+1}) \cap N^+(u_k) = \emptyset$.
-		\end{itemize}
+		We have a forward arc $u_k \in R_k$, $v_{k+1} \in R_{k+1}$ with $u_k \to v_{k+1}$, followed by the first back arc in the graph, $w \in R{j \le k-1}$, with $v_{k+1} \to w$. From Theorems \ref{ilb} and \ref{MCEInt}, $v_{k+1}$ must have exactly $k+1$ interior neighbors. Corollary \ref{regout} implies that $v_{k+1}$ must have an out-degree of $\delta$. There arc takes one, leaving only $\delta - (k+1) - 1$ slots for exterior arcs. 
 		
-		Because $N^+(v_{k+1}) \subseteq N^{++}(u_k)$, it follows directly that:
-		
-		$$|N^+(v_{k+1})| \le |N^{++}(u_k)|$$
-		
-		The regularity condition gives the following bounds on the size of $N^+(u_k)$ and $N^+(z_j)$ by their location prior to the first disconnected back neighbor. 
-		
-		$$|N^+(u_k)| = |N^+(z_j)| = \delta $$
-		
-		We now chain the inequalities:
-		
-		$$|N^+(u_k)| = \delta = |N^+(v_{k+1})| = \le |N^{++}(u_k)|$$
-		
-		Therefore, $|N^+(u_k)| \le |N^{++}(u_k)|$, making $u_k$ a Seymour vertex. 
+		The node $w$ lies at least more than one layer closer to $v_0$. 
+		By the regularity of an MCE, $w$ has to connect to exactly $\delta$ nodes in $R_j \cup R_{j+1}$. 
+		These nodes in $N^+(w)$ are second neighbors of $v_{k+1}$. 
+		By assumption, there is no child overlap between $v_{k+1}$ and $w$ and $v_{k+1}$ does not itself have an arc to any node in $R_{j+1}$. 
+		Thus the nodes in $R_j \cup R_{j+1}$ are $\delta$ unique second neighbors of $v_{k+1}$. 
+		Thus $v_{k+1}$ is a Seymour node.
 	\end{proof}		
 	
 	Alternatively, the children of the nodes $u_k \to v_{k+1}$ may overlap. In such a case, there is the possibility of an infinite descending chain. However, this MCE is based on a BFS-Lex traversal, which gives a well-founded set. This guarantees that any recursive decent must terminate. Thus, every terminal node in that chain must become a Seymour vertex. This implies that disconnected back arcs cannot exist in either case of an MCE. 
@@ -865,6 +941,13 @@
 		Let $G$ be a Minimum Counterexample (MCE) formed by BFS-Lex layers $R_i$. Then the vertices within the layer $R_i$ form an equivalence relation via degree structure, and the equivalence classes are the BFS layers. 
 	\end{theorem}\label{eqrel}
 	\begin{proof}
+		Let $R_{k+1}$ be a layer, and let $\sim$ be a binary relation on $R_{k+1}$ (a subset of $R_{k+1} \times R_{k+1}$). We define $v_{k+1,1} \sim v_{k+1,2}$ if:
+		\begin{itemize}
+			\item $v_{k+1,1}$ and $v_{k+1,2}$ have the same set of parents (in $R_k$);
+			\item for every common parent $u_k$, $|\text{int}(u_k, v_{k+1,1})| = |\text{int}(u_k, v_{k+1,2})|$; and
+			\item for every common parent $u_k$, $\text{ext}(u_k, v_{k+1,1}) = \text{ext}(u_k, v_{k+1,2})$.
+		\end{itemize}
+		
 		We will prove this by induction on the distance from the root node $v_0$. 
 		Base cases: 
 		$k = 0$: 
