@@ -149,8 +149,6 @@
 	
 	This BFS approach breaks the graph into multiple layers. In contrast to other types of triangles, forward-facing transitive triangles allow parent nodes to communicate necessities to child nodes. This creates a downward flow of activity from parent to child. In order to prevent a parent from becoming Seymour, children of that parent must interlock into cycles. These children will then become parent nodes to children in a later layer. These new children will also need to form cycles to prevent the newer parents from becoming Seymour nodes. This process continues to repeat as the BFS distance increases. This dependency will be formally defined as interior neighbors. 
 	
-	Here is a breakdown of the specific flags in your methodology section, categorized by tone, unnatural phrasing, sentence length, and logical gaps, without any rewrites.
-	
 	\subsection{Old-Definitions}
 	The problem with using standard definitions of neighborhoods is that first neighborhoods cannot be separated from second neighbors without losing information. Once influence is passed, the connection between the node and second neighbors can only be represented by the number of connections. This also leads to loss of information about the ancestry of those neighbors. It causes a disconnect and makes it impossible to track the exact distribution of out-degree influence.
 	
@@ -178,10 +176,6 @@
 	Seymour diamonds double-count second neighbors.
 	
 	If there are two children $v_{i+1}$ and $w_{i+1}$ at distance one who both have an edge to the same node $y_{i+2}$, then we cannot simply add their out-degrees. The operation $|N^+(v_{i+1})| + |N^+(w_{i+1})|$ will count this node twice.
-	
-	%	\begin{remark}{Why New Definitions Are Needed}
-		%		The traditional definitions that are used to define the neighborhoods $N^+(v)$ and $N^{++}(v)$ do not take into account the layering structure causing double counting with Seymour's diamond. Two children of a parent having the same child will result in duplicates when summing the out-degree. By using the canonical partition we can make sure this does not happen. The second neighborhood can be defined by taking the union of forward neighbor sets.
-		%	\end{remark}
 	
 	\begin{theorem}[BFS-Lex Coordinate System]\label{bfslex}
 		For a given finite connected oriented graph $G \in \mathcal{O}$ and root vertex $v_0 \in V(G)$, we obtain a unique well-ordering induced by the combination of a BFS-algorithm and a lexicographical ordering of $V(G)$.
@@ -218,9 +212,17 @@
 	The graph $G \in \mathcal{C}$ is a \textbf{Minimum Counterexample (MCE)} if it is constructed using the BFS-Lex algorithm rooted at a minimum out-degree node $v_0$ and which also minimizes subject to lexicographic minimization of
 	
 	\begin{itemize}
-		\item The number of interior neighbors in each neighborhood
-		\item The maximum total interior degree in each neighborhood
+		\item The number of interior neighbors in each layer
+		\item The maximum difference of in-degree and out-degree in each layer
 	\end{itemize}
+	
+	A graph $G \in \mathcal{C}$ is a \textbf{pre-Minimum Counterexample (pre-MCE)} if $G$ is an oriented counterexample (with non-Seymour vertices as required) equipped with a BFS-Lex layering rooted at a minimum out-degree vertex $v_0$ satisfying the required structural layer conditions.
+	
+	A pre-MCE $G$ is a \textbf{Minimum Counterexample (MCE)} if it minimizes, in lexicographic order across layers $\ell = 0, 1, 2, \dots$, the layer profile
+	\[
+	\bigl(\mathrm{int}(G, \ell),\, \mathrm{imb}(G, \ell)\bigr)_{\ell \ge 0},
+	\]
+	where $\mathrm{int}(G, \ell)$ denotes the number of interior neighbors in layer $\ell$ and $\mathrm{imb}(G, \ell) = \max_{v \in L_\ell} \bigl|d_G^-(v) - d_G^+(v)\bigr|$ denotes the maximum in/out-degree difference in layer $\ell$.
 	
 	\begin{remark}
 		Let $G\in \mathcal{O}$ be an MCE. The interior neighbors of $v_{i+1}$ with respect to $u_i$ are the vertices $\text{int}(u_i, v_{i+1}) = N^+(u_i) \cap N^+(v_{i+1})$. By definition, $\text{int}(u_i, v_{i+1}) \subseteq N^+(u_i)$. 
@@ -269,22 +271,31 @@
 	\caption{ \textit { \textbf{Eulerian Cycles}. Nodes in $R_1$ have in-degree and out-degree = 1. This implies the existence of at least one cycle. This cycle prevents $v_0$ from being a Seymour node. }}
 \end{figure}
 
+COMMENT : Define IsMinPrefixCounterexample. (minimizes mceMetric (N.mceMetric $le$ M.mceMetric), so a non-optimal alternative M with strictly larger maxTotalInteriorDegree (at equal interiorArcCount) violates hmce.2 M hM rather than exceeding a maximum. The goal here is that I'm going to show that no MCE be sustainable beyond $\delta /3$ BFS layers. )
+
+Let $G \in \mathcal{O}$ be an MCE, and let $u_k \in R_k$ and $v_{k+1} \in R_{k+1}$ such that $u_k \to v_{k+1}$. Leveraging the Degree Partition of $v_{k+1}$'s out-neighborhood, the traditional Seymour condition can be decomposed into two criteria: Interior Seymour Property and Exterior Seymour Property. 
+
+A vertex $v_{k+1}$ is \textbf{Interior Seymour} if it has a second-neighborhood within the same layer of at least size equal to its first-neighborhood:
+$$|N^{++}(v_{k+1}) \cap R_{k+1}| \ge |N^+(v_{k+1}) \cap R_{k+1}|$$
+
+A vertex $v_{k+1}$ is \textbf{Exterior Seymour} if it has a non-decreasing size in its next two layers, $R_{k+2}$, $R_{k+3}$:
+$$|R_{k+2}| \ge |R_{k+3}|$$
+
 	
-	\begin{lemma}
-		Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ which contains no back-neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
-		$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
-		$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
-	\end{lemma}
-	\begin{proof}
-		\begin{itemize}
-			\item Interior Neighbors: By definition, these are the nodes which can be reached by both $u_k$ and $v_{k+1}$ (i.e. $N^+(u_k) \cap N^+(v_{k+1})$). As we are assuming there are no back neighbors in the BFS, out-neighbors from nodes in layer $R_k$ only go to nodes in $R_k$ and $R_{k+1}$. Out-neighbors from nodes in layer $R_{k+1}$ will only go to nodes in $R_{k+1}$ and $R_{k+2}$. The intersection of the previous two results just leaves the nodes in $R_{k+1}$. Hence, all interior neighbors are found in the layer $R_{k+1}$.
+%	\begin{lemma}
+%		Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ which contains no back-neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
+%		$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
+%		$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
+%	\end{lemma}
+%	\begin{proof}
+%		\begin{itemize}
+%			\item Interior Neighbors: By definition, these are the nodes which can be reached by both $u_k$ and $v_{k+1}$ (i.e. $N^+(u_k) \cap N^+(v_{k+1})$). As we are assuming there are no back neighbors in the BFS, out-neighbors from nodes in layer $R_k$ only go to nodes in $R_k$ and $R_{k+1}$. Out-neighbors from nodes in layer $R_{k+1}$ will only go to nodes in $R_{k+1}$ and $R_{k+2}$. The intersection of the previous two results just leaves the nodes in $R_{k+1}$. Hence, all interior neighbors are found in the layer $R_{k+1}$.
 			
-			\item Exterior Neighbors: These are found at the intersection of the second neighborhood of $u_k$ and first neighborhood of  $v_{k+1}$ (i.e. $N^2(u_k) \cap N^+(v_{k+1})$). Second neighbors of $u_k$ may go to nodes in $R_{k+1}$ and $R_{k+2}$ and out-neighbors of $v_{k+1}$ will go to nodes in $R_{k+1}$ and  $R_{k+2}$. So at first our candidates for exterior neighbors are $R_{k+1} \cup R_{k+2}$. However, if $w \in R_{k+1}$ has $u_k \to w$, then $w \in N^{+}(u_k)$, so $w \notin N^{++}(u_k)$ (and if $v_{k+1} \to w$, then $w \in \text{int}(u_k, v_{k+1})$). 
-			The only way $w \in R_{k+1}$ could land in $N^{++}(u_k) \cap N^{+}(v_{k+1})$ is if $u_k \not\to w$ while some $x \in N^{+}(u_k)$ has $x \to w$ and $v_{k+1} \to w$. 
-			The first and second neighborhoods are completely disjoint. So removing all nodes in $R_{k+1}$ gives us that exterior neighbors are strictly contained within $R_{k+2}$.
-		\end{itemize}
-	\end{proof}
-	
+%			\item Exterior Neighbors: These are found at the intersection of the second neighborhood of $u_k$ and first neighborhood of  $v_{k+1}$ (i.e. $N^2(u_k) \cap N^+(v_{k+1})$). Second neighbors of $u_k$ may go to nodes in $R_{k+1}$ and $R_{k+2}$ and out-neighbors of $v_{k+1}$ will go to nodes in $R_{k+1}$ and  $R_{k+2}$. So at first our candidates for exterior neighbors are $R_{k+1} \cup R_{k+2}$. However, if $w \in R_{k+1}$ has $u_k \to w$, then $w \in N^{+}(u_k)$, so $w \notin N^{++}(u_k)$ (and if $v_{k+1} \to w$, then $w \in \text{int}(u_k, v_{k+1})$). 
+%			The only way $w \in R_{k+1}$ could land in $N^{++}(u_k) \cap N^{+}(v_{k+1})$ is if $u_k \not\to w$ while some $x \in N^{+}(u_k)$ has $x \to w$ and $v_{k+1} \to w$. 
+%			The first and second neighborhoods are completely disjoint. So removing all nodes in $R_{k+1}$ gives us that exterior neighbors are strictly contained within $R_{k+2}$.
+%		\end{itemize}
+%	\end{proof}	
 	
 	This MCE will be constructed under the BFS-lex well-ordering on $V(G)$. This will be modeled through an iterative packing process. At any step $k$, the vertex set $V(G)$ is partitioned into a vector of three distinct, mutually exclusive zones:
 	
@@ -327,29 +338,8 @@
 		\end{description}
 		These sets are disjoint because the sets are the layer indices $R_{i+1}$ vs $R_{i+2}$ are mutually exclusive partitions of the vertex set. 
 	\end{proof}
-	
-	Let $G \in \mathcal{O}$ be an MCE, and let $u_k \in R_k$ and $v_{k+1} \in R_{k+1}$ such that $u_k \to v_{k+1}$. Leveraging the Degree Partition of $v_{k+1}$'s out-neighborhood, the traditional Seymour condition can be decomposed into two criteria: Interior Seymour Property and Exterior Seymour Property. 
-	
-	A vertex $v_{k+1}$ is \textbf{Interior Seymour} if it has a second-neighborhood within the same layer of at least size equal to its first-neighborhood:
-	$$|N^{++}(v_{k+1}) \cap R_{k+1}| \ge |N^+(v_{k+1}) \cap R_{k+1}|$$
-	
-	A vertex $v_{k+1}$ is \textbf{Exterior Seymour} if it has a non-decreasing size in its next two layers, $R_{k+2}$, $R_{k+3}$:
-	$$|R_{k+2}| \ge |R_{k+3}|$$
-		
-	The BFS layering also allows for an update of the classification of interior and exterior neighbors. They are known to be in the first and second neighborhoods of their parent nodes, respectively. Instead, they can also be thought in terms of their respective distance to the root node. 
-	
-	\begin{theorem}[Eulerian Cycle-Packing and Hierholzer Decomposition]
-		Let $G \in \mathcal{O}$ be a minimum counterexample (MCE) with root $v_0$ of minimum out-degree $\delta$, and let $R_i$ denote the rooted neighborhood at distance $i \ge 1$ from $v_0$ under the BFS-Lex ordering without back-arcs[cite: 4, 7, 10]. Suppose every vertex in $G$ is non-Seymour[cite: 5, 10], and that in layer $R_i$ every vertex has balanced interior in-degree and out-degree equal to $d_{\mathrm{int}}(i)$ while satisfying the MCE interior minimality criteria. Then the interior subgraph on $R_i$ is Eulerian and decomposes via Hierholzer's algorithm into edge-disjoint directed cycles.
-	\end{theorem}
-	
-	\begin{proof}
-		Consider the interior arcs within layer $R_i$. By the MCE minimality criteria, the graph minimizes the number of interior neighbors in the layer and minimizes the maximum total interior degree $\max_{v \in R_i} d_{text{int}}(v)$[cite: 10, 11]. Because every vertex in $G$ has out-degree at least $\delta$ and any excess exterior arcs would push a parent vertex in $R_{i-1}$ into becoming a Seymour vertex, the interior requirements within $R_i$ are tightly bounded.
-		
-		When every vertex in $R_i$ has equal interior in-degree and interior out-degree $d_{text{int}}(i)$, the interior restriction on $R_i$ is balanced. No interior arc needed to maintain this degree floor can be removed without either dropping a vertex's degree below its required threshold or shifting degree outward in a way that creates a Seymour vertex. Furthermore, if an alternative configuration on the same layer has uneven degrees—with some vertex exceeding the balanced interior degree while another falls below it—then the maximum interior degree is strictly larger than in the balanced cycle-packed configuration, violating the MCE minimality condition.
-		
-		Finally, because each vertex in this interior configuration has matched in-degree and out-degree, Hierholzer's algorithm applies directly to partition the interior arcs of $R_i$ into edge-disjoint directed cycles.
-	\end{proof}
-	
+			
+	The BFS layering also allows for an update of the classification of interior and exterior neighbors. They are known to be in the first and second neighborhoods of their parent nodes, respectively. Instead, they can also be thought in terms of their respective distance to the root node. 	
 	
 	\begin{lemma}[Layer $R_{k+1}$ Neighborhood Coverage]
 		For any $k \ge 0$, the ($k+1$)-th layer is contained within the union of out-neighborhoods of vertices in the $k$-th layer:
@@ -360,27 +350,27 @@
 	\end{proof}	
 	
 	
-	\begin{lemma}[Layer Equivalence]
-		Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ that contains no back neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
-		$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
-		$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
+%	\begin{lemma}[Layer Equivalence]
+%		Let $G \in \mathcal{O}$ be an MCE with a BFS layering $\{R_i\}$ that contains no back neighbors. Then for any parent node $u_k \in R_k$ and child node $v_{k+1} \in R_{k+1}$:
+%		$\text{int}(u_k, v_{k+1}) \subseteq R_{k+1}$
+%		$\text{ext}(u_k, v_{k+1}) \subseteq R_{k+2}$
 		\label{layerEquiv}
-	\end{lemma}
-	\begin{proof}
-		We will first show that interior neighbors are at a distance one from the parent. This will then allow us to show that exterior neighbors are distance two from the parent. 
-		\begin{itemize}
-			\item Interior Neighbors: By definition, these are the nodes that can be reached by both $u_k$ and $v_{k+1}$ (i.e. $N^+(u_k) \cap N^+(v_{k+1})$). As we are assuming there are no back neighbors in the BFS, out-neighbors from nodes in layer $R_k$ only go to nodes in $R_k$ and $R_{k+1}$. Out-neighbors from nodes in layer $R_{k+1}$ will only go to nodes in $R_{k+1}$ and $R_{k+2}$. The intersection of the previous two results just leaves the nodes in $R_{k+1}$. Hence, all interior neighbors are found in the layer $R_{k+1}$.
+%	\end{lemma}
+%	\begin{proof}
+%		We will first show that interior neighbors are at a distance one from the parent. This will then allow us to show that exterior neighbors are distance two from the parent. 
+%		\begin{itemize}
+%			\item Interior Neighbors: By definition, these are the nodes that can be reached by both $u_k$ and $v_{k+1}$ (i.e. $N^+(u_k) \cap N^+(v_{k+1})$). As we are assuming there are no back neighbors in the BFS, out-neighbors from nodes in layer $R_k$ only go to nodes in $R_k$ and $R_{k+1}$. Out-neighbors from nodes in layer $R_{k+1}$ will only go to nodes in $R_{k+1}$ and $R_{k+2}$. The intersection of the previous two results just leaves the nodes in $R_{k+1}$. Hence, all interior neighbors are found in the layer $R_{k+1}$.
 			
-			\item Exterior Neighbors: 
-			These are found at the intersection of the second neighborhood of $u_k$ and the first neighborhood of  $v_{k+1}$ (i.e. $N^{++}(u_k) \cap N^+(v_{k+1})$). 
-			Second neighbors of $u_k$ may go to nodes in $R_k$, $R_{k+1}$ and $R_{k+2}$ and out-neighbors of $v_{k+1}$ will go to nodes in $R_{k+1}$ and  $R_{k+2}$. 
-			Our candidates for exterior neighbors are $R_{k+1} \cup R_{k+2}$. 
-			Exterior neighbors are a subset of second neighbors of the parent node ($\text{ext}(u_k, v_{k+1}) \subseteq N^{++}(u_k))$. 
-			A vertex in $R_{k+1}$ cannot be in $N^{++}(u_k)$ because it is distance 1 from $u_k$. 
-			This implies that the exterior neighbors are contained within $R_{k+2}$. 
+%			\item Exterior Neighbors: 
+%			These are found at the intersection of the second neighborhood of $u_k$ and the first neighborhood of  $v_{k+1}$ (i.e. $N^{++}(u_k) \cap N^+(v_{k+1})$). 
+%			Second neighbors of $u_k$ may go to nodes in $R_k$, $R_{k+1}$ and $R_{k+2}$ and out-neighbors of $v_{k+1}$ will go to nodes in $R_{k+1}$ and  $R_{k+2}$. 
+%			Our candidates for exterior neighbors are $R_{k+1} \cup R_{k+2}$. 
+%			Exterior neighbors are a subset of second neighbors of the parent node ($\text{ext}(u_k, v_{k+1}) \subseteq N^{++}(u_k))$. 
+%			A vertex in $R_{k+1}$ cannot be in $N^{++}(u_k)$ because it is distance 1 from $u_k$. 
+%			This implies that the exterior neighbors are contained within $R_{k+2}$. 
 			
-		\end{itemize}
-	\end{proof}
+%		\end{itemize}
+%	\end{proof}
 	
 	What an MCE seeks to do is minimize the interior arcs. Lemma \ref{parOk} shows that removing an extra arc from a child node does not impact any parent node in the previous layer, as their status will remain non-Seymour. 
 	
@@ -494,6 +484,52 @@
 		Thus, we have $$\text{int}(u_k, v_{k+1}) = k+1.$$
 	\end{proof}
 	
+	\begin{theorem}[Balanced Cycle-Packing]
+		Let $G \in \mathcal{O}$ be a pre-MCE with lexicographic root $v_0$ of minimum out-degree $\delta$. 
+		Let $R_k$ denote the rooted neighborhood at distance $k \ge 1$ from $v_0$ under the BFS-Lex ordering without back-arcs. 
+		Suppose every vertex in $R_{j < k}$ is non-Seymour, and that in layer $R_k$ every vertex has balanced interior in-degree and out-degree equal to $k$. 
+		Then the subgraph on $R_k$ is the unique witness of the pre-MCE at distance $k$.
+		\label{thm_bal_wit}
+	\end{theorem}
+	
+	
+	\begin{proof}
+		Consider the interior arcs within layer $R_k$. 
+		The first criteria of the MCE metric minimizes the number of interior neighbors in each layer. 
+		Every vertex in each layer of a balanced graph has in-degree equals out-degree equals $k$. 
+		This implies that every node in $R_k$ meets the interior degree equality 
+		condition set forth in Theorem \ref{MCEInt}
+		If $u_k$ were to lower this interior degree. 
+
+		The second criteria of the MCE metric minimizes the maximum difference between in-degree and out-degree in every layer $\min_v{|d^+(v) - d^-(v)|}$
+		Every vertex in a balanced graph has equal in-degree and equal out-degree, bringing this difference to 0 at every vertex. Further, because it is 0, everywhere, no other graph can have a lower optimal value. Thus this is the unique class of graphs. 
+	\end{proof}
+%	\begin{theorem}[Optimality of Eulerian Cycle-Packing in Layer $R_k$]
+	%		Consider a graph $G$ $ \in \mathcal{O}$ created by the BFS-Lex algorithm starting from node $v_0 \in V(G)$ with minimum out-degree. Let $R_k$ be the $k$-th layer in the rooted layering.
+	
+	%		For parent node $u_k \in R_k$ with children $v_{k+1, i} \in R_{k+1}$, where all vertices have in-degree and out-degree equal to $k+1$ ($d^+_{R_{k+1}}(v_{k+1, i}) = d^-_{R_{k+1}}(v_{k+1, i}) = k+1$), the layer $R_{k+1}$ will satisfy the MCE optimization criteria:
+	%		\begin{itemize}
+		%			\item Minimize the overall amount of interior neighbors.
+		%			\item Minimize the maximum total interior degree ($\max_{v_{k+1, i} \in R_{k+1}} \text{deg}_{\text{int}}(u_k, v_{k+1, i})$).
+		%		\end{itemize}
+	%		\label{cyclePacking}
+	%	\end{theorem}
+
+%	\begin{proof}
+	%A cycle packing is defined as a graph where every layer at distance $k$ has every node with in-degree equal to its out-degree equal of $k$. 
+	%This enforces that there are at least $k$ disjoint cycles at distance $k$.
+	
+	%Because every node has exactly degree $k$, no arc can be removed from any cycle on any layer. Removing an interior arc would lower its degree by 1. This would lower it below the $\delta$ threshold, which is not allowed as $\delta$ is the minimum out-degree. 
+	%		The only alternative is to raise the number of exterior neighbors. However, this would force the parent node to become a Seymour vertex, which violates the MCE conditions.
+	
+	%		Consider now an alternative graph $H$ that is not a cycle packing. Then $H$ has two nodes that are not degree 2. These nodes have degrees less than 2 and greater than 2. 
+	%		The existence of a node greater than 2 implies that there is a subgraph $H'$ of $H$ where the maximality criteria yields a higher value than on the cycle graph. 
+	%		Thus $H$ is not an optimal graph for the MCE graph. 
+	
+	%		Therefore, the Eulerian cycle graphs will give us the unique optimal solutions to the MCEs. 
+	%	\end{proof}
+	
+	
 	
 	\begin{theorem}[Neighborhood Size]
 		Let $G \in \mathcal{O}$ be an MCE without back arcs, with MDN $v_0$. Assume that the rooted neighborhoods are $R_0$, $R_1$, $\ldots$, $R_k$ generated using the BFS traversed with no back neighbors. All nodes are non-Seymour. Then for all $i \geq 0$, $|R_i| = \delta - i + 1$. 
@@ -550,29 +586,6 @@
 		
 	The definition of an MCE above, combined with the proofs of a lower bound for interior degree and a formula for neighborhood size allow for an MCE witness. Rather that speaking descriptively about what the characteristics are Theorem \ref{cyclePacking} shows that Eulerian graphs where every node has out-degree $k$ at distance $k$ are exactly the constructions necessary for the SSNC. 
 	
-	\begin{theorem}[Optimality of Eulerian Cycle-Packing in Layer $R_k$]
-		Consider a graph $G$ $ \in \mathcal{O}$ created by the BFS-Lex algorithm starting from node $v_0 \in V(G)$ with minimum out-degree. Let $R_k$ be the $k$-th layer in the rooted layering.
-		
-		For parent node $u_k \in R_k$ with children $v_{k+1, i} \in R_{k+1}$, where all vertices have in-degree and out-degree equal to $k+1$ ($d^+_{R_{k+1}}(v_{k+1, i}) = d^-_{R_{k+1}}(v_{k+1, i}) = k+1$), the layer $R_{k+1}$ will satisfy the MCE optimization criteria:
-		\begin{itemize}
-			\item Minimize the overall amount of interior neighbors.
-			\item Minimize the maximum total interior degree ($\max_{v_{k+1, i} \in R_{k+1}} \text{deg}_{\text{int}}(u_k, v_{k+1, i})$).
-		\end{itemize}
-		\label{cyclePacking}
-	\end{theorem}
-	
-	\begin{proof}
-		A cycle packing is defined as a graph where every layer at distance $k$ has every node with in-degree equal to its out-degree equal of $k$. This enforces that there are at least $k$ disjoint cycles at distance $k$.
-		
-		Because every node has exactly degree $k$, no arc can be removed from any cycle on any layer. Removing an interior arc would lower its degree by 1. This would lower it below the $\delta$ threshold, which is not allowed as $\delta$ is the minimum out-degree. 
-		The only alternative is to raise the number of exterior neighbors. However, this would force the parent node to become a Seymour vertex, which violates the MCE conditions.
-		
-		Consider now an alternative graph $H$ that is not a cycle packing. Then $H$ has two nodes that are not degree 2. These nodes have degrees less than 2 and greater than 2. 
-		The existence of a node greater than 2 implies that there is a subgraph $H'$ of $H$ where the maximality criteria yields a higher value than on the cycle graph. 
-		Thus $H$ is not an optimal graph for the MCE graph. 
-		
-		Therefore, the Eulerian cycle graphs will give us the unique optimal solutions to the MCEs. 
-	\end{proof}
 	
 	Another consequence of the rooted neighborhood size formula is that it sets the worse possible rate of decrease. The lower bound for interior neighbors is also an upper bound for exterior neighbors (because there are no back neighbors). 
 	
